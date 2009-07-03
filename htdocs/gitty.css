@@ -1,0 +1,57 @@
+#gittyBody{
+font:0.9em Arial, Helvetica, Verdana sans-serif;
+border:1px solid #d9d8d1;
+}
+#gittyHead{
+position:relative;
+height:4em;
+background-color:#d9d8d1;
+}
+#gittyHead h1{
+position:absolute;
+left:1em;
+margin:0;
+line-height:2.6666em;
+font-size:150%;
+}
+#gittyHead p{
+position:absolute;
+right:1em;
+margin:0;
+line-height:4em;
+}
+#gittyHead p a img{
+vertical-align:middle;
+}
+#gittyHead p a img{
+border:0;
+}
+
+#gittyFooter{
+padding:0.1em 1em;
+background-color:#d9d8d1;
+}
+#gittyFooter p
+{
+margin:0;
+text-align:right;
+}
+
+#gittyContent{
+padding:0.5em 1em;
+}
+
+#gittyContent table{
+width:100%;
+margin:0 auto;
+border-spacing:0;
+}
+#gittyContent table th, #gittyContent table td{
+padding:0.5em 0.5em;
+}
+#gittyContent table thead th{
+text-align:left;
+}
+#gittyContent table .gittyTableEven{
+background-color:#eee;
+}
