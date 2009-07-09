@@ -36,7 +36,7 @@
                             </tr>
                         </thead>
 <?php
-$config = new Gitty_Config('../config.ini');
+$config = new Gitty_Config($_SERVER['GITTY_CONFIG']);
 $gitty = new Gitty($config);
 
 foreach ($gitty->getRepositories() as $i => $repository): ?>

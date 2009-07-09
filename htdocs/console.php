@@ -21,7 +21,7 @@
 
             <div id="gittyContent">
 <?php
-$config = new Gitty_Config('../config.ini');
+$config = new Gitty_Config($_SERVER['GITTY_CONFIG']);
 $deploy = new Gitty_Deploy($config);
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
