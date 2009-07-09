@@ -10,7 +10,8 @@ class Gitty_Config_Default
             ),
             'gitty' => array(
                 'readDirectories' => '0',
-                'dateFormat' => 'Y-m-d H:i:s'
+                'dateFormat' => 'Y-m-d H:i:s',
+                'revistionFile' => 'revision.txt'
             )
         )
     );

@@ -13,24 +13,6 @@ class Gitty_Git_Command
         return $out;
     }
 
-    static function ADD ($file = '.') {
-        if (func_num_args() > 1) {
-            $files = func_get_args();
-
-            return 'add ' . implode(' ',$files);
-        }
-
-        return "add $file";
-    }
-
-    static function COMMIT () {
-        return 'commit';
-    }
-
-    static function DIFF () {
-        return 'diff';
-    }
-
     static function STATUS () {
         return 'status';
     }
@@ -51,5 +33,25 @@ class Gitty_Git_Command
     static function REVLIST_LAST_CHANGE()
     {
         return 'rev-list --header --max-count=1 HEAD';
+    }
+
+    static function REVLIST_ORDER_DESC()
+    {
+        return 'rev-list --all --full-history --topo-order';
+    }
+
+    static function REVLIST_GET_LATEST()
+    {
+        return 'rev-list --all --full-history --topo-order --max-count=1';
+    }
+
+    static function DIFF($revId, $newest)
+    {
+        return 'diff -M -C --name-status '. $revId . ' ' . $newest;
+    }
+
+    static function SHORT_DIFF($revId, $newest)
+    {
+        return 'diff --shortstat '. $revId . ' ' . $newest;
     }
 }

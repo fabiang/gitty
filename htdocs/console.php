@@ -23,7 +23,7 @@
 <?php
 $config = new Gitty_Config('../config.ini');
 $deploy = new Gitty_Deploy($config);
-$projectId = (int)$_REQUEST['update'];
+$projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
 $project = $_REQUEST['project'][$projectId];
 $deploy->setProjectId($projectId);
@@ -33,11 +33,17 @@ $deploy->setDeploymentId((int)$project['remote']);
                 <ul>
 <?php
 $deploy->start();
-while (!$deploy->hasFinished()) {
-?>
-                    <li><?php print $deploy->getLastStatusName(); ?> <?php print $deploy->getLastStatus(); ?></li>
-<?php
+if (isset($_REQUEST['install'])) {
+    $deploy->install = true;
 }
+$deploy->setCallback('callback');
+$deploy->open();
+
+function callback($deploy) {
+    printf('<li>%s</li>', $deploy->message());
+    flush();
+}
+
 $deploy->close();
 ?>
                 </ul>
