@@ -1,5 +1,5 @@
 <?php
-class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter
+class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
 {
     const METHOD = 'FTP';
 
