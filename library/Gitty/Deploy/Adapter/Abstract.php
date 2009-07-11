@@ -27,6 +27,7 @@ abstract class Gitty_Deploy_Adapter_Abstract
     protected $_callback;
     protected $_count = 0;
     protected $_tempDir;
+    protected $_branch = 'master';
 
     public $install = false;
 
@@ -83,8 +84,20 @@ abstract class Gitty_Deploy_Adapter_Abstract
     protected function _createTemp()
     {
         $this->_tempDir = $tempDir = $this->_config->global['gitty']['tempDir'] . '/' . uniqid() . '/';
-        mkdir($tempDir);
-        Gitty_Git_Command::exec(Gitty_Git_Command::EXPORT($tempDir), $this->_projectConfig['repository'], $this->_config);
+
+        $cur = getcwd();
+        chdir(dirname($tempDir));
+
+        Gitty_Git_Command::exec(Gitty_Git_Command::CLONEREPO($this->_projectConfig['repository']), $this->_projectConfig['repository'], $this->_config);
+        Gitty_Git_Command::exec(Gitty_Git_Command::CHECKOUT($this->_branch), $this->_projectConfig['repository'], $this->_config);
+
+        $proj = str_replace('.git', '', basename($this->_projectConfig['repository']));
+
+        rename(dirname($tempDir) . '/' . $proj, $tempDir);
+
+        $this->_deleteDirectory($this->_tempDir . '.git');
+
+        chdir($cur);
     }
     protected function _deleteTemp()
     {

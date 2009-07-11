@@ -60,6 +60,16 @@ class Gitty_Git_Command
         return 'checkout-index -a -f --prefix='.$dest;
     }
 
+    static function CLONEREPO($dest)
+    {
+        return 'clone '.$dest;
+    }
+
+    static function CHECKOUT($branch)
+    {
+        return 'checkout '.$branch;
+    }
+
     static function BRANCH($name)
     {
         return 'branch '.$name;

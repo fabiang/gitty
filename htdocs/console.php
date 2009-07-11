@@ -37,6 +37,7 @@ $deploy->setCallback('callback');
 if (isset($_REQUEST['install'])) {
     $deploy->install();
 }
+ob_start();
 $deploy->open();
 
 function callback($deploy) {
