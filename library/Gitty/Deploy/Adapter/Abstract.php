@@ -43,8 +43,8 @@ abstract class Gitty_Deploy_Adapter_Abstract
     protected $_callback;
     protected $_count = 0;
     protected $_tempDir;
-    protected $_branch = 'master';
 
+    public $branch = 'master';
     public $install = false;
 
     protected function _listFiles($remoteRev)
@@ -105,7 +105,7 @@ abstract class Gitty_Deploy_Adapter_Abstract
         chdir(dirname($tempDir));
 
         Gitty_Git_Command::exec(Gitty_Git_Command::CLONEREPO($this->_projectConfig['repository']), $this->_projectConfig['repository'], $this->_config);
-        Gitty_Git_Command::exec(Gitty_Git_Command::CHECKOUT($this->_branch), $this->_projectConfig['repository'], $this->_config);
+        Gitty_Git_Command::exec(Gitty_Git_Command::CHECKOUT($this->branch), $this->_projectConfig['repository'], $this->_config);
 
         $proj = str_replace('.git', '', basename($this->_projectConfig['repository']));
 

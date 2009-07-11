@@ -63,6 +63,8 @@ class Gitty_Deploy
 
         $this->_oldBranch = $currentBranch;
 
+        $this->_adapter->branch = $name;
+
         Gitty_Git_Command::exec(Gitty_Git_Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
     }
 
