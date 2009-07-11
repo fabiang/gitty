@@ -57,6 +57,11 @@ class Gitty_Git_Command
 
     static function EXPORT($dest)
     {
-        return "checkout-index -a -f --prefix=$dest";
+        return 'checkout-index -a -f --prefix='.$dest;
+    }
+
+    static function BRANCH($name)
+    {
+        return 'branch '.$name;
     }
 }

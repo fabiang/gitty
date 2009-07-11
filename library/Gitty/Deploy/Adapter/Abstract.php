@@ -93,7 +93,7 @@ abstract class Gitty_Deploy_Adapter_Abstract
     protected function _writeRevFile()
     {
         $revFile = $this->_url . $this->_config->global['gitty']['revistionFile'];
-        file_put_contents($revFile, $this->_newestRevisitionId, FILE_TEXT, $this->_stream);
+        file_put_contents($revFile, $this->_newestRevisitionId, null, $this->_stream);
     }
 
     public function start($config, $deploymentConfig, $projectConfig)

@@ -21,13 +21,13 @@
 
             <div id="gittyContent">
 <?php
-$config = new Gitty_Config($_SERVER['GITTY_CONFIG']);
+$config = new Gitty_Config(getenv('GITTY_CONFIG'));
 $deploy = new Gitty_Deploy($config);
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
 $project = $_REQUEST['project'][$projectId];
 $deploy->setProjectId($projectId);
-$deploy->setBranchId($project['branch']);
+$deploy->setBranch($project['branch']);
 $deploy->setDeploymentId((int)$project['remote']);
 ?>
                 <ul>

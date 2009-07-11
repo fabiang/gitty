@@ -12,6 +12,7 @@ class Gitty_Deploy
     protected $_deploymentId = 0;
     protected $_deploymentConfig;
     protected $_branch;
+    protected $_oldBranch = 'master';
 
     public function __construct($config)
     {
@@ -30,9 +31,23 @@ class Gitty_Deploy
         $this->_projectConfig = $this->_projectConfigs[$this->_projectId];
     }
 
-    public function setBranchId($name)
+    public function setBranch($name)
     {
         $this->_branch = $name;
+
+        $branchesString = Gitty_Git_Command::exec(Gitty_Git_Command::BRANCHES(), $this->_projectConfig['repository'], $this->_config);
+
+        $currentBranch = 'master';
+        foreach($branchesString as $branch) {
+            if (substr($branch, 0 ,1) == '*') {
+                $currentBranch = trim(substr($branch, 1));
+                break;
+            }
+        }
+
+        $this->_oldBranch = $currentBranch;
+
+        Gitty_Git_Command::exec(Gitty_Git_Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function setDeploymentId($id)
@@ -83,6 +98,7 @@ class Gitty_Deploy
     public function close()
     {
         $this->_adapter->close();
+        Gitty_Git_Command::exec(Gitty_Git_Command::BRANCH($this->_oldBranch), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function hasFinished()
