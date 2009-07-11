@@ -24,7 +24,10 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
         $stat = Gitty_Git_Command::exec(Gitty_Git_Command::SHORT_DIFF($this->_remoteRevistionId, $this->_newestRevisitionId),
                                         $this->_projectConfig['repository'],
                                         $this->_config);
+
         $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::stat($stat[0]));
+
+        $this->_createTemp();
 
         $add = $this->_files['added'];
         if (count($add)) {
@@ -32,6 +35,19 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
 
             foreach ($add as $file) {
                 $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::add($file));
+
+                $sourceFile = $this->_tempDir . $file;
+                $destinationFile = $this->_url . $file;
+
+                if (!is_dir($this->_url . dirname($file))) {
+                    mkdir($this->_url . dirname($file), null, true, $this->_stream);
+                }
+
+                if (version_compare(PHP_VERSION, '5.3.0') === 1) {
+                    copy($sourceFile, $destinationFile, $this->_stream);
+                } else {
+                    file_put_contents($destinationFile, file_get_contents($sourceFile), 0, $this->_stream);
+                }
             }
         }
 
@@ -41,6 +57,19 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
 
             foreach ($mod as $file) {
                 $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::modify($file));
+
+                $sourceFile = $this->_tempDir . $file;
+                $destinationFile = $this->_url . $file;
+
+                if (!is_dir($this->_url . dirname($file))) {
+                    mkdir($this->_url . dirname($file), null, true, $this->_stream);
+                }
+
+                if (version_compare(PHP_VERSION, '5.3.0') === 1) {
+                    copy($sourceFile, $destinationFile, $this->_stream);
+                } else {
+                    file_put_contents($destinationFile, file_get_contents($sourceFile), 0, $this->_stream);
+                }
             }
         }
 
@@ -48,6 +77,8 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
         $this->_writeRevFile();
 
         $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::end($this->install, self::METHOD));
+
+        $this->_deleteTemp();
 
         $this->_finished = true;
     }

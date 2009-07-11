@@ -33,20 +33,22 @@ $deploy->setDeploymentId((int)$project['remote']);
                 <ul>
 <?php
 $deploy->start();
-if (isset($_REQUEST['install'])) {
-    $deploy->install = true;
-}
 $deploy->setCallback('callback');
+if (isset($_REQUEST['install'])) {
+    $deploy->install();
+}
 $deploy->open();
 
 function callback($deploy) {
     printf('<li>%s</li>', $deploy->message());
     flush();
+    ob_flush();
 }
 
 $deploy->close();
 ?>
                 </ul>
+                <p><a href="index.php">zurück</a></p>
 <?php
 unset($deploy);
 ?>

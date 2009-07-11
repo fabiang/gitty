@@ -9,38 +9,43 @@ abstract class Gitty_Deploy_Adapter_Messages
     abstract public static function rename($file);
     abstract public static function end($install, $method);
 
-    public static function stat($stat)
+    final public static function stat($stat)
     {
         return $stat;
     }
 
-    public static function startAdd()
+    final public static function startAdd()
     {
         return 'add files...';
     }
 
-    public static function startModify()
+    final public static function startModify()
     {
         return 'modified files...';
     }
 
-    public static function startDelete()
+    final public static function startDelete()
     {
         return 'deleting files...';
     }
 
-    public static function startCopy()
+    final public static function startCopy()
     {
         return 'copy files...';
     }
 
-    public static function startRename()
+    final public static function startRename()
     {
         return 'rename files...';
     }
 
-    public static function revFile($file)
+    final public static function revFile($file)
     {
         return 'write revisition file "'.$file.'"...';
+    }
+
+    final public static function upToDate()
+    {
+        return 'everything up-to-date... nothing to do';
     }
 }

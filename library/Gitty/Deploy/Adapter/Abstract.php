@@ -26,16 +26,19 @@ abstract class Gitty_Deploy_Adapter_Abstract
 
     protected $_callback;
     protected $_count = 0;
+    protected $_tempDir;
 
-    public $install;
+    public $install = false;
 
     protected function _listFiles($remoteRev)
     {
         $newestRev = $this->_newestRevisitionId;
 
-        if ($newestRev == $remoteRev) {
+        if ($newestRev == $remoteRev && !$this->install) {
             // same revisition; up-to-date
-            return;
+            $this->setMessage(Gitty_Deploy_Adapter_Messages::upToDate());
+            $this->_finished = true;
+            return false;
         }
 
         $diff = Gitty_Git_Command::exec(Gitty_Git_Command::DIFF($remoteRev, $newestRev), $this->_projectConfig['repository'], $this->_config);
@@ -61,11 +64,36 @@ abstract class Gitty_Deploy_Adapter_Abstract
                     break;
             }
         }
+
+        return true;
+    }
+    protected function _deleteDirectory($dir)
+    {
+        if (!file_exists($dir)) return true;
+        if (!is_dir($dir) || is_link($dir)) return unlink($dir);
+            foreach (scandir($dir) as $item) {
+                if ($item == '.' || $item == '..') continue;
+                if (!$this->_deleteDirectory($dir . "/" . $item)) {
+                    chmod($dir . "/" . $item, 0777);
+                    if (!$this->_deleteDirectory($dir . "/" . $item)) return false;
+                };
+            }
+            return rmdir($dir);
+    }
+    protected function _createTemp()
+    {
+        $this->_tempDir = $tempDir = $this->_config->global['gitty']['tempDir'] . '/' . uniqid() . '/';
+        mkdir($tempDir);
+        Gitty_Git_Command::exec(Gitty_Git_Command::EXPORT($tempDir), $this->_projectConfig['repository'], $this->_config);
+    }
+    protected function _deleteTemp()
+    {
+        $this->_deleteDirectory($this->_tempDir);
     }
     protected function _writeRevFile()
     {
         $revFile = $this->_url . $this->_config->global['gitty']['revistionFile'];
-        //file_put_contents($revFile, $this->_newestRevisitionId, FILE_TEXT, $this->_stream);
+        file_put_contents($revFile, $this->_newestRevisitionId, FILE_TEXT, $this->_stream);
     }
 
     public function start($config, $deploymentConfig, $projectConfig)
@@ -86,18 +114,18 @@ abstract class Gitty_Deploy_Adapter_Abstract
 
         $revFile = $this->_url . $this->_config->global['gitty']['revistionFile'];
 
-        if (file_exists($revFile)) {
+        if (file_exists($revFile) && !$this->install) {
             $lastRev = trim(file_get_contents($revFile , false, $this->_stream));
 
             $this->_remoteRevistionId = $lastRev;
-            $this->install = false;
         } else {
             $lastRev = $this->_oldestRevisitionId;
             $this->install = true;
         }
 
-        $this->_listFiles($lastRev);
-        $this->_deploy();
+        if ($this->_listFiles($lastRev)) {
+            $this->_deploy();
+        }
     }
 
     public function close()

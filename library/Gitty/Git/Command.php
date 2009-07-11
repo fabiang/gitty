@@ -54,4 +54,9 @@ class Gitty_Git_Command
     {
         return 'diff --shortstat '. $revId . ' ' . $newest;
     }
+
+    static function EXPORT($dest)
+    {
+        return "checkout-index -a -f --prefix=$dest";
+    }
 }

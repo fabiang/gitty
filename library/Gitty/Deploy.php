@@ -119,4 +119,9 @@ class Gitty_Deploy
     {
         return $this->_adapter->count();
     }
+
+    public function install($install = true)
+    {
+        $this->_adapter->install = (bool)$install;
+    }
 }
