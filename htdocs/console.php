@@ -1,4 +1,4 @@
-<?php require '../bootstrap.php'; ?>
+<?php require '../../gitty/bootstrap.php'; ?>
 <!DOCTYPE html>
 
 <html>

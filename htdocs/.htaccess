@@ -1,1 +1,1 @@
-SetEnv GITTY_CONFIG '../config-workbox.ini'
+Setenv GITTY_CONFIG '../config-workbox.ini'
