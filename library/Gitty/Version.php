@@ -20,7 +20,7 @@
  */
 final class Gitty_Version
 {
-    const VERSION = '0.1 PREVIEW';
+    const VERSION = '0.1';
 
     public static function compareVersion($version)
     {

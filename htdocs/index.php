@@ -26,10 +26,10 @@ require '../../gitty/bootstrap.php'; ?>
 
     <head>
         <title>Gitty - Web deployment made graphically</title>
-        <meta http-equiv="Content-Type" value="text/html;charset=utf-8">
+        <meta http-equiv="Content-Type" value="text/html;charset=utf-8" >
 
-        <link rel="icon" href="git-favicon.png" type="image/png" />
-        <link rel="stylesheet" href="gitty.css" type="text/css" media="screen,projection" />
+        <link rel="icon" href="git-favicon.png" type="image/png" >
+        <link rel="stylesheet" href="gitty.css" type="text/css" media="screen,projection" >
     </head>
 
 
