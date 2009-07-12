@@ -1,5 +1,8 @@
 <?php
 /**
+ * Gitty - web deployment tool
+ * Copyright (C) 2009 Fabian Grutschus
+ *
  * This file is part of Gitty.
  *
  * Gitty is free software: you can redistribute it and/or modify
