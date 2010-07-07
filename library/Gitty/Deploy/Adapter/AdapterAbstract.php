@@ -113,8 +113,8 @@ abstract class AdapterAbstract
         $cur = getcwd();
         chdir(dirname($tempDir));
 
-        \Gitty\Git\Command::exec(Gitty\Git\Command::CLONEREPO($this->_projectConfig['repository']), $this->_projectConfig['repository'], $this->_config);
-        \Gitty\Git\Command::exec(Gitty\Git\Command::CHECKOUT($this->branch), $this->_projectConfig['repository'], $this->_config);
+        \Gitty\Git\Command::exec(\Gitty\Git\Command::CLONEREPO($this->_projectConfig['repository']), $this->_projectConfig['repository'], $this->_config);
+        \Gitty\Git\Command::exec(\Gitty\Git\Command::CHECKOUT($this->branch), $this->_projectConfig['repository'], $this->_config);
 
         $proj = str_replace('.git', '', basename($this->_projectConfig['repository']));
 

@@ -42,8 +42,8 @@ require '../../gitty/bootstrap.php'; ?>
 
             <div id="gittyContent">
 <?php
-$config = new Gitty_Config(getenv('GITTY_CONFIG'));
-$deploy = new Gitty_Deploy($config);
+$config = new Gitty\Config(getenv('GITTY_CONFIG'));
+$deploy = new Gitty\Deploy($config);
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
 $project = $_REQUEST['project'][$projectId];
@@ -77,7 +77,7 @@ unset($deploy);
             </div>
 
             <div id="gittyFooter">
-                <p>Gitty Version <?php print Gitty_Version::VERSION; ?></p>
+                <p>Gitty Version <?php print Gitty\Version::VERSION; ?></p>
             </div>
 
         </div>

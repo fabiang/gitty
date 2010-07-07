@@ -60,7 +60,7 @@ class Deploy
     {
         $this->_branch = $name;
 
-        $branchesString = Git\Command::exec(Gitty_Git_Command::BRANCHES(), $this->_projectConfig['repository'], $this->_config);
+        $branchesString = Git\Command::exec(Git\Command::BRANCHES(), $this->_projectConfig['repository'], $this->_config);
 
         $currentBranch = 'master';
         foreach($branchesString as $branch) {
@@ -74,7 +74,7 @@ class Deploy
 
         $this->_adapter->branch = $name;
 
-        Git\Command::exec(Gitty_Git_Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
+        Git\Command::exec(Git\Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function setDeploymentId($id)
@@ -125,7 +125,7 @@ class Deploy
     public function close()
     {
         $this->_adapter->close();
-        Git\Command::exec(Gitty_Git_Command::BRANCH($this->_oldBranch), $this->_projectConfig['repository'], $this->_config);
+        Git\Command::exec(Git\Command::BRANCH($this->_oldBranch), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function hasFinished()
