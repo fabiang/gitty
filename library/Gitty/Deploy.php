@@ -18,9 +18,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Deploy
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+class Deploy
 {
-    static $defaultAdapter = 'Gitty_Deploy_Adapter_Ftp';
+    static $defaultAdapter = 'Deploy\\Adapter\\Ftp';
 
     protected $_adapterType = 'ftp';
     protected $_adapter;
@@ -54,7 +60,7 @@ class Gitty_Deploy
     {
         $this->_branch = $name;
 
-        $branchesString = Gitty_Git_Command::exec(Gitty_Git_Command::BRANCHES(), $this->_projectConfig['repository'], $this->_config);
+        $branchesString = Git\Command::exec(Gitty_Git_Command::BRANCHES(), $this->_projectConfig['repository'], $this->_config);
 
         $currentBranch = 'master';
         foreach($branchesString as $branch) {
@@ -68,7 +74,7 @@ class Gitty_Deploy
 
         $this->_adapter->branch = $name;
 
-        Gitty_Git_Command::exec(Gitty_Git_Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
+        Git\Command::exec(Gitty_Git_Command::BRANCH($name), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function setDeploymentId($id)
@@ -97,14 +103,14 @@ class Gitty_Deploy
 
     public function start()
     {
-        $adapterName = 'Gitty_Deploy_Adapter_' . ucfirst(strtolower($this->_adapterType));
+        $adapterName = 'Gitty\\Deploy\\Adapter\\' . ucfirst(strtolower($this->_adapterType));
 
         try {
-            $adapter = Gitty_Loader::loadClass($adapterName);
+            $adapter = Loader::loadClass($adapterName);
             $adapter = new $adapterName;
         } catch(Exception $e) {
             require_once 'Gitty/Deploy/Exception.php';
-            throw new Gitty_Deploy_Exception("Can't create instance of adapter '$adapterName'. Does adapter with name '$this->_adapterType' exist?");
+            throw new Deploy\Exception("Can't create instance of adapter '$adapterName'. Does adapter with name '$this->_adapterType' exist?");
         }
 
         $this->_adapter = $adapter;
@@ -119,7 +125,7 @@ class Gitty_Deploy
     public function close()
     {
         $this->_adapter->close();
-        Gitty_Git_Command::exec(Gitty_Git_Command::BRANCH($this->_oldBranch), $this->_projectConfig['repository'], $this->_config);
+        Git\Command::exec(Gitty_Git_Command::BRANCH($this->_oldBranch), $this->_projectConfig['repository'], $this->_config);
     }
 
     public function hasFinished()

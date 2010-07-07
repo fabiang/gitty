@@ -16,10 +16,36 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Loader
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+
+/**
+ * Loader class for Gitty
+ *
+ * @package Gitty
+ * @author Fabian Grutschus
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
+class Loader
 {
+    /**
+     * namespace separator \ since PHP 5.3
+     */
+    const NAMESPACE_SEPARATOR = '\\';
+
+    /**
+     * loading a file by its class name
+     *
+     * @param String $class Class name
+     * @param String|Array $dirs Directories for file lookup
+     * @throws Gitty\Exception
+     */
     public static function loadClass($class, $dirs = null)
     {
         if (class_exists($class, false) || interface_exists($class, false)) {
@@ -28,11 +54,11 @@ class Gitty_Loader
 
         if ((null !== $dirs) && !is_string($dirs) && !is_array($dirs)) {
             require_once 'Gitty/Exception.php';
-            throw new Gitty_Exception('Directory argument must be a string or an array');
+            throw new Exception('Directory argument must be a string or an array');
         }
 
         // autodiscover the path from the class name
-        $file = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+        $file = str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $class) . '.php';
         if (!empty($dirs)) {
             // use the autodiscovered path
             $dirPath = dirname($file);
@@ -56,10 +82,17 @@ class Gitty_Loader
 
         if (!class_exists($class, false) && !interface_exists($class, false)) {
             require_once 'Gitty/Exception.php';
-            throw new Gitty_Exception("File \"$file\" does not exist or class \"$class\" was not found in the file");
+            throw new Exception("File \"$file\" does not exist or class \"$class\" was not found in the file");
         }
     }
 
+    /**
+     * loads a file
+     *
+     * @param String $filename Filename
+     * @param Array $dirs Directories for file lookup
+     * @param Boolean $once include the file only one time
+     */
     public static function loadFile($filename, $dirs = null, $once = false)
     {
         self::_securityCheck($filename);
@@ -94,6 +127,14 @@ class Gitty_Loader
 
         return true;
     }
+
+    /**
+     * the autoloader function
+     *
+     * @param String $class Class name
+     * @return Object Instance when class can be loaded
+     * @return Boolean false if error is thrown
+     */
     public static function autoload($class)
     {
         try {
@@ -104,18 +145,25 @@ class Gitty_Loader
         }
     }
 
-    public static function registerAutoload($class = 'Gitty_Loader', $enabled = true)
+    /**
+     * register this class to PHPs autoloader
+     *
+     * @param String $class The name of the autoloading class (default: this class)
+     * @param Boolean $enabled autoloading enabled/disabled
+     * @throws Gitty\Exception
+     */
+    public static function registerAutoload($class = '\Gitty\Loader', $enabled = true)
     {
         if (!function_exists('spl_autoload_register')) {
             require_once 'Gitty/Exception.php';
-            throw new Gitty_Exception('spl_autoload does not exist in this PHP installation');
+            throw new Exception('spl_autoload does not exist in this PHP installation');
         }
 
         self::loadClass($class);
         $methods = get_class_methods($class);
         if (!in_array('autoload', (array) $methods)) {
             require_once 'Gitty/Exception.php';
-            throw new Gitty_Exception("The class \"$class\" does not have an autoload() method");
+            throw new Exception("The class \"$class\" does not have an autoload() method");
         }
 
         if ($enabled === true) {
@@ -125,11 +173,22 @@ class Gitty_Loader
         }
     }
 
+    /**
+     * allow constructing this class
+     *
+     * @param Boolean $autoloading autoloading enabled/disabled
+     */
     public function __construct($autoloading = true)
     {
         $this->registerAutoload(null, $autoloading);
     }
 
+    /**
+     * check for invalid filename charackters
+     *
+     * @param $filename $filename the filename
+     * @throws Gitty\Exception
+     */
     protected static function _securityCheck($filename)
     {
         /**
@@ -137,16 +196,23 @@ class Gitty_Loader
          */
         if (preg_match('/[^a-z0-9\\/\\\\_.-]/i', $filename)) {
             require_once 'Gitty/Exception.php';
-            throw new Gitty_Exception('Security check: Illegal character in filename');
+            throw new Exception('Security check: Illegal character in filename');
         }
     }
 
+    /**
+     * helper function for including
+     *
+     * @param String $filespec the file
+     * @param Boolean $once include just once
+     * @return Boolean file could be included
+     */
     protected static function _includeFile($filespec, $once = false)
     {
         if ($once) {
             return include_once $filespec;
         } else {
-            return include $filespec ;
+            return include $filespec;
         }
     }
 }

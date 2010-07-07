@@ -18,7 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Git
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+class Git
 {
     protected $_gittyConfig;
     protected $_repositoriesDirectories = array();
@@ -33,12 +39,12 @@ class Gitty_Git
             foreach ($global_directories as $global_directory) {
                 if (!is_dir($global_directory)) {
                     require_once 'Gitty/Exception.php';
-                    throw new Gitty_Exception("global directory $global_directory doesn't exist");
+                    throw new Exception("global directory $global_directory doesn't exist");
                 }
 
                 if (!is_readable($global_directory)) {
                     require_once 'Gitty/Exception.php';
-                    throw new Gitty_Exception("global directory $global_directory isn't readable");
+                    throw new Exception("global directory $global_directory isn't readable");
                 }
 
                 $subdirectories = scandir($global_directory);
@@ -58,7 +64,7 @@ class Gitty_Git
             foreach ($config->projects as $projectName => $projectConfig) {
                 if (!isset($projectConfig['repository']) && !isset($projectConfig['directory'])) {
                     require_once 'Gitty/Exception.php';
-                    throw new Gitty_Exception("no directory for '$projectName' defined");
+                    throw new Exception("no directory for '$projectName' defined");
                 }
 
                 $dir = isset($projectConfig['repository']) ? $projectConfig['repository'] : $projectConfig['directory'];
@@ -66,7 +72,7 @@ class Gitty_Git
 
                 if (!is_dir($dir . '/' . $gitDirectory)) {
                     require_once 'Gitty/Exception.php';
-                    throw new Gitty_Exception("Not a git repository '$projectName': $gitDirectory");
+                    throw new Exception("Not a git repository '$projectName': $gitDirectory");
                 }
 
                 $this->loadRepository($dir, $projectName);
@@ -92,6 +98,6 @@ class Gitty_Git
 
         $this->_repositoriesDirectories[$projectName] = $path;
 
-        array_push($this->_repositories, new Gitty_Git_Repository($projectName, $path, $this->_gittyConfig));
+        array_push($this->_repositories, new Git\Repository($projectName, $path, $this->_gittyConfig));
     }
 }

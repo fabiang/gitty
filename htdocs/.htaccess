@@ -1,1 +1,2 @@
-Setenv GITTY_CONFIG '../config-workbox.ini'
+Setenv GITTY_CONFIG '../config.ini'
+php_value date.timezone Europe/Berlin

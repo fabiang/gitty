@@ -18,7 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-abstract class Gitty_Deploy_Adapter_Messages
+
+/**
+ * @namespace Gitty\Deploy\Adapter
+ */
+namespace Gitty\Deploy\Adapter;
+
+abstract class Messages
 {
     abstract public static function start($install, $method);
     abstract public static function modify($file);

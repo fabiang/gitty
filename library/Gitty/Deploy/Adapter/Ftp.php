@@ -18,7 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
+
+/**
+ * @namespace Gitty\Deploy\Adapter
+ */
+namespace Gitty\Deploy\Adapter;
+
+class Ftp extends AdapterAbstract
 {
     const METHOD = 'FTP';
 
@@ -38,22 +44,22 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
     {
         $files = $this->_files;
 
-        $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::start($this->install, self::METHOD));
+        $this->setMessage(Ftp\Messages::start($this->install, self::METHOD));
 
-        $stat = Gitty_Git_Command::exec(Gitty_Git_Command::SHORT_DIFF($this->_remoteRevistionId, $this->_newestRevisitionId),
+        $stat = \Gitty\Git\Command::exec(\Gitty\Git\Command::SHORT_DIFF($this->_remoteRevistionId, $this->_newestRevisitionId),
                                         $this->_projectConfig['repository'],
                                         $this->_config);
 
-        $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::stat($stat[0]));
+        $this->setMessage(Ftp\Messages::stat($stat[0]));
 
         $this->_createTemp();
 
         $add = $this->_files['added'];
         if (count($add)) {
-            $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::startAdd());
+            $this->setMessage(Ftp\Messages::startAdd());
 
             foreach ($add as $file) {
-                $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::add($file));
+                $this->setMessage(Ftp\Messages::add($file));
 
                 $sourceFile = $this->_tempDir . $file;
                 $destinationFile = $this->_url . $file;
@@ -72,10 +78,10 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
 
         $mod = $this->_files['modified'];
         if (count($mod)) {
-            $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::startModify());
+            $this->setMessage(Ftp\Messages::startModify());
 
             foreach ($mod as $file) {
-                $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::modify($file));
+                $this->setMessage(Ftp\Messages::modify($file));
 
                 $sourceFile = $this->_tempDir . $file;
                 $destinationFile = $this->_url . $file;
@@ -92,10 +98,10 @@ class Gitty_Deploy_Adapter_Ftp extends Gitty_Deploy_Adapter_Abstract
             }
         }
 
-        $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::revFile($this->_config->global['gitty']['revistionFile']));
+        $this->setMessage(Ftp\Messages::revFile($this->_config->global['gitty']['revistionFile']));
         $this->_writeRevFile();
 
-        $this->setMessage(Gitty_Deploy_Adapter_Ftp_Messages::end($this->install, self::METHOD));
+        $this->setMessage(Ftp\Messages::end($this->install, self::METHOD));
 
         $this->_deleteTemp();
 

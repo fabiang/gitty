@@ -57,8 +57,8 @@ require '../../gitty/bootstrap.php'; ?>
                             </tr>
                         </thead>
 <?php
-$config = new Gitty_Config(getenv('GITTY_CONFIG'));
-$gitty = new Gitty($config);
+$config = new Gitty\Config(getenv('GITTY_CONFIG'));
+$gitty = new Gitty\Git($config);
 
 foreach ($gitty->getRepositories() as $i => $repository): ?>
                         <tbody class="<?php if ($i % 2): ?>gittyTableOdd<?php else: ?>gittyTableEven<?php endif; ?>">
@@ -94,7 +94,7 @@ unset($config, $gitty);
             </div>
 
             <div id="gittyFooter">
-                <p>Gitty Version <?php print Gitty_Version::VERSION; ?></p>
+                <p>Gitty Version <?php print Gitty\Version::VERSION; ?></p>
             </div>
 
         </div>

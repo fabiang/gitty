@@ -12,17 +12,61 @@
  *
  * Gitty is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Config
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+/**
+ * config class
+ *
+ * @package Gitty
+ * @author Fabian Grutschus
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
+class Config
 {
+    /**
+     * config file data as array
+     */
     protected $_data = array();
+
+    /**
+     * separator for nesting
+     */
     protected $_nestSeparator = '.';
 
+    /**
+     * default config data
+     */
+    public static $defaultConfig = array(
+        'global' => array(
+            'git' => array(
+                'defaultGitDir' => '.git',
+                'descriptionFile' => 'description',
+                'binLocation'=> '/usr/bin/git'
+            ),
+            'gitty' => array(
+                'readDirectories' => '0',
+                'dateFormat' => 'Y-m-d H:i:s',
+                'revistionFile' => 'revision.txt',
+                'tempDir' => '/tmp'
+            )
+        )
+    );
+
+    /**
+     * merge one or more arrays together (recursively)
+     *
+     * @return Array merged array
+     */
     private function array_merge_recusive ()
     {
         $aArrays = func_get_args();
@@ -55,19 +99,19 @@ class Gitty_Config
     {
         if (!file_exists($filename)) {
             require_once 'Gitty/Exception.php';
-            new Gitty_Exception('Config file does not exist');
+            new Exception('Config file does not exist');
         }
 
         if (!is_readable($filename)) {
             require_once 'Gitty/Exception.php';
-            new Gitty_Exception('Config file isn\'t readable');
+            new Exception('Config file isn\'t readable');
         }
 
         try {
             $iniArray = parse_ini_file($filename, true);
         } catch(Exception $e) {
             require_once 'Gitty/Exception.php';
-            new Gitty_Exception('Config could not be parsed');
+            new Exception('Config could not be parsed');
         }
 
         $processArray = array();
@@ -79,7 +123,7 @@ class Gitty_Config
             $processArray[$sectionName] = $sub;
         }
 
-        $processArray = $this->array_merge_recusive(Gitty_Config_Default::$DEFAULT, $processArray);
+        $processArray = $this->array_merge_recusive(self::$defaultConfig, $processArray);
 
         $this->_data = $processArray;
     }
@@ -93,12 +137,12 @@ class Gitty_Config
                     $config[$pieces[0]] = array();
                 } elseif (!is_array($config[$pieces[0]])) {
                     require_once 'Gitty/Config/Exception.php';
-                    throw new Gitty_Config_Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
+                    throw new Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
                 }
                 $config[$pieces[0]] = $this->_processKey($config[$pieces[0]], $pieces[1], $value);
             } else {
                 require_once 'Gitty/Config/Exception.php';
-                throw new Gitty_Config_Exception("Invalid key '$key'");
+                throw new Exception("Invalid key '$key'");
             }
         } else {
             $config[$key] = $value;
@@ -118,7 +162,7 @@ class Gitty_Config
             $this->_count = count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
-            throw new Gitty_Config_Exception('Gitty_Config is read only');
+            throw new Exception('Gitty_Config is read only');
         }
     }
 
@@ -138,7 +182,7 @@ class Gitty_Config
             $this->_count = count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
-            throw new Gitty_Config_Exception('Gitty_Config is read only');
+            throw new Exception('Gitty_Config is read only');
         }
     }
 
@@ -155,7 +199,7 @@ class Gitty_Config
     {
         $array = array();
         foreach ($this->_data as $key => $value) {
-            if ($value instanceof Gitty_Config) {
+            if ($value instanceof Gitty\Config) {
                 $array[$key] = $value->toArray();
             } else {
                 $array[$key] = $value;

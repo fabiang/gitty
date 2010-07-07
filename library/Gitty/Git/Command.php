@@ -18,7 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Git_Command
+
+/**
+ * @namespace Gitty\Git
+ */
+namespace Gitty\Git;
+
+class Command
 {
     static function exec($command, $path, $config)
     {

@@ -18,6 +18,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Deploy_Exception extends Gitty_Exception
+
+/**
+ * @namespace Gitty\Deploy
+ */
+namespace Gitty\Deploy;
+
+class Exception extends \Gitty\Exception
 {
 }

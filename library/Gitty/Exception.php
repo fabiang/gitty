@@ -18,6 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Exception extends Exception
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+/**
+ * Exception class
+ *
+ * @package Gitty
+ * @author Fabian Grutschus
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
+class Exception extends \Exception
 {
 }

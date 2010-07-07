@@ -18,10 +18,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-final class Gitty_Version
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+/**
+ * Gitty version
+ *
+ * @package Gitty
+ * @author Fabian Grutschus
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
+final class Version
 {
     const VERSION = '0.1.1';
 
+    /**
+     * compare version with Gittys version
+     *
+     * @param String $version the version to compare with
+     * @see http://php.net/version_compare
+     * @return Mixed
+     */
     public static function compareVersion($version)
     {
         return version_compare($version, self::VERSION);

@@ -29,4 +29,4 @@ set_include_path(
 );
 
 require_once 'library/Gitty/Loader.php';
-Gitty_Loader::registerAutoload();
+Gitty\Loader::registerAutoload();

@@ -18,7 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Gitty_Git_Repository
+
+/**
+ * @namespace Gitty\Git
+ */
+namespace Gitty\Git;
+
+class Repository
 {
     protected $_config;
     protected $_info = array(
@@ -48,7 +54,7 @@ class Gitty_Git_Repository
 
                 if (!is_readable($descFile)) {
                     require_once 'Gitty/Exception.php';
-                    throw new Gitty_Exception("'$projectName' contains a description file, but it's not readable");
+                    throw new \Gitty\Exception("'$projectName' contains a description file, but it's not readable");
                 }
 
                 $this->_info['description'] = trim(strip_tags(file_get_contents($descFile)));
@@ -78,7 +84,7 @@ class Gitty_Git_Repository
 
     public function getOwner()
     {
-        $ownerString = Gitty_Git_Command::exec(Gitty_Git_Command::REVLIST_OWNER(), $this->get('path'), $this->_config);
+        $ownerString = Command::exec(Command::REVLIST_OWNER(), $this->get('path'), $this->_config);
 
         foreach ($ownerString as $output) {
             if (substr($output, 0, 9) == 'committer') {
@@ -94,7 +100,7 @@ class Gitty_Git_Repository
 
     public function getLastChange()
     {
-        $dateString = Gitty_Git_Command::exec(Gitty_Git_Command::REVLIST_LAST_CHANGE(), $this->get('path'), $this->_config);
+        $dateString = Command::exec(Command::REVLIST_LAST_CHANGE(), $this->get('path'), $this->_config);
 
         foreach ($dateString as $output) {
             if (substr($output, 0, 9) == 'committer') {
@@ -110,7 +116,7 @@ class Gitty_Git_Repository
 
     public function getBranches()
     {
-        $branchesString = Gitty_Git_Command::exec(Gitty_Git_Command::BRANCHES(), $this->get('path'), $this->_config);
+        $branchesString = Command::exec(Command::BRANCHES(), $this->get('path'), $this->_config);
 
         $branches = array();
         foreach($branchesString as $branch) {
@@ -139,13 +145,13 @@ class Gitty_Git_Repository
         $deploymentsData = array();
         foreach ($deployments['adapter'] as $i => $adapter) {
 
-            $adapterName = 'Gitty_Deploy_Adapter_' . ucfirst($adapter);
+            $adapterName = 'Gitty\\Deploy\\Adapter\\' . ucfirst($adapter);
 
             try {
                 $adapterMethod = constant("$adapterName::METHOD");
             } catch(Exception $e) {
                 require_once 'Gitty/Exception.php';
-                throw new Gitty_Exception("'$adapter' is unknown");
+                throw new \Gitty\Exception("'$adapter' is unknown");
             }
 
             $deploymentsData[] = array(
