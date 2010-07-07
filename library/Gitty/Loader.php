@@ -12,7 +12,7 @@
  *
  * Gitty is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -197,22 +197,6 @@ class Loader
         if (preg_match('/[^a-z0-9\\/\\\\_.-]/i', $filename)) {
             require_once 'Gitty/Exception.php';
             throw new Exception('Security check: Illegal character in filename');
-        }
-    }
-
-    /**
-     * helper function for including
-     *
-     * @param String $filespec the file
-     * @param Boolean $once include just once
-     * @return Boolean file could be included
-     */
-    protected static function _includeFile($filespec, $once = false)
-    {
-        if ($once) {
-            return include_once $filespec;
-        } else {
-            return include $filespec;
         }
     }
 }

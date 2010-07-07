@@ -28,7 +28,6 @@ namespace Gitty;
  * config class
  *
  * @package Gitty
- * @author Fabian Grutschus
  * @license http://www.gnu.org/licenses/gpl.html
  */
 class Config
@@ -95,6 +94,12 @@ class Config
         return $aMerged;
     }
 
+    /**
+     * constructor
+     *
+     * @param String $filename path to config file
+     * @throws Gitty\Exception
+     */
     public function __construct($filename)
     {
         if (!file_exists($filename)) {
@@ -128,6 +133,14 @@ class Config
         $this->_data = $processArray;
     }
 
+    /**
+     * process a config key
+     *
+     * @param Array $config config as array
+     * @param String $key key
+     * @param String $value value
+     * @return Array processed config array
+     */
     protected function _processKey($config, $key, $value)
     {
         if (strpos($key, $this->_nestSeparator) !== false) {
@@ -150,11 +163,21 @@ class Config
         return $config;
     }
 
+    /**
+     * support for <code>isset($config->option)</code>
+     *
+     * @param String $name
+     */
     public function __isset($name)
     {
         return isset($this->_data[$name]);
     }
 
+    /**
+     * support for <code>unset($config->option)</code>
+     *
+     * @param String $name
+     */
     public function __unset($name)
     {
         if ($this->_allowModifications) {
@@ -162,15 +185,26 @@ class Config
             $this->_count = count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
-            throw new Exception('Gitty_Config is read only');
+            throw new Exception('Gitty\Config is read only');
         }
     }
 
+    /**
+     * support for <code>$option = $config->option</code>
+     *
+     * @param String $name
+     */
     public function __get($name)
     {
         return $this->get($name);
     }
 
+    /**
+     * support for <code>$config->option = "foo"</code>
+     *
+     * @param String $name key name
+     * @param String $value value of key
+     */
     public function __set($name, $value)
     {
         if ($this->_allowModifications) {
@@ -182,10 +216,17 @@ class Config
             $this->_count = count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
-            throw new Exception('Gitty_Config is read only');
+            throw new Exception('Gitty\Config is read only');
         }
     }
 
+    /**
+     * get an option or return defined default
+     *
+     * @param String $name the key name
+     * @param Mixed $default use this value if key doesn't exists
+     * @return Mixed the value or default
+     */
     public function get($name, $default = null)
     {
         $result = $default;
@@ -195,6 +236,11 @@ class Config
         return $result;
     }
 
+    /**
+     * return config as array
+     *
+     * @return Array config array
+     */
     public function toArray()
     {
         $array = array();
