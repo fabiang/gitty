@@ -68,19 +68,19 @@ class Config
      */
     private function array_merge_recusive ()
     {
-        $aArrays = func_get_args();
+        $aArrays = \func_get_args();
         $aMerged = $aArrays[0];
 
-        for($i = 1; $i < count($aArrays); $i++) {
+        for($i = 1; $i < \count($aArrays); $i++) {
 
-            if (is_array($aArrays[$i])) {
+            if (\is_array($aArrays[$i])) {
 
                 foreach ($aArrays[$i] as $key => $val) {
 
                     if (!isset($aMerged[$key])) {
                         $aMerged[$key] = $val;
-                    } elseif (is_array($aArrays[$i][$key])) {
-                        $aMerged[$key] = is_array($aMerged[$key]) ? $this->array_merge_recusive($aMerged[$key], $aArrays[$i][$key]) : $aArrays[$i][$key];
+                    } elseif (\is_array($aArrays[$i][$key])) {
+                        $aMerged[$key] = \is_array($aMerged[$key]) ? $this->array_merge_recusive($aMerged[$key], $aArrays[$i][$key]) : $aArrays[$i][$key];
                     } else {
                         $aMerged[$key] = $val;
                     }
@@ -102,19 +102,19 @@ class Config
      */
     public function __construct($filename)
     {
-        if (!file_exists($filename)) {
+        if (!\file_exists($filename)) {
             require_once 'Gitty/Exception.php';
             new Exception('Config file does not exist');
         }
 
-        if (!is_readable($filename)) {
+        if (!\is_readable($filename)) {
             require_once 'Gitty/Exception.php';
             new Exception('Config file isn\'t readable');
         }
 
         try {
-            $iniArray = parse_ini_file($filename, true);
-        } catch(Exception $e) {
+            $iniArray = \parse_ini_file($filename, true);
+        } catch(\Exception $e) {
             require_once 'Gitty/Exception.php';
             new Exception('Config could not be parsed');
         }
@@ -123,7 +123,7 @@ class Config
         foreach($iniArray as $sectionName => $sectionData) {
             $sub = array();
             foreach ($sectionData as $key => $value) {
-                $sub = array_merge_recursive($sub, $this->_processKey(array(), $key, $value));
+                $sub = \array_merge_recursive($sub, $this->_processKey(array(), $key, $value));
             }
             $processArray[$sectionName] = $sub;
         }
@@ -143,12 +143,12 @@ class Config
      */
     protected function _processKey($config, $key, $value)
     {
-        if (strpos($key, $this->_nestSeparator) !== false) {
+        if (\strpos($key, $this->_nestSeparator) !== false) {
             $pieces = explode($this->_nestSeparator, $key, 2);
-            if (strlen($pieces[0]) && strlen($pieces[1])) {
+            if (\strlen($pieces[0]) && \strlen($pieces[1])) {
                 if (!isset($config[$pieces[0]])) {
                     $config[$pieces[0]] = array();
-                } elseif (!is_array($config[$pieces[0]])) {
+                } elseif (!\is_array($config[$pieces[0]])) {
                     require_once 'Gitty/Config/Exception.php';
                     throw new Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
                 }
@@ -182,7 +182,7 @@ class Config
     {
         if ($this->_allowModifications) {
             unset($this->_data[$name]);
-            $this->_count = count($this->_data);
+            $this->_count = \count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
             throw new Exception('Gitty\Config is read only');
@@ -208,12 +208,12 @@ class Config
     public function __set($name, $value)
     {
         if ($this->_allowModifications) {
-            if (is_array($value)) {
+            if (\is_array($value)) {
                 $this->_data[$name] = new self($value, true);
             } else {
                 $this->_data[$name] = $value;
             }
-            $this->_count = count($this->_data);
+            $this->_count = \count($this->_data);
         } else {
             require_once 'Gitty/Config/Exception.php';
             throw new Exception('Gitty\Config is read only');
@@ -230,7 +230,7 @@ class Config
     public function get($name, $default = null)
     {
         $result = $default;
-        if (array_key_exists($name, $this->_data)) {
+        if (\array_key_exists($name, $this->_data)) {
             $result = $this->_data[$name];
         }
         return $result;
@@ -245,7 +245,7 @@ class Config
     {
         $array = array();
         foreach ($this->_data as $key => $value) {
-            if ($value instanceof Gitty\Config) {
+            if ($value instanceof Config) {
                 $array[$key] = $value->toArray();
             } else {
                 $array[$key] = $value;

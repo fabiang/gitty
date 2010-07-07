@@ -33,7 +33,7 @@ class Ftp extends AdapterAbstract
     protected function _setUrl()
     {
         $deploymentConfig = $this->_deploymentConfig;
-        $this->_url = sprintf('ftp://%s:%s@%s%s/',
+        $this->_url = \sprintf('ftp://%s:%s@%s%s/',
                                $deploymentConfig['username'],
                                $deploymentConfig['password'],
                                $deploymentConfig['hostname'],
@@ -55,7 +55,7 @@ class Ftp extends AdapterAbstract
         $this->_createTemp();
 
         $add = $this->_files['added'];
-        if (count($add)) {
+        if (\count($add)) {
             $this->setMessage(Ftp\Messages::startAdd());
 
             foreach ($add as $file) {
@@ -64,20 +64,20 @@ class Ftp extends AdapterAbstract
                 $sourceFile = $this->_tempDir . $file;
                 $destinationFile = $this->_url . $file;
 
-                if (!is_dir($this->_url . dirname($file))) {
-                    mkdir($this->_url . dirname($file), null, true, $this->_stream);
+                if (!\is_dir($this->_url . \dirname($file))) {
+                    \mkdir($this->_url . \dirname($file), null, true, $this->_stream);
                 }
 
-                if (version_compare(PHP_VERSION, '5.3.0') === 1) {
-                    copy($sourceFile, $destinationFile, $this->_stream);
+                if (\version_compare(PHP_VERSION, '5.3.0') === 1) {
+                    \copy($sourceFile, $destinationFile, $this->_stream);
                 } else {
-                    file_put_contents($destinationFile, file_get_contents($sourceFile), 0, $this->_stream);
+                    \file_put_contents($destinationFile, \file_get_contents($sourceFile), 0, $this->_stream);
                 }
             }
         }
 
         $mod = $this->_files['modified'];
-        if (count($mod)) {
+        if (\count($mod)) {
             $this->setMessage(Ftp\Messages::startModify());
 
             foreach ($mod as $file) {
@@ -86,14 +86,14 @@ class Ftp extends AdapterAbstract
                 $sourceFile = $this->_tempDir . $file;
                 $destinationFile = $this->_url . $file;
 
-                if (!is_dir($this->_url . dirname($file))) {
-                    mkdir($this->_url . dirname($file), null, true, $this->_stream);
+                if (!\is_dir($this->_url . \dirname($file))) {
+                    \mkdir($this->_url . \dirname($file), null, true, $this->_stream);
                 }
 
-                if (version_compare(PHP_VERSION, '5.3.0') === 1) {
-                    copy($sourceFile, $destinationFile, $this->_stream);
+                if (\version_compare(PHP_VERSION, '5.3.0') === 1) {
+                    \copy($sourceFile, $destinationFile, $this->_stream);
                 } else {
-                    file_put_contents($destinationFile, file_get_contents($sourceFile), 0, $this->_stream);
+                    \file_put_contents($destinationFile, \file_get_contents($sourceFile), 0, $this->_stream);
                 }
             }
         }

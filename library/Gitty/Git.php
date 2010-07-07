@@ -37,22 +37,22 @@ class Git
         if (isset($config->global['git']) && isset($config->global['git']['directories'])) {
             $global_directories = $config->global['git']['directories'];
             foreach ($global_directories as $global_directory) {
-                if (!is_dir($global_directory)) {
+                if (!\is_dir($global_directory)) {
                     require_once 'Gitty/Exception.php';
                     throw new Exception("global directory $global_directory doesn't exist");
                 }
 
-                if (!is_readable($global_directory)) {
+                if (!\is_readable($global_directory)) {
                     require_once 'Gitty/Exception.php';
                     throw new Exception("global directory $global_directory isn't readable");
                 }
 
-                $subdirectories = scandir($global_directory);
+                $subdirectories = \scandir($global_directory);
 
                 foreach($subdirectories as $subdirectory) {
                     $dir = $global_directory . '/' . $subdirectory;
-                    if ($subdirectory != '.' && $subdirectory != '..' && is_dir($dir)) {
-                        if (is_dir($dir . '/' . $config->global['git']['defaultGitDir'])) {
+                    if ($subdirectory != '.' && $subdirectory != '..' && \is_dir($dir)) {
+                        if (\is_dir($dir . '/' . $config->global['git']['defaultGitDir'])) {
                             $this->loadRepository($dir);
                         }
                     }
@@ -70,7 +70,7 @@ class Git
                 $dir = isset($projectConfig['repository']) ? $projectConfig['repository'] : $projectConfig['directory'];
                 $gitDirectory = $config->global['git']['defaultGitDir'];
 
-                if (!is_dir($dir . '/' . $gitDirectory)) {
+                if (!\is_dir($dir . '/' . $gitDirectory)) {
                     require_once 'Gitty/Exception.php';
                     throw new Exception("Not a git repository '$projectName': $gitDirectory");
                 }
@@ -93,11 +93,11 @@ class Git
     public function loadRepository($path, $projectName = null)
     {
         if (!$projectName) {
-            $projectName = basename($path);
+            $projectName = \basename($path);
         }
 
         $this->_repositoriesDirectories[$projectName] = $path;
 
-        array_push($this->_repositories, new Git\Repository($projectName, $path, $this->_gittyConfig));
+        \array_push($this->_repositories, new Git\Repository($projectName, $path, $this->_gittyConfig));
     }
 }

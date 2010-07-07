@@ -30,8 +30,8 @@ class Command
     {
         $global = $config->global;
         $out = array();
-        $result = exec(sprintf('GIT_DIR=%s %s %s',
-                            escapeshellarg($path . '/' . $global['git']['defaultGitDir']),
+        $result = exec(\sprintf('GIT_DIR=%s %s %s',
+                            \escapeshellarg($path . '/' . $global['git']['defaultGitDir']),
                             $global['git']['binLocation'],
                             $command), $out);
 

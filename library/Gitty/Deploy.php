@@ -42,7 +42,7 @@ class Deploy
     public function __construct($config)
     {
         $this->_config = $config;
-        $this->_projectConfigs = array_values($config->projects);
+        $this->_projectConfigs = \array_values($config->projects);
     }
 
     public function setProjectId($id)
@@ -64,8 +64,8 @@ class Deploy
 
         $currentBranch = 'master';
         foreach($branchesString as $branch) {
-            if (substr($branch, 0 ,1) == '*') {
-                $currentBranch = trim(substr($branch, 1));
+            if (\substr($branch, 0 ,1) == '*') {
+                $currentBranch = \trim(\substr($branch, 1));
                 break;
             }
         }
@@ -103,12 +103,12 @@ class Deploy
 
     public function start()
     {
-        $adapterName = 'Gitty\\Deploy\\Adapter\\' . ucfirst(strtolower($this->_adapterType));
+        $adapterName = 'Gitty\\Deploy\\Adapter\\' . \ucfirst(\strtolower($this->_adapterType));
 
         try {
             $adapter = Loader::loadClass($adapterName);
             $adapter = new $adapterName;
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
             require_once 'Gitty/Deploy/Exception.php';
             throw new Deploy\Exception("Can't create instance of adapter '$adapterName'. Does adapter with name '$this->_adapterType' exist?");
         }

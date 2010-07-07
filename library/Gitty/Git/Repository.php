@@ -50,20 +50,20 @@ class Repository
         } else {
             $gitDirectory = $config->global['git']['defaultGitDir'];
             $descFile = $path . '/' . $gitDirectory . '/' . $config->global['git']['descriptionFile'];
-            if (is_file($descFile)) {
+            if (\is_file($descFile)) {
 
-                if (!is_readable($descFile)) {
+                if (!\is_readable($descFile)) {
                     require_once 'Gitty/Exception.php';
                     throw new \Gitty\Exception("'$projectName' contains a description file, but it's not readable");
                 }
 
-                $this->_info['description'] = trim(strip_tags(file_get_contents($descFile)));
+                $this->_info['description'] = \trim(\strip_tags(\file_get_contents($descFile)));
             }
         }
 
         $this->_info['owner'] = $this->getOwner();
         $this->_info['lastChangeTimestamp'] = $this->getLastChange();
-        $this->_info['lastChange'] = date($config->global['gitty']['dateFormat'], $this->_info['lastChangeTimestamp']);
+        $this->_info['lastChange'] = \date($config->global['gitty']['dateFormat'], $this->_info['lastChangeTimestamp']);
         $this->_info['branches'] = $this->getBranches();
         $this->_info['remotes'] = $this->getRemotes();
     }
@@ -76,7 +76,7 @@ class Repository
     public function get($name, $default = null)
     {
         $result = $default;
-        if (array_key_exists($name, $this->_info)) {
+        if (\array_key_exists($name, $this->_info)) {
             $result = $this->_info[$name];
         }
         return $result;
@@ -87,11 +87,11 @@ class Repository
         $ownerString = Command::exec(Command::REVLIST_OWNER(), $this->get('path'), $this->_config);
 
         foreach ($ownerString as $output) {
-            if (substr($output, 0, 9) == 'committer') {
+            if (\substr($output, 0, 9) == 'committer') {
                 $results = array();
-                preg_match('/^ (.+) \d+ \+\d{4}$/', substr($output, 9), $results);
+                \preg_match('/^ (.+) \d+ \+\d{4}$/', \substr($output, 9), $results);
 
-                $owner = trim($results[1]);
+                $owner = \trim($results[1]);
             }
         }
 
@@ -103,11 +103,11 @@ class Repository
         $dateString = Command::exec(Command::REVLIST_LAST_CHANGE(), $this->get('path'), $this->_config);
 
         foreach ($dateString as $output) {
-            if (substr($output, 0, 9) == 'committer') {
+            if (\substr($output, 0, 9) == 'committer') {
                 $results = array();
-                preg_match('/^ .+ (\d+) \+\d{4}$/', substr($output, 9), $results);
+                \preg_match('/^ .+ (\d+) \+\d{4}$/', \substr($output, 9), $results);
 
-                $date = trim($results[1]);
+                $date = \trim($results[1]);
             }
         }
 
@@ -120,14 +120,14 @@ class Repository
 
         $branches = array();
         foreach($branchesString as $branch) {
-            if (substr($branch, 0 ,1) == '*') {
+            if (\substr($branch, 0 ,1) == '*') {
                 $branches[] = array(
-                    'name' => trim(substr($branch, 1)),
+                    'name' => \trim(\substr($branch, 1)),
                     'default' => 1
                 );
             } else {
                 $branches[] = array(
-                    'name' => trim($branch),
+                    'name' => \trim($branch),
                     'default' => 0
                 );
             }
@@ -145,11 +145,11 @@ class Repository
         $deploymentsData = array();
         foreach ($deployments['adapter'] as $i => $adapter) {
 
-            $adapterName = 'Gitty\\Deploy\\Adapter\\' . ucfirst($adapter);
+            $adapterName = 'Gitty\\Deploy\\Adapter\\' . \ucfirst($adapter);
 
             try {
-                $adapterMethod = constant("$adapterName::METHOD");
-            } catch(Exception $e) {
+                $adapterMethod = \constant("$adapterName::METHOD");
+            } catch(\Exception $e) {
                 require_once 'Gitty/Exception.php';
                 throw new \Gitty\Exception("'$adapter' is unknown");
             }

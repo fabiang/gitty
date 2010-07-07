@@ -33,7 +33,7 @@ namespace Gitty;
  */
 final class Version
 {
-    const VERSION = '0.1.1';
+    const VERSION = '0.2pre';
 
     /**
      * compare version with Gittys version
@@ -44,6 +44,6 @@ final class Version
      */
     public static function compareVersion($version)
     {
-        return version_compare($version, self::VERSION);
+        return \version_compare($version, self::VERSION);
     }
 }

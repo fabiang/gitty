@@ -70,23 +70,23 @@ abstract class AdapterAbstract
         $diff = \Gitty\Git\Command::exec(\Gitty\Git\Command::DIFF($remoteRev, $newestRev), $this->_projectConfig['repository'], $this->_config);
 
         foreach ($diff as $file) {
-            $fileInfo = preg_split('#\s+#', $file);
+            $fileInfo = \preg_split('#\s+#', $file);
             switch ($fileInfo[0]) {
                 case 'D':
-                    array_push($this->_files['deleted'], $fileInfo[1]);
+                    \array_push($this->_files['deleted'], $fileInfo[1]);
                     break;
                 case 'M':
-                    array_push($this->_files['modified'], $fileInfo[1]);
+                    \array_push($this->_files['modified'], $fileInfo[1]);
                     break;
                 case 'C':
-                    array_push($this->_files['copied'], $fileInfo[1]);
+                    \array_push($this->_files['copied'], $fileInfo[1]);
                     break;
                 case 'R':
-                    array_push($this->_files['renamed'], $fileInfo[1]);
+                    \array_push($this->_files['renamed'], $fileInfo[1]);
                     break;
                 case 'A':
                 default:
-                    array_push($this->_files['added'], $fileInfo[1]);
+                    \array_push($this->_files['added'], $fileInfo[1]);
                     break;
             }
         }
@@ -95,34 +95,34 @@ abstract class AdapterAbstract
     }
     protected function _deleteDirectory($dir)
     {
-        if (!file_exists($dir)) return true;
-        if (!is_dir($dir) || is_link($dir)) return unlink($dir);
-            foreach (scandir($dir) as $item) {
+        if (!\file_exists($dir)) return true;
+        if (!\is_dir($dir) || \is_link($dir)) return \unlink($dir);
+            foreach (\scandir($dir) as $item) {
                 if ($item == '.' || $item == '..') continue;
                 if (!$this->_deleteDirectory($dir . "/" . $item)) {
-                    chmod($dir . "/" . $item, 0777);
+                    \chmod($dir . "/" . $item, 0777);
                     if (!$this->_deleteDirectory($dir . "/" . $item)) return false;
                 };
             }
-            return rmdir($dir);
+            return \rmdir($dir);
     }
     protected function _createTemp()
     {
-        $this->_tempDir = $tempDir = $this->_config->global['gitty']['tempDir'] . '/' . uniqid() . '/';
+        $this->_tempDir = $tempDir = $this->_config->global['gitty']['tempDir'] . '/' . \uniqid() . '/';
 
-        $cur = getcwd();
-        chdir(dirname($tempDir));
+        $cur = \getcwd();
+        \chdir(dirname($tempDir));
 
         \Gitty\Git\Command::exec(\Gitty\Git\Command::CLONEREPO($this->_projectConfig['repository']), $this->_projectConfig['repository'], $this->_config);
         \Gitty\Git\Command::exec(\Gitty\Git\Command::CHECKOUT($this->branch), $this->_projectConfig['repository'], $this->_config);
 
-        $proj = str_replace('.git', '', basename($this->_projectConfig['repository']));
+        $proj = \str_replace('.git', '', \basename($this->_projectConfig['repository']));
 
-        rename(dirname($tempDir) . '/' . $proj, $tempDir);
+        \rename(\dirname($tempDir) . '/' . $proj, $tempDir);
 
         $this->_deleteDirectory($this->_tempDir . '.git');
 
-        chdir($cur);
+        \chdir($cur);
     }
     protected function _deleteTemp()
     {
@@ -131,7 +131,7 @@ abstract class AdapterAbstract
     protected function _writeRevFile()
     {
         $revFile = $this->_url . $this->_config->global['gitty']['revistionFile'];
-        file_put_contents($revFile, $this->_newestRevisitionId, null, $this->_stream);
+        \file_put_contents($revFile, $this->_newestRevisitionId, null, $this->_stream);
     }
 
     public function start($config, $deploymentConfig, $projectConfig)
@@ -143,17 +143,17 @@ abstract class AdapterAbstract
 
         $revs = \Gitty\Git\Command::exec(\Gitty\Git\Command::REVLIST_ORDER_DESC(), $this->_projectConfig['repository'], $this->_config);
         $this->_newestRevisitionId = $revs[0];
-        $this->_oldestRevisitionId = $revs[(count($revs) - 1)];
+        $this->_oldestRevisitionId = $revs[(\count($revs) - 1)];
     }
 
     public function open()
     {
-        $this->_stream = stream_context_create($this->_options);
+        $this->_stream = \stream_context_create($this->_options);
 
         $revFile = $this->_url . $this->_config->global['gitty']['revistionFile'];
 
-        if (file_exists($revFile) && !$this->install) {
-            $lastRev = trim(file_get_contents($revFile , false, $this->_stream));
+        if (\file_exists($revFile) && !$this->install) {
+            $lastRev = \trim(\file_get_contents($revFile , false, $this->_stream));
 
             $this->_remoteRevistionId = $lastRev;
         } else {
@@ -188,7 +188,7 @@ abstract class AdapterAbstract
         $this->_count++;
 
         if ($this->_callback) {
-            call_user_func($this->_callback, $this);
+            \call_user_func($this->_callback, $this);
         }
     }
 
