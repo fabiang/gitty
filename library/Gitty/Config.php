@@ -43,6 +43,9 @@ class Config implements \IteratorAggregate, \ArrayAccess
      */
     protected $_allowModifications = true;
 
+    /**
+     * current count of data entries
+     */
     protected $_count = 0;
 
     /**
@@ -196,7 +199,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
      * @return Iterator Iterator class
      */
     public function getIterator() {
-        return new C\Iterator($this);
+        return new \ArrayObject($this->_data);
     }
 
     /**
