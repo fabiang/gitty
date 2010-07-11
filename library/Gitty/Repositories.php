@@ -1,0 +1,121 @@
+<?php
+/**
+ * Gitty - web deployment tool
+ * Copyright (C) 2010 Fabian Grutschus
+ *
+ * This file is part of Gitty.
+ *
+ * Gitty is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Gitty is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @namespace Gitty
+ */
+namespace Gitty;
+
+/**
+ * short hands
+ */
+use \Gitty\Repositories as Repo;
+use \Gitty\Config as Config;
+use \Gitty\Loader as Loader;
+
+/**
+ * repository class
+ *
+ * @package Gitty
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
+class Repositories
+{
+    /**
+     * default adapter
+     */
+    protected static $_default_adapter = '\\Gitty\\Repositories\\Adapter\\Git';
+
+    /**
+     * instance of the adapter
+     */
+    protected $_adapter = null;
+
+    /**
+     * this class registers all repos to this variable
+     */
+    protected $_repositories = array();
+
+    /**
+     * config object
+     */
+    protected $_config = null;
+
+    /**
+     * set default adapter
+     */
+    public static function setDefaultAdapter($adapter)
+    {
+        if (!(new $adapter instanceof Repo\AdapterInterface)) {
+            require_once dirname(__FILE__).'/Config/Exception.php';
+            throw new C\Exception(get_class($data).' does not implement Gitty\Repository\AdapterInterface interface');
+        }
+
+        self::$_default_adapter = $adapter;
+    }
+
+    /**
+     * get default adapter
+     */
+    public function getDefaultAdapter()
+    {
+        return self::$_default_adapter;
+    }
+
+    public function getRepositories()
+    {
+        return $this->_repositories;
+    }
+
+    public function register(Repo\AdapterAbstract $repository)
+    {
+        $this->_repositories[] = $repository;
+    }
+
+    public function __construct(Config $config)
+    {
+        $projects = $config->projects;
+
+        foreach($projects as $project_uniqname => $project_data) {
+
+            if (isset($project_data->adapter)) {
+
+                try {
+                    $adapter = '\\Gitty\\Repositories\\Adapter\\' . ucfirst($project_data->adapter);
+                    Loader::loadClass(\substr($adapter, 1));
+                } catch(\Gitty\Exception $e) {
+                    require_once dirname(__FILE__).'/Exception.php';
+                    throw new Exception("adapter '$adapter' is unknown");
+                }
+
+                $repository = new $adapter($project_data);
+
+            } else {
+                Loader::loadClass(\substr(self::$_default_adapter, 1));
+                $repository = new self::$_default_adapter($project_data);
+            }
+
+            $this->register($repository);
+
+            var_dump($repository);
+        }
+    }
+}

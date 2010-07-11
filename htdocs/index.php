@@ -59,6 +59,9 @@ require '../../gitty/bootstrap.php'; ?>
 <?php
 $config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
 
+$repositories = new Gitty\Repositories($config);
+
+/*
 $gitty = new Gitty\Git($config);
 
 foreach ($gitty->getRepositories() as $i => $repository): ?>
@@ -87,8 +90,8 @@ foreach ($gitty->getRepositories() as $i => $repository): ?>
                             </tr>
                         </tbody>
 <?php endforeach;
-
-unset($config, $gitty);
+*/
+unset($config);
 ?>
                     </table>
                 </form>

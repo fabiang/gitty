@@ -21,6 +21,7 @@
 
 /**
  * @namespace Gitty\Config
+ * @license http://www.gnu.org/licenses/gpl.html
  */
 namespace Gitty\Config;
 

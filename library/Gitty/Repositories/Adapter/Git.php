@@ -20,22 +20,42 @@
  */
 
 /**
- * @namespace Gitty\Config
- * @license http://www.gnu.org/licenses/gpl.html
+ * @namespace Gitty\Repository
  */
-namespace Gitty\Config;
+namespace Gitty\Repositories\Adapter;
 
 /**
- * make sure Gitty\Exception is available
- */
-require_once dirname(__FILE__) . '/../Exception.php';
-
-/**
- * class for config exceptions
+ * git repositories
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class Exception extends \Gitty\Exception
+class Git extends \Gitty\Repositories\AdapterAbstract
 {
+    public function getOwner()
+    {
+
+    }
+    public function setOwner($owner)
+    {
+
+    }
+
+    public function getLastChange()
+    {
+
+    }
+    public function setLastChange(\DateTime $datetime)
+    {
+
+    }
+
+    public function getBranches()
+    {
+
+    }
+    public function setBranches($branches)
+    {
+        
+    }
 }

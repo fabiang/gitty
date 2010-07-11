@@ -42,7 +42,7 @@ require '../../gitty/bootstrap.php'; ?>
 
             <div id="gittyContent">
 <?php
-$config = new Gitty\Config(getenv('GITTY_CONFIG'));
+$config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
 $deploy = new Gitty\Deploy($config);
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 

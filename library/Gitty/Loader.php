@@ -1,7 +1,7 @@
 <?php
 /**
  * Gitty - web deployment tool
- * Copyright (C) 2009 Fabian Grutschus
+ * Copyright (C) 2010 Fabian Grutschus
  *
  * This file is part of Gitty.
  *
@@ -29,7 +29,6 @@ namespace Gitty;
  * Loader class for Gitty
  *
  * @package Gitty
- * @author Fabian Grutschus
  * @license http://www.gnu.org/licenses/gpl.html
  */
 class Loader

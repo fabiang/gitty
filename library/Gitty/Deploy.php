@@ -42,7 +42,7 @@ class Deploy
     public function __construct($config)
     {
         $this->_config = $config;
-        $this->_projectConfigs = \array_values($config->projects);
+        $this->_projectConfigs = \array_values((array)$config->projects);
     }
 
     public function setProjectId($id)
