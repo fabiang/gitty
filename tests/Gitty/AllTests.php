@@ -17,7 +17,6 @@ require_once dirname(__FILE__).'/ConfigTest.php';
 
 class AllTests
 {
-
     public static function suite()
     {
         $suite = new \PHPUnit_Framework_TestSuite('Gitty Classes');

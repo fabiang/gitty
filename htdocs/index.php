@@ -57,13 +57,7 @@ require '../../gitty/bootstrap.php'; ?>
                             </tr>
                         </thead>
 <?php
-$ini = new Gitty\Config\Ini(getenv('GITTY_CONFIG'));
-$config = new Gitty\Config($ini);
-?>
-<pre>
-    <?php var_dump($ini->toArray()); ?>
-</pre>
-<?php
+$config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
 
 $gitty = new Gitty\Git($config);
 
