@@ -23,6 +23,7 @@
  * @namespace Gitty
  */
 namespace Gitty;
+use \Gitty\Config as C;
 
 /**
  * config class
@@ -30,7 +31,7 @@ namespace Gitty;
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class Config
+class Config implements \IteratorAggregate, \ArrayAccess
 {
     /**
      * config file data as array
@@ -38,9 +39,11 @@ class Config
     protected $_data = array();
 
     /**
-     * separator for nesting
+     * allow modifications of the class
      */
-    protected $_nestSeparator = '.';
+    protected $_allowModifications = true;
+
+    protected $_count = 0;
 
     /**
      * default config data
@@ -62,105 +65,38 @@ class Config
     );
 
     /**
-     * merge one or more arrays together (recursively)
-     *
-     * @return Array merged array
-     */
-    private function array_merge_recusive ()
-    {
-        $aArrays = \func_get_args();
-        $aMerged = $aArrays[0];
-
-        for($i = 1; $i < \count($aArrays); $i++) {
-
-            if (\is_array($aArrays[$i])) {
-
-                foreach ($aArrays[$i] as $key => $val) {
-
-                    if (!isset($aMerged[$key])) {
-                        $aMerged[$key] = $val;
-                    } elseif (\is_array($aArrays[$i][$key])) {
-                        $aMerged[$key] = \is_array($aMerged[$key]) ? $this->array_merge_recusive($aMerged[$key], $aArrays[$i][$key]) : $aArrays[$i][$key];
-                    } else {
-                        $aMerged[$key] = $val;
-                    }
-
-                }
-
-            }
-
-        }
-
-        return $aMerged;
-    }
-
-    /**
      * constructor
      *
      * @param String $filename path to config file
      * @throws Gitty\Exception
      */
-    public function __construct($filename)
+    public function __construct($data, $allowModifications = true)
     {
-        if (!\file_exists($filename)) {
-            require_once 'Gitty/Exception.php';
-            new Exception('Config file does not exist');
-        }
-
-        if (!\is_readable($filename)) {
-            require_once 'Gitty/Exception.php';
-            new Exception('Config file isn\'t readable');
-        }
-
-        try {
-            $iniArray = \parse_ini_file($filename, true);
-        } catch(\Exception $e) {
-            require_once 'Gitty/Exception.php';
-            new Exception('Config could not be parsed');
-        }
-
-        $processArray = array();
-        foreach($iniArray as $sectionName => $sectionData) {
-            $sub = array();
-            foreach ($sectionData as $key => $value) {
-                $sub = \array_merge_recursive($sub, $this->_processKey(array(), $key, $value));
+        if (\is_object($data)) {
+            if (!($data instanceof C\Loader)) {
+                require_once dirname(__FILE__).'/Config/Exception.php';
+                throw new C\Exception(get_class($data).' does not implement Gitty\Config\ConfigLoader interface');
             }
-            $processArray[$sectionName] = $sub;
+
+            $data = $data->toArray();
+            $data = array_merge_recursive(self::$defaultConfig, $data);
         }
 
-        $processArray = $this->array_merge_recusive(self::$defaultConfig, $processArray);
+        if (!\is_array($data)) {
+            require_once dirname(__FILE__).'/Config/Exception.php';
+            throw new C\Exception('first parameter has to be array');
+        }
 
-        $this->_data = $processArray;
-    }
-
-    /**
-     * process a config key
-     *
-     * @param Array $config config as array
-     * @param String $key key
-     * @param String $value value
-     * @return Array processed config array
-     */
-    protected function _processKey($config, $key, $value)
-    {
-        if (\strpos($key, $this->_nestSeparator) !== false) {
-            $pieces = explode($this->_nestSeparator, $key, 2);
-            if (\strlen($pieces[0]) && \strlen($pieces[1])) {
-                if (!isset($config[$pieces[0]])) {
-                    $config[$pieces[0]] = array();
-                } elseif (!\is_array($config[$pieces[0]])) {
-                    require_once 'Gitty/Config/Exception.php';
-                    throw new Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
-                }
-                $config[$pieces[0]] = $this->_processKey($config[$pieces[0]], $pieces[1], $value);
+        foreach($data as $name => $value) {
+            if (\is_array($value)) {
+                $this->_data[$name] = new self($value, true);
             } else {
-                require_once 'Gitty/Config/Exception.php';
-                throw new Exception("Invalid key '$key'");
+                $this->_data[$name] = $value;
             }
-        } else {
-            $config[$key] = $value;
+            $this->_count = \count($this->_data);
         }
-        return $config;
+
+        $this->_allowModifications = $allowModifications;
     }
 
     /**
@@ -184,8 +120,8 @@ class Config
             unset($this->_data[$name]);
             $this->_count = \count($this->_data);
         } else {
-            require_once 'Gitty/Config/Exception.php';
-            throw new Exception('Gitty\Config is read only');
+            require_once dirname(__FILE__).'/Config/Exception.php';
+            throw new C\Exception('Gitty\Config is read only');
         }
     }
 
@@ -215,8 +151,8 @@ class Config
             }
             $this->_count = \count($this->_data);
         } else {
-            require_once 'Gitty/Config/Exception.php';
-            throw new Exception('Gitty\Config is read only');
+            require_once dirname(__FILE__).'/Config/Exception.php';
+            throw new C\Exception('Gitty\Config is read only');
         }
     }
 
@@ -252,5 +188,53 @@ class Config
             }
         }
         return $array;
+    }
+
+    /**
+     * get iterator
+     *
+     * @return Iterator Iterator class
+     */
+    public function getIterator() {
+        return new C\Iterator($this);
+    }
+
+    /**
+     * ArrayAccess: set
+     *
+     * @param Mixed $offset the offset
+     * @param Mixed $value the value
+     */
+    public function offsetSet($offset, $value) {
+        $this->_data[$offset] = $value;
+    }
+
+    /**
+     * ArrayAccess: test if offset exists
+     *
+     * @param Mixed $offset the offset
+     * @return Boolean true if offset exists
+     */
+    public function offsetExists($offset) {
+        return isset($this->_data[$offset]);
+    }
+
+    /**
+     * ArrayAccess: unset()
+     *
+     * @param Mixed $offset the offset
+     */
+    public function offsetUnset($offset) {
+        unset($this->_data[$offset]);
+    }
+
+    /**
+     * ArrayAccess: get data
+     *
+     * @param Mixed $offset the offset
+     * @return Mixed|Null returns the data if offset exists, otherwise null
+     */
+    public function offsetGet($offset) {
+        return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
     }
 }
