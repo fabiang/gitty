@@ -114,11 +114,11 @@ abstract class AdapterAbstract
     {
         return $this->_remotes;
     }
-    public function registerRemote(\Gitty\Remotes\AdapterAbstract $remote)
+    public function registerRemote(\Gitty\Remote $remote)
     {
         $this->_remotes[] = $remote;
     }
-    public function unregisterRemote(\Gitty\Remotes\AdapterAbstract $remote)
+    public function unregisterRemote(\Gitty\Remote $remote)
     {
         $index = array_search($remote, $this->_remotes, true);
         unset($this->_remotes[$index]);
@@ -133,4 +133,7 @@ abstract class AdapterAbstract
 
     abstract public function getBranches();
     abstract public function setBranches($branches);
+
+    abstract public function getUpdateFiles($uid);
+    abstract public function getInstallFiles();
 }

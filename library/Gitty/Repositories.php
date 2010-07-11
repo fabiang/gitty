@@ -65,8 +65,8 @@ class Repositories
     public static function setDefaultAdapter($adapter)
     {
         if (!(new $adapter instanceof Repo\AdapterInterface)) {
-            require_once dirname(__FILE__).'/Config/Exception.php';
-            throw new C\Exception(get_class($data).' does not implement Gitty\Repository\AdapterInterface interface');
+            require_once dirname(__FILE__).'/Repositories/Exception.php';
+            throw new Repo\Exception(get_class($data).' does not implement Gitty\Repository\AdapterInterface interface');
         }
 
         self::$_default_adapter = $adapter;
@@ -100,22 +100,27 @@ class Repositories
 
                 try {
                     $adapter = '\\Gitty\\Repositories\\Adapter\\' . ucfirst($project_data->adapter);
-                    Loader::loadClass(\substr($adapter, 1));
+                    Loader::loadClass($adapter);
                 } catch(\Gitty\Exception $e) {
-                    require_once dirname(__FILE__).'/Exception.php';
-                    throw new Exception("adapter '$adapter' is unknown");
+                    require_once dirname(__FILE__).'/Repositories/Exception.php';
+                    throw new Repo\Exception("adapter '$adapter' is unknown");
                 }
 
                 $repository = new $adapter($project_data);
 
             } else {
-                Loader::loadClass(\substr(self::$_default_adapter, 1));
+                Loader::loadClass(self::$_default_adapter);
                 $repository = new self::$_default_adapter($project_data);
             }
 
-            $this->register($repository);
+            foreach($project_data->deployment as $deployment_name => $deployment_data) {
 
-            var_dump($repository);
+                $remote = new \Gitty\Remote($deployment_data);
+                $repository->registerRemote($remote);
+
+            }
+
+            $this->register($repository);
         }
     }
 }

@@ -20,51 +20,55 @@
  */
 
 /**
- * @namespace Gitty\Repository
+ * @namespace Gitty
  */
-namespace Gitty\Repositories\Adapter;
+namespace Gitty\Remote;
 
 /**
- * git repositories
+ * repository class
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class Git extends \Gitty\Repositories\AdapterAbstract
+abstract class AdapterAbstract
 {
-    public function getOwner()
-    {
+    protected $_context = null;
+    protected $_url = null;
+    public $mode = 0755;
 
+    public function copy($sourceFile, $destination_file)
+    {
+        \copy($source_file, $this->url . $destination_file, $this->_content);
     }
-    public function setOwner($owner)
+    public function copyFiles($files)
     {
-
-    }
-
-    public function getLastChange()
-    {
-
-    }
-    public function setLastChange(\DateTime $datetime)
-    {
-
+        foreach($files as $file) {
+            $this->copy($file);
+        }
     }
 
-    public function getBranches()
+    public function unlink($file)
     {
-
-    }
-    public function setBranches($branches)
-    {
-
+        \unlink($file, $this->_context);
     }
 
-    public function getUpdateFiles($uid)
+    public function unlinkFiles($files)
     {
-
+        foreach($files as $file) {
+            $this->unlink($file);
+        }
     }
 
-    public function getInstallFiles()
+    public function makeDir($dir)
     {
+        \mkdir($dir, $this->mode, true, $this->_context);
     }
+    public function makeDirs($dirs)
+    {
+        foreach($dirs as $dir) {
+            $this->makeDir($dir);
+        }
+    }
+
+    abstract public function init();
 }

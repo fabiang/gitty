@@ -58,6 +58,12 @@ class Loader
 
         // autodiscover the path from the class name
         $file = \str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $class) . '.php';
+
+        // if class name begins with \ strip it
+        if ($file[0] === '/') {
+            $file = \substr($file, 1);
+        }
+
         if (!empty($dirs)) {
             // use the autodiscovered path
             $dirPath = \dirname($file);
