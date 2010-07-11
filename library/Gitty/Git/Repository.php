@@ -143,9 +143,9 @@ class Repository
         $deployments = $projectConfig['deployment'];
 
         $deploymentsData = array();
-        foreach ($deployments['adapter'] as $i => $adapter) {
+        foreach ($deployments as $serviceName => $serviceData) {
 
-            $adapterName = 'Gitty\\Deploy\\Adapter\\' . \ucfirst($adapter);
+            $adapterName = 'Gitty\\Deploy\\Adapter\\' . \ucfirst($serviceData['adapter']);
 
             try {
                 $adapterMethod = \constant("$adapterName::METHOD");
@@ -155,12 +155,12 @@ class Repository
             }
 
             $deploymentsData[] = array(
-                'adapter'       => $adapter,
-                'method' => $adapterMethod,
-                'hostname' => $deployments['hostname'][$i],
-                'username' => $deployments['username'][$i],
-                'password' => $deployments['password'][$i],
-                'path' => $deployments['path'][$i]
+                'adapter'  => $serviceData['adapter'],
+                'method'   => $adapterMethod,
+                'hostname' => $serviceData['hostname'],
+                'username' => $serviceData['username'],
+                'password' => $serviceData['password'],
+                'path'     => $serviceData['path']
             );
         }
 
