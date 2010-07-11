@@ -1,7 +1,7 @@
 <?php
 /**
  * Gitty - web deployment tool
- * Copyright (C) 2009 Fabian Grutschus
+ * Copyright (C) 2010 Fabian Grutschus
  *
  * This file is part of Gitty.
  *

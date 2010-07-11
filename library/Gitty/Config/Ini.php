@@ -1,9 +1,35 @@
 <?php
 /**
+ * Gitty - web deployment tool
+ * Copyright (C) 2010 Fabian Grutschus
+ *
+ * This file is part of Gitty.
+ *
+ * Gitty is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Gitty is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  * @namespace Gitty\Config
  */
 namespace Gitty\Config;
 
+/**
+ * helper class for loading ini conigurations files
+ *
+ * @package Gitty
+ * @license http://www.gnu.org/licenses/gpl.html
+ */
 class Ini implements Loader
 {
     /**
@@ -46,6 +72,11 @@ class Ini implements Loader
         return $config;
     }
 
+    /**
+     * class constructor
+     *
+     * @param String $filename the filepath to the ini file
+     */
     public function __construct($filename)
     {
         if (!\file_exists($filename)) {
@@ -81,6 +112,8 @@ class Ini implements Loader
 
     /**
      * return data as array
+     *
+     * @return Array the data as array
      */
     public function toArray()
     {
