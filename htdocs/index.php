@@ -61,16 +61,13 @@ $config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
 
 $repositories = new Gitty\Repositories($config);
 
-/*
-$gitty = new Gitty\Git($config);
-
-foreach ($gitty->getRepositories() as $i => $repository): ?>
+foreach ($repositories->getRepositories() as $i => $repository): ?>
                         <tbody class="<?php if ($i % 2): ?>gittyTableOdd<?php else: ?>gittyTableEven<?php endif; ?>">
                             <tr>
                                 <td><?php print htmlspecialchars($repository->name); ?></td>
                                 <td><?php print htmlspecialchars($repository->description); ?></td>
                                 <td><?php print htmlspecialchars($repository->owner); ?></td>
-                                <td><?php print $repository->lastChange; ?></td>
+                                <td><?php print $repository->lastChange->format($config->global->gitty->dateFormat); ?></td>
                                 <td>
                                     <select name="project[<?php print $i ?>][branch]">
 <?php foreach($repository->branches as $branch): ?>
@@ -80,9 +77,9 @@ foreach ($gitty->getRepositories() as $i => $repository): ?>
                                 </td>
                                 <td>
                                     <select name="project[<?php print $i ?>][remote]">
-<?php foreach($repository->remotes as $j => $remote): ?>
+<?php /*foreach($repository->remotes as $j => $remote): ?>
                                         <option value="<?php print $j ?>"><?php print $j; ?>: <?php print $remote['method']; ?> (Host: <?php print $remote['hostname']; ?>, User: <?php print $remote['username']; ?>, Path: <?php print $remote['path']; ?>)</option>
-<?php endforeach; ?>
+<?php endforeach; */?>
                                     </select>
                                 </td>
                                 <td><button name="update" value="0">update</button></td>
@@ -90,8 +87,8 @@ foreach ($gitty->getRepositories() as $i => $repository): ?>
                             </tr>
                         </tbody>
 <?php endforeach;
-*/
-unset($config);
+
+unset($config, $repositories, $i, $repository);
 ?>
                     </table>
                 </form>
