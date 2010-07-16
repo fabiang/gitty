@@ -23,6 +23,10 @@
  * @namespace Gitty
  */
 namespace Gitty;
+
+/**
+ * short hands
+ */
 use \Gitty\Config as C;
 
 /**
@@ -68,6 +72,42 @@ class Config implements \IteratorAggregate, \ArrayAccess
     );
 
     /**
+     * Merges any number of arrays / parameters recursively, replacing
+     * entries with string keys with values from latter arrays.
+     * If the entry or the next value to be assigned is an array, then it
+     * automagically treats both arguments as an array.
+     * Numeric entries are appended, not replaced, but only if they are
+     * unique
+     *
+     * @access public
+     * @return array Resulting array, once all have been merged
+     * @see http://www.php.net/manual/en/function.array-merge-recursive.php#96201
+     */
+    private function array_merge_recursive_distinct () {
+        $arrays = func_get_args();
+        $base = array_shift($arrays);
+        if(!is_array($base)) $base = empty($base) ? array() : array($base);
+            foreach($arrays as $append) {
+                if(!is_array($append)) $append = array($append);
+                foreach($append as $key => $value) {
+                if(!array_key_exists($key, $base) and !is_numeric($key)) {
+                    $base[$key] = $append[$key];
+                    continue;
+                }
+                if(is_array($value) or is_array($base[$key])) {
+                    // modified from original
+                    $base[$key] = $this->array_merge_recursive_distinct($base[$key], $append[$key]);
+                } else if(is_numeric($key)) {
+                    if(!in_array($value, $base)) $base[] = $value;
+                } else {
+                    $base[$key] = $value;
+                }
+            }
+        }
+        return $base;
+    }
+
+    /**
      * constructor
      *
      * @param String $filename path to config file
@@ -82,7 +122,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
             }
 
             $data = $data->toArray();
-            $data = array_merge_recursive(self::$defaultConfig, $data);
+            $data = $this->array_merge_recursive_distinct(self::$defaultConfig, $data);
         }
 
         if (!\is_array($data)) {

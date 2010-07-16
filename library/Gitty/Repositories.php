@@ -42,7 +42,7 @@ class Repositories
     /**
      * default adapter
      */
-    protected static $_default_adapter = '\\Gitty\\Repositories\\Adapter\\Git';
+    protected static $_default_adapter = null;
 
     /**
      * instance of the adapter
@@ -58,6 +58,15 @@ class Repositories
      * config object
      */
     protected $_config = null;
+
+    protected static function _getDefaultAdapter()
+    {
+        if (self::$_default_adapter === null) {
+            self::$_default_adapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
+        }
+
+        return self::$_default_adapter;
+    }
 
     /**
      * set default adapter
@@ -75,9 +84,9 @@ class Repositories
     /**
      * get default adapter
      */
-    public function getDefaultAdapter()
+    public static function getDefaultAdapter()
     {
-        return self::$_default_adapter;
+        return self::_getDefaultAdapter();
     }
 
     public function getRepositories()
@@ -99,7 +108,7 @@ class Repositories
             if (isset($project_data->adapter)) {
 
                 try {
-                    $adapter = '\\Gitty\\Repositories\\Adapter\\' . ucfirst($project_data->adapter);
+                    $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\' . ucfirst($project_data->adapter);
                     Loader::loadClass($adapter);
                 } catch(\Gitty\Exception $e) {
                     require_once dirname(__FILE__).'/Repositories/Exception.php';
@@ -109,9 +118,11 @@ class Repositories
                 $repository = new $adapter($project_data);
 
             } else {
-                Loader::loadClass(self::$_default_adapter);
-                $repository = new self::$_default_adapter($project_data);
+                $adapter = self::_getDefaultAdapter();
             }
+
+            Loader::loadClass($adapter);
+            $repository = new $adapter($project_data);
 
             foreach($project_data->deployment as $deployment_name => $deployment_data) {
 

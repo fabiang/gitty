@@ -52,12 +52,12 @@ class Loader
         }
 
         if ((null !== $dirs) && !\is_string($dirs) && !\is_array($dirs)) {
-            require_once 'Gitty/Exception.php';
+            require_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Directory argument must be a string or an array');
         }
 
         // autodiscover the path from the class name
-        $file = \str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $class) . '.php';
+        $file = \str_replace(self::NAMESPACE_SEPARATOR, \DIRECTORY_SEPARATOR, $class) . '.php';
 
         // if class name begins with \ strip it
         if ($file[0] === '/') {
@@ -86,7 +86,7 @@ class Loader
         }
 
         if (!\class_exists($class, false) && !\interface_exists($class, false)) {
-            require_once 'Gitty/Exception.php';
+            require_once \dirname(__FILE__).'/Exception.php';
             throw new Exception("File \"$file\" does not exist or class \"$class\" was not found in the file");
         }
     }
@@ -157,17 +157,22 @@ class Loader
      * @param Boolean $enabled autoloading enabled/disabled
      * @throws Gitty\Exception
      */
-    public static function registerAutoload($class = '\Gitty\Loader', $enabled = true)
+    public static function registerAutoload($class = null, $enabled = true)
     {
+        // if no class is specified use this class
+        if ($class === null) {
+            $class = __NAMESPACE__.'\\Loader';
+        }
+
         if (!\function_exists('spl_autoload_register')) {
-            require_once 'Gitty/Exception.php';
+            require_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('spl_autoload does not exist in this PHP installation');
         }
 
         self::loadClass($class);
         $methods = \get_class_methods($class);
         if (!\in_array('autoload', (array) $methods)) {
-            require_once 'Gitty/Exception.php';
+            require_once \dirname(__FILE__).'/Exception.php';
             throw new Exception("The class \"$class\" does not have an autoload() method");
         }
 
@@ -200,7 +205,7 @@ class Loader
          * Security check
          */
         if (\preg_match('/[^a-z0-9\\/\\\\_.-]/i', $filename)) {
-            require_once 'Gitty/Exception.php';
+            require_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Security check: Illegal character in filename');
         }
     }

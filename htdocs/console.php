@@ -43,17 +43,20 @@ require '../../gitty/bootstrap.php'; ?>
             <div id="gittyContent">
 <?php
 $config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
-$deploy = new Gitty\Deploy($config);
+$deploy = new Gitty\Deployment($config);
+
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
 $project = $_REQUEST['project'][$projectId];
+$deploy->registerObserver(new Gitty\Observer\DefaultObserver());
 $deploy->setProjectId($projectId);
 $deploy->setBranch($project['branch']);
-$deploy->setDeploymentId((int)$project['remote']);
+$deploy->setRemoteId((int)$project['remote']);
 ?>
                 <ul>
 <?php
 $deploy->start();
+/*
 $deploy->setCallback('callback');
 if (isset($_REQUEST['install'])) {
     $deploy->install();
@@ -66,13 +69,13 @@ function callback($deploy) {
     flush();
     ob_flush();
 }
-
-$deploy->close();
+*/
+$deploy->end();
 ?>
                 </ul>
                 <p><a href="index.php">zurück</a></p>
 <?php
-unset($deploy);
+unset($config, $deploy, $projectId, $project);
 ?>
             </div>
 

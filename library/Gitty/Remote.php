@@ -35,12 +35,24 @@ class Remote
      /**
      * default adapter
      */
-    protected static $_default_adapter = '\\Gitty\\Remotes\\Adapter\\Ftp';
+    protected static $_default_adapter = null;
 
     /**
      * instance of the adapter
      */
     protected $_adapter = null;
+
+    /**
+     * helper function to make default adapter namespace-aware
+     */
+    protected static function _getDefaultAdapter()
+    {
+        if (self::$_default_adapter === null) {
+            self::$_default_adapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';
+        }
+
+        return self::$_default_adapter;
+    }
 
     /**
      * set default adapter
@@ -66,7 +78,7 @@ class Remote
      */
     public static function getDefaultAdapter()
     {
-        return self::$_default_adapter;
+        return self::_getDefaultAdapter();
     }
 
     /**
@@ -79,7 +91,7 @@ class Remote
         if (isset($config->adapter)) {
 
             try {
-                $adapter = '\\Gitty\\Remote\\Adapter\\' . ucfirst($config->adapter);
+                $adapter = __NAMESPACE__.'\\Remote\\Adapter\\' . ucfirst($config->adapter);
                 Loader::loadClass($adapter);
             } catch(Exception $e) {
                 require_once \dirname(__FILE__).'/Remote/Exception.php';
@@ -89,9 +101,11 @@ class Remote
             $remote = new $adapter($config);
 
         } else {
-            Loader::loadClass(self::$_default_adapter);
-            $remote = new self::$_default_adapter($config);
+            $adapter = self::_getDefaultAdapter();
         }
+
+        Loader::loadClass($adapter);
+        $remote = new $adapter($config);
 
         $this->_adapter = $remote;
 

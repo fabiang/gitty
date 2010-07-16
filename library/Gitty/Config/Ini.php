@@ -30,6 +30,7 @@ namespace Gitty\Config;
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
+ * @todo make this class usable like Gitty\Config
  */
 class Ini implements Loader
 {

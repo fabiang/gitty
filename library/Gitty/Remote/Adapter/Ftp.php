@@ -25,12 +25,17 @@
 namespace Gitty\Remote\Adapter;
 
 /**
+ * storthands
+ */
+use \Gitty as G;
+
+/**
  * ftp remote adapter
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class Ftp extends \Gitty\Remote\AdapterAbstract
+class Ftp extends G\Remote\AdapterAbstract
 {
     /**
      * options for context
@@ -69,7 +74,7 @@ class Ftp extends \Gitty\Remote\AdapterAbstract
      * @param Array $options options for context
      * @todo handle option when it is an array
      */
-    public function __construct(\Gitty\Config $config, $options = null)
+    public function __construct(G\Config $config, $options = null)
     {
         $this->_hostname = $config->hostname;
         if (isset($config->port)) {

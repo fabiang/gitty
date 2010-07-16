@@ -21,9 +21,13 @@
 
 /**
  * @namespace Gitty\Repositories
- * @license http://www.gnu.org/licenses/gpl.html
  */
 namespace Gitty\Repositories;
+
+/**
+ * storthands
+ */
+use \Gitty as G;
 
 /**
  * make sure Gitty\Exception is available
@@ -36,6 +40,6 @@ require_once dirname(__FILE__) . '/../Exception.php';
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class Exception extends \Gitty\Exception
+class Exception extends G\Exception
 {
 }

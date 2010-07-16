@@ -25,13 +25,18 @@
 namespace Gitty\Repositories\Adapter;
 
 /**
+ * storthands
+ */
+use \Gitty as G;
+
+/**
  * git repository adapter
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  * @todo make defaultGitDir a static and his access functions
  */
-class Git extends \Gitty\Repositories\AdapterAbstract
+class Git extends G\Repositories\AdapterAbstract
 {
     /**
      * default git meta directory, by default it's named .git
@@ -102,7 +107,7 @@ class Git extends \Gitty\Repositories\AdapterAbstract
 
                 if (!\is_readable($descFile)) {
                     require_once \dirname(__FILE__) . '/../Exception.php';
-                    throw new \Gitty\Repositories\Exception("'$projectName' contains a description file, but it's not readable");
+                    throw new G\Repositories\Exception("'$projectName' contains a description file, but it's not readable");
                 }
 
                 $this->setDescription(\trim(\strip_tags(\file_get_contents($descFile))));

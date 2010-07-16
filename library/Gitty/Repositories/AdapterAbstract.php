@@ -25,6 +25,11 @@
 namespace Gitty\Repositories;
 
 /**
+ * storthands
+ */
+use \Gitty as G;
+
+/**
  * Adapters need to implement this interface
  *
  * @package Gitty
@@ -260,7 +265,7 @@ abstract class AdapterAbstract
      *
      * @param \Gitty\Remote $remote a remote instance
      */
-    public function registerRemote(\Gitty\Remote $remote)
+    public function registerRemote(G\Remote $remote)
     {
         $this->_remotes[] = $remote;
     }
@@ -270,7 +275,7 @@ abstract class AdapterAbstract
      *
      * @param \Gitty\Remote $remote a remote instance
      */
-    public function unregisterRemote(\Gitty\Remote $remote)
+    public function unregisterRemote(G\Remote $remote)
     {
         $index = \array_search($remote, $this->_remotes, true);
         unset($this->_remotes[$index]);
