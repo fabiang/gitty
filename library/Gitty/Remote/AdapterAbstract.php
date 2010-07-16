@@ -29,29 +29,63 @@ namespace Gitty\Remote;
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
+ * @todo implement some getter and setters
  */
 abstract class AdapterAbstract
 {
+    /**
+     * stream context
+     */
     protected $_context = null;
+
+    /**
+     * adapter url
+     */
     protected $_url = null;
+
+    /**
+     * file mode for new files
+     */
     public $mode = 0755;
 
+    /**
+     * copy a file
+     *
+     * @param String $sourceFile source file
+     * @param String $destination_file desitnation
+     */
     public function copy($sourceFile, $destination_file)
     {
-        \copy($source_file, $this->url . $destination_file, $this->_content);
+        return \copy($source_file, $this->url . $destination_file, $this->_content);
     }
+
+    /**
+     * copy an array of files
+     *
+     * @param Array $files array of files: array('/source/foo' => '/destination/file.txt')
+     */
     public function copyFiles($files)
     {
-        foreach($files as $file) {
-            $this->copy($file);
+        foreach($files as $source => $destination) {
+            $this->copy($source, $destination);
         }
     }
 
+    /**
+     * unlink a file
+     *
+     * @param String $file a file
+     */
     public function unlink($file)
     {
-        \unlink($file, $this->_context);
+        return \unlink($file, $this->_context);
     }
 
+    /**
+     * unlink an array of files
+     *
+     * @param Array $files array of files
+     */
     public function unlinkFiles($files)
     {
         foreach($files as $file) {
@@ -59,10 +93,21 @@ abstract class AdapterAbstract
         }
     }
 
+    /**
+     * make a directory
+     *
+     * @param String $dir directory name
+     */
     public function makeDir($dir)
     {
-        \mkdir($dir, $this->mode, true, $this->_context);
+        return \mkdir($dir, $this->mode, true, $this->_context);
     }
+
+    /**
+     * make directories from array
+     *
+     * @param Array $dirs array of directories
+     */
     public function makeDirs($dirs)
     {
         foreach($dirs as $dir) {
@@ -70,5 +115,28 @@ abstract class AdapterAbstract
         }
     }
 
+    /**
+     * return the name of the adapter
+     *
+     * @return String the adapter name (Ftp, File, Sftp etc.)
+     */
+    public function getAdapterName()
+    {
+        $class_name = \get_class($this);
+        return \substr($class_name, \strrpos($class_name, '\\') + 1);
+    }
+
+    /**
+     * initialize adapter
+     *
+     * @abstract
+     */
     abstract public function init();
+
+    /**
+     * adapter must implement __toString
+     *
+     * @abstract
+     */
+    abstract public function __toString();
 }

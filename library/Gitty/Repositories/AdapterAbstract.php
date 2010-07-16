@@ -29,6 +29,7 @@ namespace Gitty\Repositories;
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
+ * @todo some getters and setters to access options
  */
 abstract class AdapterAbstract
 {
@@ -40,7 +41,7 @@ abstract class AdapterAbstract
     /**
      * description of the project
      */
-    protected $_description = null;
+    protected $_description = '';
 
     /**
      * path to the project

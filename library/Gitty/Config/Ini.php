@@ -64,13 +64,13 @@ class Ini implements Loader
                     $config[$pieces[0]] = array();
 
                 } elseif (!\is_array($config[$pieces[0]])) {
-                    require_once dirname(__FILE__).'/Exception.php';
+                    require_once \dirname(__FILE__).'/Exception.php';
                     throw new Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
                 }
                 $config[$pieces[0]] = $this->_processKey($config[$pieces[0]], $pieces[1], $value);
 
             } else {
-                require_once dirname(__FILE__).'/Exception.php';
+                require_once \dirname(__FILE__).'/Exception.php';
                 throw new Exception("Invalid key '$key'");
             }
         } else {
@@ -87,20 +87,20 @@ class Ini implements Loader
     public function __construct($filename)
     {
         if (!\file_exists($filename)) {
-            require_once dirname(__FILE__).'/Exception.php';
-            throw new Exception('Config file does not exist');
+            require_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception("Config file does not exist: '$filename'");
         }
 
         if (!\is_readable($filename)) {
-            require_once dirname(__FILE__).'/Exception.php';
-            throw new Exception('Config file isn\'t readable');
+            require_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception("Config file isn't readable: '$filename'");
         }
 
         try {
             $iniArray = \parse_ini_file($filename, true);
         } catch(\Exception $e) {
-            require_once dirname(__FILE__).'/Exception.php';
-            throw new Exception('Config could not be parsed');
+            require_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception("Config could not be parsed: '$filename'");
         }
 
         $processArray = array();

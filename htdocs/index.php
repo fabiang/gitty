@@ -77,9 +77,9 @@ foreach ($repositories->getRepositories() as $i => $repository): ?>
                                 </td>
                                 <td>
                                     <select name="project[<?php print $i ?>][remote]">
-<?php /*foreach($repository->remotes as $j => $remote): ?>
-                                        <option value="<?php print $j ?>"><?php print $j; ?>: <?php print $remote['method']; ?> (Host: <?php print $remote['hostname']; ?>, User: <?php print $remote['username']; ?>, Path: <?php print $remote['path']; ?>)</option>
-<?php endforeach; */?>
+<?php foreach($repository->remotes as $j => $remote): ?>
+                                        <option value="<?php print $j ?>">#<?php print $j; ?>: <?php print $remote ?></option>
+<?php endforeach; ?>
                                     </select>
                                 </td>
                                 <td><button name="update" value="0">update</button></td>
