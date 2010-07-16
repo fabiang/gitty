@@ -53,9 +53,29 @@ class Deployment
     protected $_repositories = null;
 
     /**
+     * current deployed repository
+     */
+    protected $_deploy_repository = null;
+
+    /**
+     * current remote to deploy
+     */
+    protected $_deploy_remote = null;
+
+    /**
      * observers
      */
     protected $_observers = array();
+
+    /**
+     * deployment should install instead of update
+     */
+    public $install = false;
+
+    /**
+     * reference to the config object
+     */
+    public $config = null;
 
     /**
      * call a method of all observers
@@ -64,10 +84,10 @@ class Deployment
      */
     protected function _callObservers($function)
     {
-        $params = array();
+        $params = array($this);
         // if there are more parameters, turn them into array
         if (\func_num_args() > 1) {
-            $params = \func_get_args();
+            $params = array_merge($params, \func_get_args());
             // remove the function name, it's already in $function
             unset($params[0]);
         }
@@ -79,17 +99,64 @@ class Deployment
         }
     }
 
+    protected function _getCurrentRepository($reset = false)
+    {
+        if ($this->_deploy_repository === null || $reset === true) {
+            // get repostories from repository object
+            $repos = $this->_repositories->getRepositories();
+            $this->_deploy_repository = $repos[$this->_project_id];
+        }
+
+        return $this->_deploy_repository;
+    }
+
+    protected function _getCurrentRemote($reset = false)
+    {
+        if ($this->_deploy_remote === null || $reset === true) {
+            // get remotes from repositories object
+            $remote = $this->_getCurrentRepository()->getRemotes();
+            $this->_deploy_remote = $remote[$this->_project_id];
+        }
+
+        return $this->_deploy_remote;
+    }
+
+    protected function _getFiles()
+    {
+        $repo = $this->_getCurrentRepository();
+        if ($this->install === true) {
+            return $repo->getInstallFiles();
+        }
+
+        $remote = $this->_getCurrentRemote();
+        return $repo->getUpdateFiles($remote->getServerRevisitionId());
+    }
+
+    protected function _writeRevistionFile()
+    {
+        $repo = $this->_getCurrentRemote()->putServerRevisitionId(
+            $this->_getCurrentRepository()->getNewestRevisitionId()
+        );
+    }
+
     /**
      * constructor
      */
-    public function __construct(Config $config)
+    public function __construct(Config $config, $install = false)
     {
         $this->_repositories = new Repositories($config);
+        $this->config = $config;
+        $this->install = $install;
     }
 
     public function __destruct()
     {
         $this->end();
+    }
+
+    public function getObersers()
+    {
+        return $this->_observers;
     }
 
     public function registerObserver(Observer\ObserverInterface $observer)
@@ -100,7 +167,9 @@ class Deployment
     public function unregisterObserver(Observer\ObserverInterface $observer)
     {
         $index = \array_search($observer, $this->_observers, true);
-        unset($this->_observers[$index]);
+        if (isset($this->_observers[$index])) {
+            unset($this->_observers[$index]);
+        }
         return !!$index;
     }
 
@@ -112,6 +181,7 @@ class Deployment
     public function setProjectId($id)
     {
         $this->_project_id = $id;
+        $this->_getCurrentRepository();
     }
 
     public function getBranch()
@@ -137,9 +207,32 @@ class Deployment
     public function start()
     {
         $this->_callObservers('onStart');
+
+        $remote = $this->_getCurrentRemote();
+        $repo = $this->_getCurrentRepository();
+
+        $files = $this->_getFiles();
+
+        //first the added files
+        $added = $files['added'];
+        if (\count($added) > 0) {
+            $this->_callObservers('onAddStart');
+
+            foreach($added as $file) {
+                $fullpath = $repo->getPath() . '/' . $file;
+                $this->_callObservers('onAdd', $file);
+                $remote->copy($fullpath, $file);
+            }
+
+            $this->_callObservers('onAddEnd');
+        }
+
+        // write revisition id to a file
+        $this->_writeRevistionFile();
     }
 
     public function end()
     {
+        $this->_callObservers('onEnd');
     }
 }

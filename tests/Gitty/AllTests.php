@@ -11,7 +11,7 @@ require_once 'PHPUnit/Framework.php';
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/Util/Filter.php';
 
-require_once dirname(__FILE__).'/ConfigTest.php';
+require_once \dirname(__FILE__).'/ConfigTest.php';
 
 \PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
@@ -20,7 +20,7 @@ class AllTests
     public static function suite()
     {
         $suite = new \PHPUnit_Framework_TestSuite('Gitty Classes');
-        $suite->addTestSuite('\\Gitty\\Tests\\Gitty\\ConfigTest');
+        $suite->addTestSuite(__NAMEPSPACE__.'\\ConfigTest');
         return $suite;
     }
 }

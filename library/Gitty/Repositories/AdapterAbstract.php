@@ -79,6 +79,41 @@ abstract class AdapterAbstract
     protected $_branches = array();
 
     /**
+     * the id of the newest revisition id
+     */
+    protected $_newestRevisitionId = null;
+
+    /**
+     * rhe id of the oldest revisition id
+     */
+    protected $_oldestRevisitionId = null;
+
+    /**
+     * modified files
+     */
+    protected $_modified = array();
+
+    /**
+     * deleted files
+     */
+    protected $_deleted = array();
+
+    /**
+     * copied files
+     */
+    protected $_copied = array();
+
+    /**
+     * renamed files
+     */
+    protected $_renamed = array();
+
+    /**
+     * added files
+     */
+    protected $_added = array();
+
+    /**
      * constructor
      *
      * @param Array $options project options
@@ -278,7 +313,9 @@ abstract class AdapterAbstract
     public function unregisterRemote(G\Remote $remote)
     {
         $index = \array_search($remote, $this->_remotes, true);
-        unset($this->_remotes[$index]);
+        if (isset($this->_remotes[$index])) {
+            unset($this->_remotes[$index]);
+        }
         return !!$index;
     }
 

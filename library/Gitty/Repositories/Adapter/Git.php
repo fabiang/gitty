@@ -90,6 +90,64 @@ class Git extends G\Repositories\AdapterAbstract
     }
 
     /**
+     * get newest and oldest revisition id
+     *
+     * @param Boolean $reset reset the values from the class
+     * @return Array newest and oldest as keys
+     */
+    protected function _getRevId($reset = false)
+    {
+        if (($this->_newestRevisitionId === null && $this->_oldestRevisitionId === null) || $reset === true) {
+            $revs = $this->_execCommand('rev-list --all --full-history --topo-order');
+
+            $this->_newestRevisitionId = $revs[0];
+            $this->_oldestRevisitionId = \end($revs);
+        }
+
+        return array('newest' => $this->_newestRevisitionId, 'oldest' => $this->_oldestRevisitionId);
+    }
+
+    /**
+     * parse files form git diff
+     *
+     * @param Array $diff the diff as array
+     * @return Array an array containing the deleted, modified, copied, renamed, added files
+     */
+    protected function _parseFiles($diff)
+    {
+        foreach ($diff as $file) {
+            $fileInfo = \preg_split('#\s+#', $file);
+
+            switch ($fileInfo[0]) {
+                case 'D':
+                    \array_push($this->_deleted, $fileInfo[1]);
+                    break;
+                case 'M':
+                    \array_push($this->_modified, $fileInfo[1]);
+                    break;
+                case 'C':
+                    \array_push($this->_copied, $fileInfo[1]);
+                    break;
+                case 'R':
+                    \array_push($this->_renamed, $fileInfo[1]);
+                    break;
+                case 'A':
+                default:
+                    \array_push($this->_added, $fileInfo[1]);
+                    break;
+            }
+        }
+
+        return array(
+            'deleted'  => $this->_deleted,
+            'modified' => $this->_modified,
+            'copied'   => $this->_copied,
+            'renamed'  => $this->_renamed,
+            'added'    => $this->_added
+        );
+    }
+
+    /**
      * constructor
      *
      * @param Array $options options for the adapter
@@ -296,23 +354,45 @@ class Git extends G\Repositories\AdapterAbstract
     }
 
     /**
+     * get newest revisition id
+     *
+     * @return String newest id
+     */
+    public function getNewestRevisitionId()
+    {
+        list($newest, ) = array_values($this->_getRevId());
+        return $newest;
+    }
+
+    /**
      * get updates file since a version id
      *
      * @param String $uuid version id
-     * @return Array files as array
-     * @todo implement
+     * @return Array an array containing the deleted, modified, copied, renamed, added files
      */
     public function getUpdateFiles($uid)
     {
+        list($newest, $oldest) = array_values($this->_getRevId());
+        $files = $this->_execCommand('diff -M -C --name-status '. $uid . ' ' . $newest);
+        return $this->_parseFiles($files);
     }
 
     /**
      * get alles files from the repository
      *
-     * @return Array files as array
-     * @todo implement
+     * @return Array an array containing the deleted, modified, copied, renamed, added files
      */
     public function getInstallFiles()
     {
+        list($newest, $oldest) = array_values($this->_getRevId());
+        $files = $this->_execCommand('ls-files --full-name');
+
+        return array(
+            'deleted'  => array(),
+            'modified' => array(),
+            'copied'   => array(),
+            'renamed'  => array(),
+            'added'    => $files
+        );
     }
 }

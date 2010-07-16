@@ -40,7 +40,7 @@ class Ftp extends G\Remote\AdapterAbstract
     /**
      * options for context
      */
-    public $options = array('ftp' => array('overwrite' => true));
+    protected $_options = array('ftp' => array('overwrite' => true));
 
     /**
      * hostname
@@ -84,8 +84,12 @@ class Ftp extends G\Remote\AdapterAbstract
         $this->_password = isset($config->password) ? $config->password : '';
         $this->_path = isset($config->path) ? $config->path : '/';
 
-        if ($options) {
-            $this->options['ftp'] = $options;
+        if ($config->revisitionFileName) {
+            $this->_revisitionFileName = $config->revisitionFileName;
+        }
+
+        if ($options !== null) {
+            $this->_options['ftp'] = $options;
         }
     }
 
@@ -104,7 +108,7 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function init()
     {
-        $this->_url = sprintf('ftp://%s:%s@%s:%d%s', $this->_username, $this->_password, $this->_hostname, $this->_port, $this->_path);
-        $this->_context = stream_context_create($this->options);
+        $this->_url = \sprintf('ftp://%s:%s@%s:%d%s', $this->_username, $this->_password, $this->_hostname, $this->_port, $this->_path);
+        $this->_context = \stream_context_create($this->_options);
     }
 }

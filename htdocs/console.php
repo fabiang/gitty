@@ -1,7 +1,7 @@
 <?php
 /**
  * Gitty - web deployment tool
- * Copyright (C) 2009 Fabian Grutschus
+ * Copyright (C) 2010 Fabian Grutschus
  *
  * This file is part of Gitty.
  *
@@ -43,7 +43,7 @@ require '../../gitty/bootstrap.php'; ?>
             <div id="gittyContent">
 <?php
 $config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
-$deploy = new Gitty\Deployment($config);
+$deploy = new Gitty\Deployment($config, isset($_REQUEST['install']));
 
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
@@ -71,12 +71,11 @@ function callback($deploy) {
 }
 */
 $deploy->end();
+
+unset($config, $deploy, $projectId, $project);
 ?>
                 </ul>
                 <p><a href="index.php">zurück</a></p>
-<?php
-unset($config, $deploy, $projectId, $project);
-?>
             </div>
 
             <div id="gittyFooter">

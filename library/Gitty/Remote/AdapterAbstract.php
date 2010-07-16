@@ -44,9 +44,34 @@ abstract class AdapterAbstract
     protected $_url = null;
 
     /**
+     * the revisition file name
+     */
+    public $_revisitionFileName = 'revisition.txt';
+
+    /**
      * file mode for new files
      */
     public $mode = 0755;
+
+    /**
+     * get revisition id of remote server
+     *
+     * @return String revisition file content
+     */
+    public function getServerRevisitionId()
+    {
+        return \trim(\file_get_contents($this->_url . '/' . $this->_revisitionFileName, false, $this->_context));
+    }
+
+    /**
+     * put revisition id in file on remote server
+     *
+     * @param String $uid revisition id
+     */
+    public function putServerRevisitionId($uid)
+    {
+        \file_put_contents($this->_url . '/' . $this->_revisitionFileName, \trim($uid), 0, $this->_context);
+    }
 
     /**
      * copy a file
@@ -54,9 +79,14 @@ abstract class AdapterAbstract
      * @param String $sourceFile source file
      * @param String $destination_file desitnation
      */
-    public function copy($sourceFile, $destination_file)
+    public function copy($source_file, $destination_file)
     {
-        return \copy($source_file, $this->url . $destination_file, $this->_content);
+        $dirname = \dirname($destination_file);
+        if (!\is_dir($this->_url . '/' . $dirname)) {
+            $this->makeDir($dirname);
+        }
+
+        return \copy($source_file, $this->_url . '/' . $destination_file, $this->_context);
     }
 
     /**
@@ -78,7 +108,7 @@ abstract class AdapterAbstract
      */
     public function unlink($file)
     {
-        return \unlink($file, $this->_context);
+        return \unlink($this->_url . '/' .$file, $this->_context);
     }
 
     /**
@@ -100,7 +130,7 @@ abstract class AdapterAbstract
      */
     public function makeDir($dir)
     {
-        return \mkdir($dir, $this->mode, true, $this->_context);
+        return \mkdir($this->_url . '/' . $dir, $this->mode, true, $this->_context);
     }
 
     /**

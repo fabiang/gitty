@@ -121,13 +121,33 @@ class Remote
     }
 
     /**
+     * get revisition id of remote server
+     *
+     * @return String revisition file content
+     */
+    public function getServerRevisitionId()
+    {
+        return $this->_adapter->getServerRevisitionId();
+    }
+
+    /**
+     * put revisition id in file on remote server
+     *
+     * @param String $uid revisition id
+     */
+    public function putServerRevisitionId($uid)
+    {
+        $this->_adapter->putServerRevisitionId($uid);
+    }
+
+    /**
      * copy a file
      *
      * @param String $file file name
      */
-    public function copy($file)
+    public function copy($file, $destination)
     {
-        $this->_adapter->copy($file);
+        $this->_adapter->copy($file, $destination);
     }
 
     /**

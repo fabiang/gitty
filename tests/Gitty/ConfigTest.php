@@ -1,6 +1,8 @@
 <?php
 namespace Gitty\Tests\Gitty;
 
+use \Gitty as Gitty;
+
 require_once 'PHPUnit/Framework.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
@@ -50,7 +52,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testConfigFileExist()
     {
         $filename = \dirname(__FILE__) . '/../data/' . \uniqid("gittyconfig_");
-        $conf = new \Gitty\Config\Ini($filename);
+        $conf = new Gitty\Config\Ini($filename);
     }
 
     /**
@@ -63,7 +65,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         \chmod($filename, 0000);
         try {
             $conf = new \Gitty\Config\Ini($filename);
-        } catch(\Gitty\Config\Exception $e) {
+        } catch(Gitty\Config\Exception $e) {
             \chmod($filename, \octdec($chmod));
             throw $e;
         }
@@ -75,13 +77,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testBrokenConfig()
     {
         $filename = \dirname(__FILE__) . '/../data/broken.ini';
-        $conf = new \Gitty\Config\Ini($filename);
+        $conf = new Gitty\Config\Ini($filename);
     }
 
     public function testConfigLoading()
     {
         $filename = \dirname(__FILE__).'/../data/example.ini';
-        $conf = new \Gitty\Config\Ini($filename);
+        $conf = new Gitty\Config\Ini($filename);
 
         $this->assertEquals($conf->toArray(), $this->exampleConfig);
     }
@@ -89,7 +91,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testToArray()
     {
         $filename = \dirname(__FILE__).'/../data/empty.ini';
-        $conf = new \Gitty\Config(array());
+        $conf = new Gitty\Config(array());
 
         foreach($this->exampleConfig as $key => $value) {
             $conf->$key = $value;
@@ -100,17 +102,17 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGet()
     {
-        $conf = new \Gitty\Config(array());
+        $conf = new Gitty\Config(array());
         $conf->test = 1;
         $this->assertEquals($conf->toArray(), array('test' => 1));
 
-        $conf = new \Gitty\Config(array('test' => '1'));
+        $conf = new Gitty\Config(array('test' => '1'));
         $this->assertEquals($conf->test, '1');
     }
 
     public function testGetDefault()
     {
-        $conf = new \Gitty\Config(array('test' => 1));
+        $conf = new Gitty\Config(array('test' => 1));
 
         $this->assertEquals($conf->get('test', 2), 1);
         $this->assertEquals($conf->get('not_exists', 2), 2);
@@ -118,7 +120,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testIssetUnset()
     {
-        $conf = new \Gitty\Config(array('test' => 1));
+        $conf = new Gitty\Config(array('test' => 1));
 
         $this->assertTrue(isset($conf->test));
         unset($conf->test);
@@ -129,7 +131,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $should_be = array('test' => 1, 'bar' => 2);
 
-        $conf = new \Gitty\Config($should_be);
+        $conf = new Gitty\Config($should_be);
 
         $this->assertTrue($conf->getIterator() instanceof \IteratorAggregate);
 
@@ -143,7 +145,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testArrayAccess()
     {
-        $conf = new \Gitty\Config(array());
+        $conf = new Gitty\Config(array());
 
         $conf['test'] = 1;
         $this->assertTrue(isset($conf['test']));
