@@ -25,6 +25,11 @@
 namespace Gitty\Observer;
 
 /**
+ * short hands
+ */
+use \Gitty\Deployment as Deployment;
+
+/**
  * observer class
  *
  * @package Gitty
@@ -32,19 +37,118 @@ namespace Gitty\Observer;
  */
 class DefaultObserver implements ObserverInterface
 {
-    public function onInit()
+    public function __construct()
     {
     }
 
-    public function onStat()
+    public function __destruct()
     {
+        $this->_flush();
     }
 
-    public function onStart()
+    public function _flush()
     {
+        flush();
+        ob_flush();
     }
 
-    public function onEnd()
+    public function onStart(Deployment $deployment)
     {
+        ob_start();
+
+        print '<p>Starting ';
+        if ($deployment->install) {
+            print 'installation';
+        } else {
+            print 'update';
+        }
+        print ' process.</p>';
+
+        $this->_flush();
+    }
+
+    public function onUpToDate(Deployment $deployment)
+    {
+        print '<p>The remote is up-to-date. Cancel.</p>';
+        $this->_flush();
+    }
+
+    public function onStat(Deployment $deployment, $files)
+    {
+        $all_count = \count($files['added']) +
+                     \count($files['modified']) +
+                     \count($files['copied']) +
+                     \count($files['renamed']) +
+                     \count($files['deleted']);
+        \printf('<p>%d files (%d added, %d modified, %d copied, %d renamed, %d deleted)</p>',
+                $all_count,
+                \count($files['added']),
+                \count($files['modified']),
+                \count($files['copied']),
+                \count($files['renamed']),
+                \count($files['deleted']));
+        $this->_flush();
+    }
+
+    public function onEnd(Deployment $deployment)
+    {
+        $start = $deployment->start;
+        $interval = $start->diff(new \DateTime());
+        \printf('<p>Everything done. Operation took %s.</p>', $interval->format('%i minutes and %s seconds'));
+        $this->_flush();
+    }
+
+    public function onAddStart(Deployment $deployment)
+    {
+        print '<p>Start adding files...</p><ul>'.
+        $this->_flush();
+    }
+
+    public function onAdd(Deployment $deployment, $file)
+    {
+        print "<li>adding $file</li>";
+        $this->_flush();
+    }
+
+    public function onAddEnd(Deployment $deployment)
+    {
+        print '</ul>';
+        $this->_flush();
+    }
+
+    public function onModifiedStart(Deployment $deployment)
+    {
+        print '<p>modified files...</p><ul>'.
+        $this->_flush();
+    }
+
+    public function onModified(Deployment $deployment, $file)
+    {
+        print "<li>$file</li>";
+        $this->_flush();
+    }
+
+    public function onModifiedEnd(Deployment $deployment)
+    {
+        print '</ul>';
+        $this->_flush();
+    }
+
+    public function onDeletedStart(Deployment $deployment)
+    {
+        print '<p>deleting files...</p><ul>'.
+        $this->_flush();
+    }
+
+    public function onDeleted(Deployment $deployment, $file)
+    {
+        print "<li>delete $file</li>";
+        $this->_flush();
+    }
+
+    public function onDeletedEnd(Deployment $deployment)
+    {
+        print '</ul>';
+        $this->_flush();
     }
 }

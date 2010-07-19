@@ -25,35 +25,26 @@
 namespace Gitty\Observer;
 
 /**
- * short hands
- */
-use \Gitty\Deployment as Deployment;
-
-/**
- * observer interface
+ * observer class
  *
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-interface ObserverInterface
+class Log implements ObserverInterface
 {
-    /**
-     * when transaction begins
-     */
-    public function onStart(Deployment $deployment);
+    public function onInit()
+    {
+    }
 
-    /**
-     * when remote repository is up-to-date
-     */
-    public function onUpToDate(Deployment $deployment);
+    public function onStat()
+    {
+    }
 
-    /**
-     * statistics
-     */
-    public function onStat(Deployment $deployment, $files);
+    public function onStart()
+    {
+    }
 
-    /**
-     * when transaction ends
-     */
-    public function onEnd(Deployment $deployment);
+    public function onEnd()
+    {
+    }
 }

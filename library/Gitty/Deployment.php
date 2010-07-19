@@ -68,6 +68,11 @@ class Deployment
     protected $_observers = array();
 
     /**
+     * the observers when cleaned
+     */
+    protected $_clean = false;
+
+    /**
      * deployment should install instead of update
      */
     public $install = false;
@@ -76,6 +81,11 @@ class Deployment
      * reference to the config object
      */
     public $config = null;
+
+    /**
+     * start time of deployment
+     */
+    public $start = null;
 
     /**
      * call a method of all observers
@@ -87,9 +97,7 @@ class Deployment
         $params = array($this);
         // if there are more parameters, turn them into array
         if (\func_num_args() > 1) {
-            $params = array_merge($params, \func_get_args());
-            // remove the function name, it's already in $function
-            unset($params[0]);
+            $params = \array_merge($params, \array_slice(\func_get_args(), 1));
         }
 
         foreach($this->_observers as $observer) {
@@ -281,6 +289,8 @@ class Deployment
     /**
      * start the updating installation process
      * and call the obeservers while performing
+     * @todo implement renamed files
+     * @todo implement copied files
      */
     public function start()
     {
@@ -289,7 +299,19 @@ class Deployment
         $remote = $this->_getCurrentRemote();
         $repo = $this->_getCurrentRepository();
 
+        $datetime = new \DateTime();
+        $datetime->format($this->config->global->gitty->dateFormat);
+        $this->start = $datetime;
+
+        if ($this->_getCurrentRepository()->getNewestRevisitionId() == $remote->getServerRevisitionId() && $this->install === false) {
+            $this->_callObservers('onUpToDate');
+            return;
+        }
+
         $files = $this->_getFiles();
+
+        // call stat on the observers
+        $this->_callObservers('onStat', $files);
 
         //first the added files
         $added = $files['added'];
@@ -320,7 +342,7 @@ class Deployment
         }
 
         // copied files
-        $copied = $files['copied'];
+        /*$copied = $files['copied'];
         if (\count($copied) > 0) {
             $this->_callObservers('onCopiedStart');
 
@@ -345,7 +367,7 @@ class Deployment
             }
 
             $this->_callObservers('onRenamedEnd');
-        }
+        }*/
 
         // deleted files
         $deleted = $files['deleted'];
@@ -370,6 +392,9 @@ class Deployment
      */
     public function end()
     {
-        $this->_callObservers('onEnd');
+        if ($this->_clean === false) {
+            $this->_callObservers('onEnd');
+            $this->_clean = true;
+        }
     }
 }

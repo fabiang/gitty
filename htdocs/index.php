@@ -57,8 +57,7 @@ require '../../gitty/bootstrap.php'; ?>
                             </tr>
                         </thead>
 <?php
-$config = new Gitty\Config\Ini(getenv('GITTY_CONFIG'));
-$repositories = new Gitty\Repositories($config);
+$repositories = new Gitty\Repositories(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
 
 foreach ($repositories->getRepositories() as $i => $repository): ?>
                         <tbody class="<?php if ($i % 2): ?>gittyTableOdd<?php else: ?>gittyTableEven<?php endif; ?>">
@@ -86,7 +85,7 @@ foreach ($repositories->getRepositories() as $i => $repository): ?>
                             </tr>
                         </tbody>
 <?php endforeach;
-unset($config, $repositories, $i, $repository);
+unset($repositories, $i, $repository);
 ?>
                     </table>
                 </form>

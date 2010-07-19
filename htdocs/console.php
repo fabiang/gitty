@@ -42,8 +42,8 @@ require '../../gitty/bootstrap.php'; ?>
 
             <div id="gittyContent">
 <?php
-$config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
-$deploy = new Gitty\Deployment($config, isset($_REQUEST['install']));
+$deploy = new Gitty\Deployment(new Gitty\Config\Ini(getenv('GITTY_CONFIG')),
+                               isset($_REQUEST['install']));
 
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
@@ -71,7 +71,7 @@ function callback($deploy) {
 }
 */
 $deploy->end();
-unset($config, $deploy, $projectId, $project);
+unset($deploy, $projectId, $project);
 ?>
                 </ul>
                 <p><a href="index.php">zurück</a></p>
