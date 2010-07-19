@@ -58,7 +58,6 @@ require '../../gitty/bootstrap.php'; ?>
                         </thead>
 <?php
 $config = new Gitty\Config\Ini(getenv('GITTY_CONFIG'));
-var_dump($config);
 $repositories = new Gitty\Repositories($config);
 
 foreach ($repositories->getRepositories() as $i => $repository): ?>

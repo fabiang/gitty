@@ -110,13 +110,15 @@ class Config implements \IteratorAggregate, \ArrayAccess
      * constructor
      *
      * @param String $filename path to config file
+     * @param Boolean $allowModifications allow modifications of the object
+     * @param Boolean $merge merge default data to the array
      * @throws Gitty\Exception
      */
-    public function __construct($data, $allowModifications = true)
+    public function __construct($data, $allowModifications = true, $merge = true)
     {
         if (\is_object($data)) {
             if (!($data instanceof C\Loader)) {
-                require_once dirname(__FILE__).'/Config/Exception.php';
+                require_once \dirname(__FILE__).'/Config/Exception.php';
                 throw new C\Exception(get_class($data).' does not implement Gitty\Config\ConfigLoader interface');
             }
 
@@ -124,18 +126,18 @@ class Config implements \IteratorAggregate, \ArrayAccess
         }
 
         if (!\is_array($data)) {
-            require_once dirname(__FILE__).'/Config/Exception.php';
+            require_once \dirname(__FILE__).'/Config/Exception.php';
             throw new C\Exception('first parameter has to be array');
         }
 
-        // if array comes from a loader merge default config to the array
-        if (__CLASS__ !== get_class($this)) {
+        // merge default data
+        if ($merge === true) {
             $data = $this->_array_merge_recursive_distinct(self::$defaultConfig, $data);
         }
 
         foreach($data as $name => $value) {
             if (\is_array($value)) {
-                $this->_data[$name] = new self($value, true);
+                $this->_data[$name] = new self($value, true, false);
             } else {
                 $this->_data[$name] = $value;
             }
