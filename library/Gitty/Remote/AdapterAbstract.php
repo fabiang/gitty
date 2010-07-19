@@ -79,11 +79,20 @@ abstract class AdapterAbstract
      * @param String $sourceFile source file
      * @param String $destination_file desitnation
      */
-    public function copy($source_file, $destination_file)
+    public function copy($source_file, $destination_file = null)
     {
+        if (\is_array($source_file) && $destination_file === null) {
+            $this->copyFiles($source_file);
+            return;
+        }
+
         $dirname = \dirname($destination_file);
         if (!\is_dir($this->_url . '/' . $dirname)) {
             $this->makeDir($dirname);
+        }
+
+        if (\is_file($this->_url . '/' . $destination_file)) {
+            $this->unlink($destination_file);
         }
 
         return \copy($source_file, $this->_url . '/' . $destination_file, $this->_context);
@@ -108,6 +117,11 @@ abstract class AdapterAbstract
      */
     public function unlink($file)
     {
+        if (\is_array($file)) {
+            $this->unlinkFiles($source_file);
+            return;
+        }
+
         return \unlink($this->_url . '/' .$file, $this->_context);
     }
 
@@ -124,12 +138,45 @@ abstract class AdapterAbstract
     }
 
     /**
+     * rename/move a file
+     *
+     * @param String $file file name
+     * @param String $destination the destination
+     */
+    public function rename($file, $destination = null)
+    {
+        if (\is_array($file) && $destination === null) {
+            $this->renameFiles($source_file);
+            return;
+        }
+
+        return \rename($file, $destination, $this->_context);
+    }
+
+    /**
+     * rename/move an array of files
+     *
+     * @param Array $files an array of files
+     */
+    public function renameFiles($files)
+    {
+        foreach($files as $file => $destination) {
+            $this->rename($file, $destination);
+        }
+    }
+
+    /**
      * make a directory
      *
      * @param String $dir directory name
      */
     public function makeDir($dir)
     {
+        if (\is_array($dir)) {
+            $this->makeDirs($dir);
+            return;
+        }
+
         return \mkdir($this->_url . '/' . $dir, $this->mode, true, $this->_context);
     }
 
@@ -157,7 +204,7 @@ abstract class AdapterAbstract
     }
 
     /**
-     * initialize adapter
+     * adapter must implement init
      *
      * @abstract
      */

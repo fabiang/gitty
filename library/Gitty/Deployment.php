@@ -204,6 +204,9 @@ class Deployment
         $this->_remote = $remote;
     }
 
+    /**
+     *
+     */
     public function start()
     {
         $this->_callObservers('onStart');
@@ -225,6 +228,58 @@ class Deployment
             }
 
             $this->_callObservers('onAddEnd');
+        }
+
+        $modified = $files['modified'];
+        if (\count($modified) > 0) {
+            $this->_callObservers('onModifiedStart');
+
+            foreach($modified as $file) {
+                $fullpath = $repo->getPath() . '/' . $file;
+                $this->_callObservers('onModified', $file);
+                $remote->copy($fullpath, $file);
+            }
+
+            $this->_callObservers('onModifiedEnd');
+        }
+
+        $copied = $files['copied'];
+        if (\count($copied) > 0) {
+            $this->_callObservers('onCopiedStart');
+
+            foreach($copied as $file) {
+                $fullpath = $repo->getPath() . '/' . $file;
+                $this->_callObservers('onCopied', $file);
+                $remote->copy($fullpath, $file);
+            }
+
+            $this->_callObservers('onCopiedEnd');
+        }
+
+        $renamed = $files['renamed'];
+        if (\count($renamed) > 0) {
+            $this->_callObservers('onRenamedStart');
+
+            foreach($renamed as $file) {
+                $fullpath = $repo->getPath() . '/' . $file;
+                $this->_callObservers('onRenamed', $file);
+                $remote->rename($fullpath, $file);
+            }
+
+            $this->_callObservers('onRenamedEnd');
+        }
+
+        $deleted = $files['deleted'];
+        if (\count($deleted) > 0) {
+            $this->_callObservers('onDeletedStart');
+
+            foreach($deleted as $file) {
+                $fullpath = $repo->getPath() . '/' . $file;
+                $this->_callObservers('onDeleted', $file);
+                $remote->unlink($fullpath);
+            }
+
+            $this->_callObservers('onDeletedEnd');
         }
 
         // write revisition id to a file
