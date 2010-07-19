@@ -21,9 +21,13 @@
 
 /**
  * @namespace Gitty\Config
- * @license http://www.gnu.org/licenses/gpl.html
  */
 namespace Gitty\Config;
+
+/**
+ * short hands
+ */
+use \Gitty as G;
 
 /**
  * helper class for loading ini conigurations files
@@ -32,13 +36,8 @@ namespace Gitty\Config;
  * @license http://www.gnu.org/licenses/gpl.html
  * @todo make this class usable like Gitty\Config
  */
-class Ini implements Loader
+class Ini extends G\Config
 {
-    /**
-     * config file data as array
-     */
-    protected $_data = array();
-
     /**
      * separator for nesting
      */
@@ -115,16 +114,6 @@ class Ini implements Loader
 
         }
 
-        $this->_data = $processArray;
-    }
-
-    /**
-     * return data as array
-     *
-     * @return Array the data as array
-     */
-    public function toArray()
-    {
-        return $this->_data;
+        parent::__construct($processArray);
     }
 }

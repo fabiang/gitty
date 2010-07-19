@@ -79,26 +79,25 @@ class Config implements \IteratorAggregate, \ArrayAccess
      * Numeric entries are appended, not replaced, but only if they are
      * unique
      *
-     * @access public
      * @return array Resulting array, once all have been merged
      * @see http://www.php.net/manual/en/function.array-merge-recursive.php#96201
      */
-    private function array_merge_recursive_distinct () {
-        $arrays = func_get_args();
-        $base = array_shift($arrays);
-        if(!is_array($base)) $base = empty($base) ? array() : array($base);
+    private function _array_merge_recursive_distinct () {
+        $arrays = \func_get_args();
+        $base = \array_shift($arrays);
+        if(!\is_array($base)) $base = empty($base) ? array() : array($base);
             foreach($arrays as $append) {
-                if(!is_array($append)) $append = array($append);
+                if(!\is_array($append)) $append = array($append);
                 foreach($append as $key => $value) {
-                if(!array_key_exists($key, $base) and !is_numeric($key)) {
+                if(!\array_key_exists($key, $base) and !\is_numeric($key)) {
                     $base[$key] = $append[$key];
                     continue;
                 }
-                if(is_array($value) or is_array($base[$key])) {
+                if(\is_array($value) or \is_array($base[$key])) {
                     // modified from original
-                    $base[$key] = $this->array_merge_recursive_distinct($base[$key], $append[$key]);
-                } else if(is_numeric($key)) {
-                    if(!in_array($value, $base)) $base[] = $value;
+                    $base[$key] = $this->_array_merge_recursive_distinct($base[$key], $append[$key]);
+                } else if(\is_numeric($key)) {
+                    if(!\in_array($value, $base)) $base[] = $value;
                 } else {
                     $base[$key] = $value;
                 }
@@ -122,12 +121,16 @@ class Config implements \IteratorAggregate, \ArrayAccess
             }
 
             $data = $data->toArray();
-            $data = $this->array_merge_recursive_distinct(self::$defaultConfig, $data);
         }
 
         if (!\is_array($data)) {
             require_once dirname(__FILE__).'/Config/Exception.php';
             throw new C\Exception('first parameter has to be array');
+        }
+
+        // if array comes from a loader merge default config to the array
+        if (__CLASS__ !== get_class($this)) {
+            $data = $this->_array_merge_recursive_distinct(self::$defaultConfig, $data);
         }
 
         foreach($data as $name => $value) {
@@ -163,7 +166,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
             unset($this->_data[$name]);
             $this->_count = \count($this->_data);
         } else {
-            require_once dirname(__FILE__).'/Config/Exception.php';
+            require_once \dirname(__FILE__).'/Config/Exception.php';
             throw new C\Exception('Gitty\Config is read only');
         }
     }
@@ -194,7 +197,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
             }
             $this->_count = \count($this->_data);
         } else {
-            require_once dirname(__FILE__).'/Config/Exception.php';
+            require_once \dirname(__FILE__).'/Config/Exception.php';
             throw new C\Exception('Gitty\Config is read only');
         }
     }

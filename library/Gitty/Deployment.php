@@ -305,6 +305,7 @@ class Deployment
             $this->_callObservers('onAddEnd');
         }
 
+        // the modified files are copied too
         $modified = $files['modified'];
         if (\count($modified) > 0) {
             $this->_callObservers('onModifiedStart');
@@ -318,6 +319,7 @@ class Deployment
             $this->_callObservers('onModifiedEnd');
         }
 
+        // copied files
         $copied = $files['copied'];
         if (\count($copied) > 0) {
             $this->_callObservers('onCopiedStart');
@@ -331,6 +333,7 @@ class Deployment
             $this->_callObservers('onCopiedEnd');
         }
 
+        // renamed files
         $renamed = $files['renamed'];
         if (\count($renamed) > 0) {
             $this->_callObservers('onRenamedStart');
@@ -344,6 +347,7 @@ class Deployment
             $this->_callObservers('onRenamedEnd');
         }
 
+        // deleted files
         $deleted = $files['deleted'];
         if (\count($deleted) > 0) {
             $this->_callObservers('onDeletedStart');
