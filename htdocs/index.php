@@ -58,7 +58,6 @@ require '../../gitty/bootstrap.php'; ?>
                         </thead>
 <?php
 $config = new Gitty\Config(new Gitty\Config\Ini(getenv('GITTY_CONFIG')));
-
 $repositories = new Gitty\Repositories($config);
 
 foreach ($repositories->getRepositories() as $i => $repository): ?>
@@ -67,18 +66,18 @@ foreach ($repositories->getRepositories() as $i => $repository): ?>
                                 <td><?php print htmlspecialchars($repository->name); ?></td>
                                 <td><?php print htmlspecialchars($repository->description); ?></td>
                                 <td><?php print htmlspecialchars($repository->owner); ?></td>
-                                <td><?php print $repository->lastChange->format($config->global->gitty->dateFormat); ?></td>
+                                <td><?php print htmlspecialchars($repository->lastChange->format($config->global->gitty->dateFormat)); ?></td>
                                 <td>
                                     <select name="project[<?php print $i ?>][branch]">
 <?php foreach($repository->branches as $branch): ?>
-                                        <option<?php if ($branch['default']): ?> selected="selected"<?php endif; ?>><?php print $branch['name'] ?></option>
+                                        <option<?php if ($branch['default']): ?> selected="selected"<?php endif; ?>><?php print htmlspecialchars($branch['name']); ?></option>
 <?php endforeach; ?>
                                     </select>
                                 </td>
                                 <td>
                                     <select name="project[<?php print $i ?>][remote]">
 <?php foreach($repository->remotes as $j => $remote): ?>
-                                        <option value="<?php print $j ?>">#<?php print $j; ?>: <?php print $remote ?></option>
+                                        <option value="<?php print $j ?>">#<?php print $j; ?>: <?php print htmlspecialchars($remote); ?></option>
 <?php endforeach; ?>
                                     </select>
                                 </td>
@@ -87,7 +86,6 @@ foreach ($repositories->getRepositories() as $i => $repository): ?>
                             </tr>
                         </tbody>
 <?php endforeach;
-
 unset($config, $repositories, $i, $repository);
 ?>
                     </table>
