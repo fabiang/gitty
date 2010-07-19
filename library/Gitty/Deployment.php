@@ -33,7 +33,7 @@ namespace Gitty;
 class Deployment
 {
     /**
-     * $_project_id
+     * project id
      */
     protected $_project_id = 0;
 
@@ -45,7 +45,7 @@ class Deployment
     /**
      * remote id
      */
-    protected $_remote = 0;
+    protected $_remote_id = 0;
 
     /**
      * repositories object
@@ -99,6 +99,12 @@ class Deployment
         }
     }
 
+    /**
+     * gets the current repository
+     *
+     * @param Boolean $reset reset repository look up
+     * @return Gitty\Repositories\AdapterAbstract the current repository
+     */
     protected function _getCurrentRepository($reset = false)
     {
         if ($this->_deploy_repository === null || $reset === true) {
@@ -110,17 +116,28 @@ class Deployment
         return $this->_deploy_repository;
     }
 
+    /**
+     * get current remote object
+     *
+     * @param Boolean $reset reset remite look up
+     * @return Gitty\Remote\AdapterAbstract the current remote
+     */
     protected function _getCurrentRemote($reset = false)
     {
         if ($this->_deploy_remote === null || $reset === true) {
             // get remotes from repositories object
             $remote = $this->_getCurrentRepository()->getRemotes();
-            $this->_deploy_remote = $remote[$this->_project_id];
+            $this->_deploy_remote = $remote[$this->_remote_id];
         }
 
         return $this->_deploy_remote;
     }
 
+    /**
+     * get files for installation/update
+     *
+     * @return Array array contains the modified/added/deleted/renamed/copied files
+     */
     protected function _getFiles()
     {
         $repo = $this->_getCurrentRepository();
@@ -132,6 +149,9 @@ class Deployment
         return $repo->getUpdateFiles($remote->getServerRevisitionId());
     }
 
+    /**
+     * write a file with the revisition file to the server
+     */
     protected function _writeRevistionFile()
     {
         $repo = $this->_getCurrentRemote()->putServerRevisitionId(
@@ -141,6 +161,9 @@ class Deployment
 
     /**
      * constructor
+     *
+     * @param Gitty\Config $config configuration object
+     * @param Boolean $install install should be performed, copies all files to the remote
      */
     public function __construct(Config $config, $install = false)
     {
@@ -149,63 +172,115 @@ class Deployment
         $this->install = $install;
     }
 
+    /**
+     * destructor, calling the end function of the object
+     */
     public function __destruct()
     {
         $this->end();
     }
 
+    /**
+     * get registered observers
+     *
+     * @return Array observers
+     */
     public function getObersers()
     {
         return $this->_observers;
     }
 
+    /**
+     * register an observer
+     *
+     * @param Gitty\Observer\ObserverInterface $observer observer which implements the ObserverInterface
+     */
     public function registerObserver(Observer\ObserverInterface $observer)
     {
         $this->_observers[] = $observer;
     }
 
+    /**
+     * unregister an observer
+     *
+     * @param Gitty\Observer\ObserverInterface $observer observer which implements the ObserverInterface
+     * @return Boolean true when observer was removed, otherwise false
+     */
     public function unregisterObserver(Observer\ObserverInterface $observer)
     {
         $index = \array_search($observer, $this->_observers, true);
-        if (isset($this->_observers[$index])) {
+        if ($index !== false) {
             unset($this->_observers[$index]);
+            return true;
         }
-        return !!$index;
+
+        return false;
     }
 
+    /**
+     * get project id
+     *
+     * @return Integer project id
+     */
     public function getProjectId()
     {
         return $this->_project_id;
     }
 
+    /**
+     * set porject id
+     *
+     * @param Integer $id project id
+     */
     public function setProjectId($id)
     {
         $this->_project_id = $id;
         $this->_getCurrentRepository();
     }
 
+    /**
+     * get branch
+     *
+     * @return String branch name
+     */
     public function getBranch()
     {
         return $this->_branch;
     }
 
+    /**
+     * set branch
+     *
+     * @param String $branch branch name
+     */
     public function setBranch($branch)
     {
         $this->_branch = $branch;
     }
 
+    /**
+     * get remote id
+     *
+     * @return Integer remote id
+     */
     public function getRemoteId()
     {
-        return $this->_remote;
-    }
-
-    public function setRemoteId($remote)
-    {
-        $this->_remote = $remote;
+        return $this->_remote_id;
     }
 
     /**
+     * set remote id
      *
+     * @param Integer $remote remote id
+     */
+    public function setRemoteId($remote)
+    {
+        $this->_remote_id = $remote;
+    }
+
+    /**
+     * start the updating installation process
+     * and call the obeservers while performing
      */
     public function start()
     {
@@ -286,6 +361,9 @@ class Deployment
         $this->_writeRevistionFile();
     }
 
+    /**
+     * call onEnd event on the observer
+     */
     public function end()
     {
         $this->_callObservers('onEnd');

@@ -59,17 +59,11 @@ class Repositories
      */
     protected $_config = null;
 
-    protected static function _getDefaultAdapter()
-    {
-        if (self::$_default_adapter === null) {
-            self::$_default_adapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
-        }
-
-        return self::$_default_adapter;
-    }
-
     /**
      * set default adapter
+     *
+     * @param String $adapter adapter name as string
+     * @todo make the test better
      */
     public static function setDefaultAdapter($adapter)
     {
@@ -83,22 +77,23 @@ class Repositories
 
     /**
      * get default adapter
+     *
+     * @return String default adapter string
      */
     public static function getDefaultAdapter()
     {
-        return self::_getDefaultAdapter();
+        if (self::$_default_adapter === null) {
+            self::$_default_adapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
+        }
+
+        return self::$_default_adapter;
     }
 
-    public function getRepositories()
-    {
-        return $this->_repositories;
-    }
-
-    public function register(Repo\AdapterAbstract $repository)
-    {
-        $this->_repositories[] = $repository;
-    }
-
+    /**
+     * constructor
+     *
+     * @param Gitty\Config $config an configuration object
+     */
     public function __construct(Config $config)
     {
         $projects = $config->projects;
@@ -118,7 +113,7 @@ class Repositories
                 $repository = new $adapter($project_data);
 
             } else {
-                $adapter = self::_getDefaultAdapter();
+                $adapter = self::getDefaultAdapter();
             }
 
             Loader::loadClass($adapter);
@@ -133,5 +128,42 @@ class Repositories
 
             $this->register($repository);
         }
+    }
+
+    /**
+     * get registered repository adapters
+     *
+     * @return Array repositoriy adapter objects in array
+     */
+    public function getRepositories()
+    {
+        return $this->_repositories;
+    }
+
+    /**
+     * register an adapter
+     *
+     * @param Gitty\Repositories\AdapterAbstract $repository an repository object
+     */
+    public function register(Repo\AdapterAbstract $repository)
+    {
+        $this->_repositories[] = $repository;
+    }
+
+    /**
+     * unregister an adapter
+     *
+     * @param Gitty\Repositories\AdapterAbstract $repository an repository object
+     * @return Boolean true if adapter is found, otherwise false
+     */
+    public function unregister(Repo\AdapterAbstract $repository)
+    {
+        $index = array_search($repository, $this->_repositories, true);
+        if ($index !== false) {
+            unset($this->_repositories[$index]);
+            return true;
+        }
+
+        return false;
     }
 }
