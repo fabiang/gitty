@@ -54,163 +54,6 @@ abstract class AdapterAbstract
     public $mode = 0755;
 
     /**
-     * get revisition id of remote server
-     *
-     * @return String revisition file content
-     */
-    public function getServerRevisitionId()
-    {
-        return \trim(\file_get_contents($this->_url . '/' . $this->_revisitionFileName, false, $this->_context));
-    }
-
-    /**
-     * put revisition id in file on remote server
-     *
-     * @param String $uid revisition id
-     */
-    public function putServerRevisitionId($uid)
-    {
-        \file_put_contents($this->_url . '/' . $this->_revisitionFileName, \trim($uid), 0, $this->_context);
-    }
-
-    /**
-     * copy a file
-     *
-     * @param String $sourceFile source file
-     * @param String $destination_file desitnation
-     */
-    public function copy($source_file, $destination_file = null)
-    {
-        if (\is_array($source_file) && $destination_file === null) {
-            $this->copyFiles($source_file);
-            return;
-        }
-
-        $dirname = \dirname($destination_file);
-        if (!\is_dir($this->_url . '/' . $dirname)) {
-            $this->makeDir($dirname);
-        }
-
-        if (\is_file($this->_url . '/' . $destination_file)) {
-            $this->unlink($destination_file);
-        }
-
-        return \copy($source_file, $this->_url . '/' . $destination_file, $this->_context);
-    }
-
-    /**
-     * copy an array of files
-     *
-     * @param Array $files array of files: array('/source/foo' => '/destination/file.txt')
-     * @param Boolean $remote copy the file on remote
-     */
-    public function copyFiles($files, $remote = false)
-    {
-        if ($remote === false) {
-            foreach($files as $source => $destination) {
-                $this->copy($source, $destination);
-            }
-        } else {
-            foreach($files as $source => $destination) {
-                $this->copy($this->_url . '/' .$source, $destination);
-            }
-        }
-    }
-
-    /**
-     * copy a file on remote
-     *
-     * @param String $source source file
-     * @param String $destination the destination for copy
-     */
-    public function copyOnRemote($source, $destination)
-    {
-        $this->copy($this->_url . '/' . $source, $destination);
-    }
-
-    /**
-     * unlink a file
-     *
-     * @param String $file a file
-     */
-    public function unlink($file)
-    {
-        if (\is_array($file)) {
-            $this->unlinkFiles($source_file);
-            return;
-        }
-
-        return \unlink($this->_url . '/' . $file, $this->_context);
-    }
-
-    /**
-     * unlink an array of files
-     *
-     * @param Array $files array of files
-     */
-    public function unlinkFiles($files)
-    {
-        foreach($files as $file) {
-            $this->unlink($file);
-        }
-    }
-
-    /**
-     * rename/move a file
-     *
-     * @param String $file file name
-     * @param String $destination the destination
-     */
-    public function rename($file, $destination = null)
-    {
-        if (\is_array($file) && $destination === null) {
-            $this->renameFiles($source_file);
-            return;
-        }
-
-        return \rename($this->_url . '/' . $file, $this->_url . '/' . $destination, $this->_context);
-    }
-
-    /**
-     * rename/move an array of files
-     *
-     * @param Array $files an array of files
-     */
-    public function renameFiles($files)
-    {
-        foreach($files as $file => $destination) {
-            $this->rename($file, $destination);
-        }
-    }
-
-    /**
-     * make a directory
-     *
-     * @param String $dir directory name
-     */
-    public function makeDir($dir)
-    {
-        if (\is_array($dir)) {
-            $this->makeDirs($dir);
-            return;
-        }
-
-        return \mkdir($this->_url . '/' . $dir, $this->mode, true, $this->_context);
-    }
-
-    /**
-     * make directories from array
-     *
-     * @param Array $dirs array of directories
-     */
-    public function makeDirs($dirs)
-    {
-        foreach($dirs as $dir) {
-            $this->makeDir($dir);
-        }
-    }
-
-    /**
      * return the name of the adapter
      *
      * @return String the adapter name (Ftp, File, Sftp etc.)
@@ -222,11 +65,50 @@ abstract class AdapterAbstract
     }
 
     /**
+     * get revisition id of remote server
+     *
+     * @return String revisition file content
+     */
+    abstract public function getServerRevisitionId();
+
+    /**
+     * put revisition id in file on remote server
+     *
+     * @param String $uid revisition id
+     */
+    abstract public function putServerRevisitionId($uid);
+
+    /**
+     * adapter must have a copy function
+     */
+    abstract public function put($file, $destination);
+
+    /**
+     * adapter must have a rename function
+     */
+    abstract public function rename($source, $destination);
+
+    /**
+     * adapter must have an unlink function
+     */
+    abstract public function unlink($file, $remove_empty_directories = true);
+
+    /**
+     * adapter must have a copy function
+     */
+    abstract public function copy($source, $destination);
+
+    /**
      * adapter must implement init
      *
      * @abstract
      */
     abstract public function init();
+
+    /**
+     * adapter must have cleanUp function
+     */
+    abstract public function cleanUp();
 
     /**
      * adapter must implement __toString

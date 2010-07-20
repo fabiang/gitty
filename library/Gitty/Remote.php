@@ -72,6 +72,14 @@ class Remote
     }
 
     /**
+     * initialize adapter
+     */
+    protected function _init()
+    {
+        $this->_adapter->init();
+    }
+
+    /**
      * get default adapter
      *
      * @return \Gitty\Remote\AdapterInterface the default adapter name
@@ -113,14 +121,6 @@ class Remote
     }
 
     /**
-     * initialize adapter
-     */
-    protected function _init()
-    {
-        $this->_adapter->init();
-    }
-
-    /**
      * get revisition id of remote server
      *
      * @return String revisition file content
@@ -141,23 +141,24 @@ class Remote
     }
 
     /**
+     * put a file onto remote
+     *
+     * @param String $file file name
+     */
+    public function put($file, $destination)
+    {
+        $this->_adapter->put($file, $destination);
+    }
+
+    /**
      * copy a file
      *
      * @param String $file file name
+     * @param String $destination destination
      */
     public function copy($file, $destination)
     {
         $this->_adapter->copy($file, $destination);
-    }
-
-    /**
-     * copy an array of files
-     *
-     * @param Array $files array of files
-     */
-    public function copyFiles($files)
-    {
-        $this->_adapter->copyFiles($files);
     }
 
     /**
@@ -171,33 +172,29 @@ class Remote
     }
 
     /**
-     * unlink an array for files
-     *
-     * @param Array $files array of file names
-     */
-    public function unlinkFiles($files)
-    {
-        $this->_adapter->unlinkFiles($files);
-    }
-
-    /**
      * make directory
      *
      * @param String $dir directory name
      */
-    public function makeDir($dir)
+    /*public function makeDir($dir)
     {
         $this->_adapter->makeDir($dir);
-    }
+    }*/
 
     /**
-     * make directories from array
+     * rename/move a file
      *
-     * @param Array $dirs array with filenames
+     * @param String $file file name
+     * @param String $destination destination
      */
-    public function makeDirs($dirs)
+    public function rename($file, $destination)
     {
-        $this->_adapter->madeDirs($dirs);
+        $this->_adapter->rename($file, $destination);
+    }
+
+    public function cleanUp()
+    {
+        $this->_adapter->cleanUp();
     }
 
     /**

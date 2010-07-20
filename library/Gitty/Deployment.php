@@ -319,9 +319,8 @@ class Deployment
             $this->_callObservers('onAddStart');
 
             foreach($added as $file) {
-                $fullpath = $repo->getPath() . '/' . $file;
                 $this->_callObservers('onAdd', $file);
-                $remote->copy($fullpath, $file);
+                $remote->put($repo->getFile($file), $file);
             }
 
             $this->_callObservers('onAddEnd');
@@ -333,9 +332,8 @@ class Deployment
             $this->_callObservers('onModifiedStart');
 
             foreach($modified as $file) {
-                $fullpath = $repo->getPath() . '/' . $file;
                 $this->_callObservers('onModified', $file);
-                $remote->copy($fullpath, $file);
+                $remote->put($repo->getFile($file), $file);
             }
 
             $this->_callObservers('onModifiedEnd');
@@ -351,7 +349,7 @@ class Deployment
                 $destination = \end(\array_values($file));
 
                 $this->_callObservers('onCopied', $source);
-                $remote->copyOnRemote($source, $destination);
+                $remote->copy($source, $destination);
             }
 
             $this->_callObservers('onCopiedEnd');
@@ -379,9 +377,8 @@ class Deployment
             $this->_callObservers('onDeletedStart');
 
             foreach($deleted as $file) {
-                $fullpath = $repo->getPath() . '/' . $file;
                 $this->_callObservers('onDeleted', $file);
-                $remote->unlink($fullpath);
+                $remote->unlink($file);
             }
 
             $this->_callObservers('onDeletedEnd');
@@ -389,6 +386,8 @@ class Deployment
 
         // write revisition id to a file
         $this->_writeRevistionFile();
+
+        $remote->cleanUp();
     }
 
     /**

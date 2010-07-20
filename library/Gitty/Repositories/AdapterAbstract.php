@@ -272,6 +272,10 @@ abstract class AdapterAbstract
      */
     public function setPath($path)
     {
+        if (\strlen($path) > 1 && \substr($path, -1) === '/') {
+            $path = \substr($path, 0, -1);
+        }
+
         $this->_path = $path;
     }
 
@@ -381,4 +385,9 @@ abstract class AdapterAbstract
      * @return Array the files
      */
     abstract public function getInstallFiles();
+
+    /**
+     * gets a file handle of a file from repository
+     */
+    abstract public function getFile($file);
 }

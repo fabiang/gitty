@@ -401,4 +401,15 @@ class Git extends G\Repositories\AdapterAbstract
             'added'    => $this->_added
         );
     }
+
+    /**
+     * get handle of a file in the repository
+     *
+     * @todo support for file that are not pysically
+     */
+    public function getFile($file)
+    {
+        $handle = fopen($this->getPath() . '/' . $file, 'r');
+        return $handle;
+    }
 }
