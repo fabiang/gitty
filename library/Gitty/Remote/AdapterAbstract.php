@@ -102,12 +102,30 @@ abstract class AdapterAbstract
      * copy an array of files
      *
      * @param Array $files array of files: array('/source/foo' => '/destination/file.txt')
+     * @param Boolean $remote copy the file on remote
      */
-    public function copyFiles($files)
+    public function copyFiles($files, $remote = false)
     {
-        foreach($files as $source => $destination) {
-            $this->copy($source, $destination);
+        if ($remote === false) {
+            foreach($files as $source => $destination) {
+                $this->copy($source, $destination);
+            }
+        } else {
+            foreach($files as $source => $destination) {
+                $this->copy($this->_url . '/' .$source, $destination);
+            }
         }
+    }
+
+    /**
+     * copy a file on remote
+     *
+     * @param String $source source file
+     * @param String $destination the destination for copy
+     */
+    public function copyOnRemote($source, $destination)
+    {
+        $this->copy($this->_url . '/' . $source, $destination);
     }
 
     /**
@@ -122,7 +140,7 @@ abstract class AdapterAbstract
             return;
         }
 
-        return \unlink($this->_url . '/' .$file, $this->_context);
+        return \unlink($this->_url . '/' . $file, $this->_context);
     }
 
     /**
@@ -150,7 +168,7 @@ abstract class AdapterAbstract
             return;
         }
 
-        return \rename($file, $destination, $this->_context);
+        return \rename($this->_url . '/' . $file, $this->_url . '/' . $destination, $this->_context);
     }
 
     /**

@@ -351,7 +351,7 @@ class Deployment
                 $destination = \end(\array_values($file));
 
                 $this->_callObservers('onCopied', $source);
-                $remote->copy($source, $destination);
+                $remote->copyOnRemote($source, $destination);
             }
 
             $this->_callObservers('onCopiedEnd');
