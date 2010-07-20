@@ -118,7 +118,7 @@ class Git extends G\Repositories\AdapterAbstract
         foreach ($diff as $file) {
             $fileInfo = \preg_split('#\s+#', $file);
 
-            switch ($fileInfo[0]) {
+            switch (\substr($fileInfo[0], 0, 1)) {
                 case 'D':
                     \array_push($this->_deleted, $fileInfo[1]);
                     break;
@@ -126,10 +126,10 @@ class Git extends G\Repositories\AdapterAbstract
                     \array_push($this->_modified, $fileInfo[1]);
                     break;
                 case 'C':
-                    \array_push($this->_copied, $fileInfo[1]);
+                    \array_push($this->_copied, array($fileInfo[1] => $fileInfo[2]));
                     break;
                 case 'R':
-                    \array_push($this->_renamed, $fileInfo[1]);
+                    \array_push($this->_renamed, array($fileInfo[1] => $fileInfo[2]));
                     break;
                 case 'A':
                 default:
@@ -387,12 +387,18 @@ class Git extends G\Repositories\AdapterAbstract
         list($newest, $oldest) = array_values($this->_getRevId());
         $files = $this->_execCommand('ls-files --full-name');
 
+        $this->_deleted = array();
+        $this->_modified  = array();
+        $this->_copied = array();
+        $this->_renamed = array();
+        $this->_added = $files;
+
         return array(
-            'deleted'  => array(),
-            'modified' => array(),
-            'copied'   => array(),
-            'renamed'  => array(),
-            'added'    => $files
+            'deleted'  => $this->_deleted,
+            'modified' => $this->_modified,
+            'copied'   => $this->_copied,
+            'renamed'  => $this->_renamed,
+            'added'    => $this->_added
         );
     }
 }

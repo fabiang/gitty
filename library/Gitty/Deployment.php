@@ -342,14 +342,16 @@ class Deployment
         }
 
         // copied files
-        /*$copied = $files['copied'];
+        $copied = $files['copied'];
         if (\count($copied) > 0) {
             $this->_callObservers('onCopiedStart');
 
             foreach($copied as $file) {
-                $fullpath = $repo->getPath() . '/' . $file;
-                $this->_callObservers('onCopied', $file);
-                $remote->copy($fullpath, $file);
+                $source = \end(\array_keys($file));
+                $destination = \end(\array_values($file));
+
+                $this->_callObservers('onCopied', $source);
+                $remote->copy($source, $destination);
             }
 
             $this->_callObservers('onCopiedEnd');
@@ -361,13 +363,15 @@ class Deployment
             $this->_callObservers('onRenamedStart');
 
             foreach($renamed as $file) {
-                $fullpath = $repo->getPath() . '/' . $file;
+                $source = \end(\array_keys($file));
+                $destination = \end(\array_values($file));
+
                 $this->_callObservers('onRenamed', $file);
-                $remote->rename($fullpath, $file);
+                $remote->rename($source, $destination);
             }
 
             $this->_callObservers('onRenamedEnd');
-        }*/
+        }
 
         // deleted files
         $deleted = $files['deleted'];
