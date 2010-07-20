@@ -48,7 +48,7 @@ $deploy = new Gitty\Deployment(new Gitty\Config\Ini(getenv('GITTY_CONFIG')),
 $projectId = isset($_REQUEST['update']) ? (int)$_REQUEST['update'] : (int)$_REQUEST['install'];
 
 $project = $_REQUEST['project'][$projectId];
-$deploy->registerObserver(new Gitty\Observer\DefaultObserver());
+$deploy->registerObserver(new Gitty\Observer\Html());
 $deploy->setProjectId($projectId);
 $deploy->setBranch($project['branch']);
 $deploy->setRemoteId((int)$project['remote']);

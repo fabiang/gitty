@@ -35,7 +35,7 @@ use \Gitty\Deployment as Deployment;
  * @package Gitty
  * @license http://www.gnu.org/licenses/gpl.html
  */
-class DefaultObserver implements ObserverInterface
+class Html implements ObserverInterface
 {
     public function __construct()
     {
