@@ -156,7 +156,6 @@ class Ftp extends G\Remote\AdapterAbstract
     public function init()
     {
         $this->_url = \sprintf('ftp://%s:%s@%s:%d%s', $this->_username, $this->_password, $this->_hostname, $this->_port, $this->_path);
-        $this->_context = \stream_context_create($this->_options);
     }
 
     /**
