@@ -289,8 +289,6 @@ class Deployment
     /**
      * start the updating installation process
      * and call the obeservers while performing
-     * @todo implement renamed files
-     * @todo implement copied files
      */
     public function start()
     {

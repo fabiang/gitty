@@ -39,11 +39,6 @@ use \Gitty\Remote as Remote;
 class Ftp extends G\Remote\AdapterAbstract
 {
     /**
-     * options for context
-     */
-    protected $_options = array('ftp' => array('overwrite' => true));
-
-    /**
      * hostname
      */
     protected $_hostname = null;
@@ -109,9 +104,8 @@ class Ftp extends G\Remote\AdapterAbstract
      *
      * @param \Gitty\Config $config configuration object
      * @param Array $options options for context
-     * @todo handle option when it is an array
      */
-    public function __construct(G\Config $config, $options = null)
+    public function __construct(G\Config $config)
     {
         $this->_hostname = $config->hostname;
         if (isset($config->port)) {
@@ -124,11 +118,6 @@ class Ftp extends G\Remote\AdapterAbstract
         if ($config->revisitionFileName) {
             $this->_revisitionFileName = $config->revisitionFileName;
         }
-
-        if ($options !== null) {
-            $this->_options['ftp'] = $options;
-        }
-
 
         $this->_connection = @ftp_connect($this->_hostname, $this->_port);
 
@@ -233,7 +222,6 @@ class Ftp extends G\Remote\AdapterAbstract
      *
      * @param String $sourceFile source file
      * @param String $destination_file desitnation
-     * @todo handle strings
      */
     public function put($file, $destination)
     {
