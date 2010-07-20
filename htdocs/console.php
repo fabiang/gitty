@@ -56,20 +56,6 @@ $deploy->setRemoteId((int)$project['remote']);
                 <ul>
 <?php
 $deploy->start();
-/*
-$deploy->setCallback('callback');
-if (isset($_REQUEST['install'])) {
-    $deploy->install();
-}
-ob_start();
-$deploy->open();
-
-function callback($deploy) {
-    printf('<li>%s</li>', $deploy->message());
-    flush();
-    ob_flush();
-}
-*/
 $deploy->end();
 unset($deploy, $projectId, $project);
 ?>

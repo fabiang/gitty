@@ -37,6 +37,12 @@ use \Gitty\Deployment as Deployment;
  */
 class Html implements ObserverInterface
 {
+    protected function _flush()
+    {
+        ob_flush();
+        flush();
+    }
+
     public function __construct()
     {
     }
@@ -46,15 +52,9 @@ class Html implements ObserverInterface
         $this->_flush();
     }
 
-    public function _flush()
-    {
-        flush();
-        ob_flush();
-    }
-
     public function onStart(Deployment $deployment)
     {
-        ob_start();
+        $this->_flush();
 
         print '<p>Starting ';
         if ($deployment->install) {
