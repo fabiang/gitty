@@ -151,4 +151,22 @@ class Html implements ObserverInterface
         print '</ul>';
         $this->_flush();
     }
+
+    public function onRenamedStart(Deployment $deployment)
+    {
+        print '<p>rename files...</p><ul>'.
+        $this->_flush();
+    }
+
+    public function onRenamed(Deployment $deployment, $file, $new)
+    {
+        print "<li>rename $file to $new</li>";
+        $this->_flush();
+    }
+
+    public function onRenamedEnd(Deployment $deployment)
+    {
+        print '</ul>';
+        $this->_flush();
+    }
 }

@@ -345,11 +345,11 @@ class Deployment
             $this->_callObservers('onCopiedStart');
 
             foreach($copied as $file) {
-                $source = \end(\array_keys($file));
-                $destination = \end(\array_values($file));
+                $source = \array_keys($file);
+                $destination = \array_values($file);
 
-                $this->_callObservers('onCopied', $source);
-                $remote->copy($source, $destination);
+                $this->_callObservers('onCopied', $source[0]);
+                $remote->copy($source[0], $destination[0]);
             }
 
             $this->_callObservers('onCopiedEnd');
@@ -361,11 +361,11 @@ class Deployment
             $this->_callObservers('onRenamedStart');
 
             foreach($renamed as $file) {
-                $source = \end(\array_keys($file));
-                $destination = \end(\array_values($file));
+                $source = \array_keys($file);
+                $destination = \array_values($file);
 
-                $this->_callObservers('onRenamed', $file);
-                $remote->rename($source, $destination);
+                $this->_callObservers('onRenamed', $source[0], $destination[0]);
+                $remote->rename($source[0], $destination[0]);
             }
 
             $this->_callObservers('onRenamedEnd');
