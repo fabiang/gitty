@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  AdapterAbstract
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/AdapterAbstract
  */
 
 /**
@@ -32,8 +40,11 @@ use \Gitty as G;
 /**
  * Adapters need to implement this interface
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  AdapterAbstract
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/AdapterAbstract
  * @todo some getters and setters to access options
  */
 abstract class AdapterAbstract
@@ -41,77 +52,77 @@ abstract class AdapterAbstract
     /**
      * name of the project
      */
-    protected $_name = '';
+    protected $name = '';
 
     /**
      * description of the project
      */
-    protected $_description = '';
+    protected $description = '';
 
     /**
      * path to the project
      */
-    protected $_path = '';
+    protected $path = '';
 
     /**
      * show branches of this project
      */
-    protected $_showBranches = true;
+    protected $showBranches = true;
 
     /**
      * registered remotes for this project (FTPs, SSHs etc)
      */
-    protected $_remotes = array();
+    protected $remoted = array();
 
     /**
      * the owner
      */
-    protected $_owner = null;
+    protected $owner = null;
 
     /**
      * last change date
      */
-    protected $_lastChange = null;
+    protected $lastChange = null;
 
     /**
      * branches
      */
-    protected $_branches = array();
+    protected $branches = array();
 
     /**
      * the id of the newest revisition id
      */
-    protected $_newestRevisitionId = null;
+    protected $newestRevisitionId = null;
 
     /**
      * rhe id of the oldest revisition id
      */
-    protected $_oldestRevisitionId = null;
+    protected $oldestRevisitionId = null;
 
     /**
      * modified files
      */
-    protected $_modified = array();
+    protected $modified = array();
 
     /**
      * deleted files
      */
-    protected $_deleted = array();
+    protected $deleted = array();
 
     /**
      * copied files
      */
-    protected $_copied = array();
+    protected $copied = array();
 
     /**
      * renamed files
      */
-    protected $_renamed = array();
+    protected $renamed = array();
 
     /**
      * added files
      */
-    protected $_added = array();
+    protected $added = array();
 
     /**
      * constructor
@@ -122,14 +133,17 @@ abstract class AdapterAbstract
     {
         // set configuration
         $this->setOptions($options);
-        $this->_showBranches = isset($options->showBranches) && !!$options->showBranches ? true : false;
+        $this->showBranches = isset($options->showBranches)
+                                    && !!$options->showBranches ? true : false;
     }
 
     /**
      * setter for configuration options
      *
-     * @param String $name the name of the option
-     * @param Mixed $value values of the option
+     * @param String $name  the name of the option
+     * @param Mixed  $value values of the option
+     *
+     * @return Null
      * @throws Gitty\Repositories\Exception
      */
     public function __set($name, $value)
@@ -145,6 +159,7 @@ abstract class AdapterAbstract
      * getter for configuration options
      *
      * @param String $name the otion
+     *
      * @return Mixed the configuration option value
      * @throws Gitty\Repositories\Exception
      */
@@ -161,6 +176,7 @@ abstract class AdapterAbstract
      * sets configuration options
      *
      * @param Array $options configuration options
+     *
      * @return \Gitty\Repositories\AdapterAbstract this class instance
      */
     public function setOptions($options)
@@ -187,18 +203,26 @@ abstract class AdapterAbstract
 
         $options = array();
 
-        foreach($instance_methods as $method_name) {
-            if (\substr($method_name, 0, 3) === 'get' && !isset($inherited_methods[$method_name])) {
-                $column_name = \substr($method_name, 3);
-                $column_name = \strtolower(\substr($column_name, 0, 1)) . \substr($column_name, 1);
-                $options[$column_name] = $this->$method_name();
+        foreach ($instance_methods as $methodname) {
+            if ('get' === \substr($methodname, 0, 3)
+                && !isset($inherited_methods[$methodname])
+            ) {
+                $columnname = \substr($methodname, 3);
+                $columnname = \strtolower(
+                    \substr($columnname, 0, 1)
+                ) . \substr($columnname, 1);
+                $options[$columnname] = $this->$methodname();
             }
         }
 
         return $options;
     }
 
-    /** alias for getOptions() */
+    /**
+     * alias for getOptions()
+     *
+     * @return Array configuration options
+     */
     public function toArray()
     {
         return $this->getOptions();
@@ -211,8 +235,8 @@ abstract class AdapterAbstract
      */
     public function getAdapterName()
     {
-        $class_name = \get_class($this);
-        return \substr($class_name, \strrpos($class_name, '\\') + 1);
+        $classname = \get_class($this);
+        return \substr($classname, \strrpos($classname, '\\') + 1);
     }
 
     /**
@@ -222,17 +246,19 @@ abstract class AdapterAbstract
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
      * set name of the project
      *
      * @param String $name project name
+     *
+     * @return Null
      */
     public function setName($name)
     {
-        $this->_name = $name;
+        $this->name = $name;
     }
 
     /**
@@ -242,17 +268,19 @@ abstract class AdapterAbstract
      */
     public function getDescription()
     {
-        return $this->_description;
+        return $this->description;
     }
 
     /**
      * set description
      *
      * @param String $description description
+     *
+     * @return Null
      */
     public function setDescription($description)
     {
-        $this->_description = $description;
+        $this->description = $description;
     }
 
     /**
@@ -262,21 +290,23 @@ abstract class AdapterAbstract
      */
     public function getPath()
     {
-        return $this->_path;
+        return $this->path;
     }
 
     /**
      * set path
      *
      * @param String $path path
+     *
+     * @return Null
      */
     public function setPath($path)
     {
-        if (\strlen($path) > 1 && \substr($path, -1) === '/') {
+        if ('/' === \strlen($path) > 1 && \substr($path, -1)) {
             $path = \substr($path, 0, -1);
         }
 
-        $this->_path = $path;
+        $this->path = $path;
     }
 
     /**
@@ -286,7 +316,7 @@ abstract class AdapterAbstract
      */
     public function showBranches()
     {
-        return $this->_showBranches;
+        return $this->showBranches;
     }
 
     /**
@@ -296,29 +326,33 @@ abstract class AdapterAbstract
      */
     public function getRemotes()
     {
-        return $this->_remotes;
+        return $this->remoted;
     }
 
     /**
      * register a remote
      *
      * @param \Gitty\Remote $remote a remote instance
+     *
+     * @return Null
      */
     public function registerRemote(G\Remote $remote)
     {
-        $this->_remotes[] = $remote;
+        $this->remoted[] = $remote;
     }
 
     /**
      * unregister a remote
      *
      * @param \Gitty\Remote $remote a remote instance
+     *
+     * @return Null
      */
     public function unregisterRemote(G\Remote $remote)
     {
-        $index = \array_search($remote, $this->_remotes, true);
-        if (isset($this->_remotes[$index])) {
-            unset($this->_remotes[$index]);
+        $index = \array_search($remote, $this->remoted, true);
+        if (isset($this->remoted[$index])) {
+            unset($this->remoted[$index]);
         }
         return !!$index;
     }
@@ -326,7 +360,6 @@ abstract class AdapterAbstract
     /**
      * get owner of the project
      *
-     * @abstract
      * @return String the owner's name
      */
     abstract public function getOwner();
@@ -334,15 +367,15 @@ abstract class AdapterAbstract
     /**
      * set owner of the project
      *
-     * @abstract
      * @param String $owner the owner's name
+     *
+     * @return Null
      */
     abstract public function setOwner($owner);
 
     /**
      * get last change date
      *
-     * @abstract
      * @return \DataTime datetime object with date/time
      */
     abstract public function getLastChange();
@@ -350,15 +383,15 @@ abstract class AdapterAbstract
     /**
      * set last change date
      *
-     * @abstract
      * @param \DateTime $datetime a DateTime object
+     *
+     * @return Null
      */
     abstract public function setLastChange(\DateTime $datetime);
 
     /**
      * get branches
      *
-     * @abstract
      * @return Array branches
      */
     abstract public function getBranches();
@@ -366,8 +399,9 @@ abstract class AdapterAbstract
     /**
      * set branches
      *
-     * @abstract
      * @param Array $branches branches
+     *
+     * @return Null
      */
     abstract public function setBranches($branches);
 
@@ -375,7 +409,8 @@ abstract class AdapterAbstract
      * get updated files
      *
      * @param String $uid an unique id that represent the version
-     * @return Array the files
+     *
+     * @return Array updated files
      */
     abstract public function getUpdateFiles($uid);
 
@@ -388,6 +423,11 @@ abstract class AdapterAbstract
 
     /**
      * gets a file handle of a file from repository
+     *
+     * @param String $file file name
+     *
+     * @return Resource file hanlde
+     * @return String   file source
      */
     abstract public function getFile($file);
 }

@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Exception
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/Exception
  */
 
 /**
@@ -37,8 +45,11 @@ require_once dirname(__FILE__) . '/../Exception.php';
 /**
  * class for config exceptions
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Exception
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/Exception
  */
 class Exception extends G\Exception
 {

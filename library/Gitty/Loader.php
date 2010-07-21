@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Config
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Loader
  */
 
 /**
@@ -28,8 +36,11 @@ namespace Gitty;
 /**
  * Loader class for Gitty
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Config
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Loader
  */
 class Loader
 {
@@ -41,8 +52,10 @@ class Loader
     /**
      * loading a file by its class name
      *
-     * @param String $class Class name
-     * @param String|Array $dirs Directories for file lookup
+     * @param String       $class Class name
+     * @param String|Array $dirs  Directories for file lookup
+     *
+     * @return Null
      * @throws Gitty\Exception
      */
     public static function loadClass($class, $dirs = null)
@@ -52,15 +65,19 @@ class Loader
         }
 
         if ((null !== $dirs) && !\is_string($dirs) && !\is_array($dirs)) {
-            require_once \dirname(__FILE__).'/Exception.php';
+            include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Directory argument must be a string or an array');
         }
 
         // autodiscover the path from the class name
-        $file = \str_replace(self::NAMESPACE_SEPARATOR, \DIRECTORY_SEPARATOR, $class) . '.php';
+        $file = \str_replace(
+            self::NAMESPACE_SEPARATOR,
+            \DIRECTORY_SEPARATOR,
+            $class
+        ) . '.php';
 
         // if class name begins with \ strip it
-        if ($file[0] === '/') {
+        if ('/' === $file[0]) {
             $file = \substr($file, 1);
         }
 
@@ -81,26 +98,31 @@ class Loader
             $file = \basename($file);
             self::loadFile($file, $dirs, true);
         } else {
-            self::_securityCheck($file);
+            self::securityCheck($file);
             include_once $file;
         }
 
         if (!\class_exists($class, false) && !\interface_exists($class, false)) {
-            require_once \dirname(__FILE__).'/Exception.php';
-            throw new Exception("File \"$file\" does not exist or class \"$class\" was not found in the file");
+            include_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception(
+                "File \"$file\" does not exist or class\
+                \"$class\" was not found in the file"
+            );
         }
     }
 
     /**
      * loads a file
      *
-     * @param String $filename Filename
-     * @param Array $dirs Directories for file lookup
-     * @param Boolean $once include the file only one time
+     * @param String  $filename Filename
+     * @param Array   $dirs     Directories for file lookup
+     * @param Boolean $once     include the file only one time
+     *
+     * @return Null
      */
     public static function loadFile($filename, $dirs = null, $once = false)
     {
-        self::_securityCheck($filename);
+        self::securityCheck($filename);
 
         /**
          * Search in provided directories, as well as include_path
@@ -137,6 +159,7 @@ class Loader
      * the autoloader function
      *
      * @param String $class Class name
+     *
      * @return Object Instance when class can be loaded
      * @return Boolean false if error is thrown
      */
@@ -153,30 +176,36 @@ class Loader
     /**
      * register this class to PHPs autoloader
      *
-     * @param String $class The name of the autoloading class (default: this class)
+     * @param String  $class   The name of the autoloading class
      * @param Boolean $enabled autoloading enabled/disabled
+     *
+     * @return Null
      * @throws Gitty\Exception
      */
     public static function registerAutoload($class = null, $enabled = true)
     {
         // if no class is specified use this class
-        if ($class === null) {
+        if (null === $class) {
             $class = __NAMESPACE__.'\\Loader';
         }
 
         if (!\function_exists('spl_autoload_register')) {
-            require_once \dirname(__FILE__).'/Exception.php';
-            throw new Exception('spl_autoload does not exist in this PHP installation');
+            include_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception(
+                'spl_autoload does not exist in this PHP installation'
+            );
         }
 
         self::loadClass($class);
         $methods = \get_class_methods($class);
         if (!\in_array('autoload', (array) $methods)) {
-            require_once \dirname(__FILE__).'/Exception.php';
-            throw new Exception("The class \"$class\" does not have an autoload() method");
+            include_once \dirname(__FILE__).'/Exception.php';
+            throw new Exception(
+                "The class \"$class\" does not have an autoload() method"
+            );
         }
 
-        if ($enabled === true) {
+        if (true === $enabled) {
             \spl_autoload_register(array($class, 'autoload'));
         } else {
             \spl_autoload_unregister(array($class, 'autoload'));
@@ -196,16 +225,18 @@ class Loader
     /**
      * check for invalid filename charackters
      *
-     * @param $filename $filename the filename
+     * @param String $filename the filename
+     *
+     * @return Null
      * @throws Gitty\Exception
      */
-    protected static function _securityCheck($filename)
+    protected static function securityCheck($filename)
     {
         /**
          * Security check
          */
         if (\preg_match('/[^a-z0-9\\/\\\\_.-]/i', $filename)) {
-            require_once \dirname(__FILE__).'/Exception.php';
+            include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Security check: Illegal character in filename');
         }
     }

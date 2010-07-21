@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Html
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Observer/Html
  */
 
 /**
@@ -32,29 +40,50 @@ use \Gitty\Deployment as Deployment;
 /**
  * observer class
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Html
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Observer/Html
  */
 class Html implements ObserverInterface
 {
-    protected function _flush()
+    /**
+     * flush output to server
+     *
+     * @return Null
+     */
+    protected function flush()
     {
         ob_flush();
         flush();
     }
 
+    /**
+     * constructor
+     */
     public function __construct()
     {
     }
 
+    /**
+     * destuctor flushes
+     */
     public function __destruct()
     {
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * start event function
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onStart(Deployment $deployment)
     {
-        $this->_flush();
+        $this->flush();
 
         print '<p>Starting ';
         if ($deployment->install) {
@@ -64,15 +93,30 @@ class Html implements ObserverInterface
         }
         print ' process.</p>';
 
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * event when remote is up-to-date
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onUpToDate(Deployment $deployment)
     {
         print '<p>The remote is up-to-date. Cancel.</p>';
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * statistics event
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     * @param Array            $files      files array
+     *
+     * @return Null
+     */
     public function onStat(Deployment $deployment, $files)
     {
         $all_count = \count($files['added']) +
@@ -80,93 +124,195 @@ class Html implements ObserverInterface
                      \count($files['copied']) +
                      \count($files['renamed']) +
                      \count($files['deleted']);
-        \printf('<p>%d files (%d added, %d modified, %d copied, %d renamed, %d deleted)</p>',
-                $all_count,
-                \count($files['added']),
-                \count($files['modified']),
-                \count($files['copied']),
-                \count($files['renamed']),
-                \count($files['deleted']));
-        $this->_flush();
+        \printf(
+            '<p>%d files (%d added, %d modified,\
+            %d copied, %d renamed, %d deleted)</p>',
+            $all_count,
+            \count($files['added']),
+            \count($files['modified']),
+            \count($files['copied']),
+            \count($files['renamed']),
+            \count($files['deleted'])
+        );
+        $this->flush();
     }
 
+    /**
+     * when transaction is finished
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onEnd(Deployment $deployment)
     {
         $start = $deployment->start;
         $interval = $start->diff(new \DateTime());
-        \printf('<p>Everything done. Operation took %s.</p>', $interval->format('%i minutes and %s seconds'));
-        $this->_flush();
+        \printf(
+            '<p>Everything done. Operation took %s.</p>',
+            $interval->format('%i minutes and %s seconds')
+        );
+        $this->flush();
     }
 
+    /**
+     * start adding files
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onAddStart(Deployment $deployment)
     {
         print '<p>Start adding files...</p><ul>'.
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * file is beeing added
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     * @param String           $file       file name
+     *
+     * @return Null
+     */
     public function onAdd(Deployment $deployment, $file)
     {
         print "<li>adding $file</li>";
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * file adding is finished
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onAddEnd(Deployment $deployment)
     {
         print '</ul>';
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * modified files are added
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onModifiedStart(Deployment $deployment)
     {
         print '<p>modified files...</p><ul>'.
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * file that was modified
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     * @param String           $file       file name
+     *
+     * @return Null
+     */
     public function onModified(Deployment $deployment, $file)
     {
         print "<li>$file</li>";
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * modified files adding ended
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onModifiedEnd(Deployment $deployment)
     {
         print '</ul>';
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * start deleting files
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onDeletedStart(Deployment $deployment)
     {
         print '<p>deleting files...</p><ul>'.
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * file is beeing deleted
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     * @param String           $file       file name
+     *
+     * @return Null
+     */
     public function onDeleted(Deployment $deployment, $file)
     {
         print "<li>delete $file</li>";
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * deleting files ended
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onDeletedEnd(Deployment $deployment)
     {
         print '</ul>';
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * start renaming files
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onRenamedStart(Deployment $deployment)
     {
         print '<p>rename files...</p><ul>'.
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * file is beeing deleted
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     * @param String           $file       old file name
+     * @param String           $new        new file name
+     *
+     * @return Null
+     */
     public function onRenamed(Deployment $deployment, $file, $new)
     {
         print "<li>rename $file to $new</li>";
-        $this->_flush();
+        $this->flush();
     }
 
+    /**
+     * renaming files has finished
+     *
+     * @param Gitty\Deployment $deployment deployment object
+     *
+     * @return Null
+     */
     public function onRenamedEnd(Deployment $deployment)
     {
         print '</ul>';
-        $this->_flush();
+        $this->flush();
     }
 }

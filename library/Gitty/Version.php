@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Version
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Version
  */
 
 /**
@@ -27,8 +35,11 @@ namespace Gitty;
 /**
  * Gitty version
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Gitty
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/version
  */
 final class Version
 {
@@ -38,6 +49,7 @@ final class Version
      * compare version with Gittys version
      *
      * @param String $version the version to compare with
+     *
      * @see http://php.net/version_compare
      * @return Mixed
      */

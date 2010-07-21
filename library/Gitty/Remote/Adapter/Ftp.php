@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Ftp
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote/Adapter/Ftp
  */
 
 /**
@@ -33,54 +41,59 @@ use \Gitty\Remote as Remote;
 /**
  * ftp remote adapter
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Ftp
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote/Adapter/Ftp
  */
 class Ftp extends G\Remote\AdapterAbstract
 {
     /**
      * hostname
      */
-    protected $_hostname = null;
+    protected $hostname = null;
 
     /**
      * port default for ftp 21
      */
-    protected $_port = 21;
+    protected $port = 21;
 
     /**
      * username
      */
-    protected $_username = null;
+    protected $username = null;
 
     /**
      * password
      */
-    protected $_password = null;
+    protected $password = null;
 
     /**
      * path
      */
-    protected $_path = null;
+    protected $path = null;
 
     /**
      * connection handle
      */
-    protected $_connection = null;
+    protected $connection = null;
 
     /**
      * 5MB temp size
      */
-    protected $_tempMaxSize = 5242880;
+    protected $tempMaxSize = 5242880;
 
     /**
      * close ftp connection
+     *
+     * @return Null
      */
-    protected function _close()
+    protected function close()
     {
-        if ($this->_connection !== null) {
-            ftp_close($this->_connection);
-            $this->_connection = null;
+        if (null !== $this->connection) {
+            ftp_close($this->connection);
+            $this->connection = null;
         }
     }
 
@@ -88,14 +101,16 @@ class Ftp extends G\Remote\AdapterAbstract
      * remove directories that are empty
      *
      * @param String $path path name
+     *
+     * @return Null
      */
-    protected function _rmDir($path)
+    protected function rmDir($path)
     {
-        $list = @\ftp_nlist($this->_connection, $path);
-        while(empty($list) && $path !== $this->_path) {
+        $list = @\ftp_nlist($this->connection, $path);
+        while (empty($list) && $path !== $this->path) {
+            @\ftp_rmdir($this->connection, $path);
             $path = \dirname($path);
-            \ftp_rmdir($this->_connection, $path);
-            $list = @\ftp_nlist($this->_connection, $path);
+            $list = @\ftp_nlist($this->connection, $path);
         }
     }
 
@@ -103,41 +118,28 @@ class Ftp extends G\Remote\AdapterAbstract
      * constructor
      *
      * @param \Gitty\Config $config configuration object
-     * @param Array $options options for context
      */
     public function __construct(G\Config $config)
     {
-        $this->_hostname = $config->hostname;
+        $this->hostname = $config->hostname;
         if (isset($config->port)) {
-            $this->_port = $config->port;
+            $this->port = $config->port;
         }
-        $this->_username = isset($config->username) ? $config->username : 'anonymous';
-        $this->_password = isset($config->password) ? $config->password : '';
-        $this->_path = isset($config->path) ? $config->path : '/';
+        $this->username = isset($config->username) ? $config->username : 'anonymous';
+        $this->password = isset($config->password) ? $config->password : '';
+        $this->path = isset($config->path) ? $config->path : '/';
 
         if ($config->revisitionFileName) {
-            $this->_revisitionFileName = $config->revisitionFileName;
-        }
-
-        $this->_connection = @ftp_connect($this->_hostname, $this->_port);
-
-        if ($this->_connection === false) {
-            require_once \dirname(__FILE__) . '/../Exception.php';
-            throw new Remote\Exception('Ftp adapter: Can\'t connect to '.$this->_hostname.' at port '.$this->_port);
-        }
-
-        if (@ftp_login($this->_connection, $this->_username, $this->_password) === false) {
-            require_once \dirname(__FILE__) . '/../Exception.php';
-            throw new Remote\Exception('Ftp adapter: Can\'t login with username '.$this->_hostname);
+            $this->revisitionFileName = $config->revisitionFileName;
         }
     }
 
     /**
-     * destructor calling _close()
+     * destructor calling close()
      */
     public function __destruct()
     {
-        $this->_close();
+        $this->close();
     }
 
     /**
@@ -147,24 +149,44 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function __toString()
     {
-        return '(FTP) ' . $this->_hostname . ':' . $this->_port;
+        return '(FTP) ' . $this->hostname . ':' . $this->port;
     }
 
     /**
      * initialize adapter
+     *
+     * @return null
      */
     public function init()
     {
-        $this->_url = \sprintf('ftp://%s:%s@%s:%d%s', $this->_username, $this->_password, $this->_hostname, $this->_port, $this->_path);
+        $this->connection = @ftp_connect($this->hostname, $this->port);
+
+        if (false === $this->connection) {
+            include_once \dirname(__FILE__) . '/../Exception.php';
+            throw new Remote\Exception(
+                'Ftp adapter: Can\'t connect to\
+                '.$this->hostname.' at port '.$this->port
+            );
+        }
+
+        $login = @ftp_login($this->connection, $this->username, $this->password);
+        if (false === $login) {
+            include_once \dirname(__FILE__) . '/../Exception.php';
+            throw new Remote\Exception(
+                'Ftp adapter: Can\'t login with username '.$this->hostname
+            );
+        }
     }
 
     /**
      * some clean ups
      * - closing ftp connection
+     *
+     * @return Null
      */
     public function cleanUp()
     {
-        $this->_close();
+        $this->close();
     }
 
     /**
@@ -177,10 +199,17 @@ class Ftp extends G\Remote\AdapterAbstract
         // open memory for read/write
         $mem = \fopen('php://memory', 'r+');
         // change directory
-        \ftp_chdir($this->_connection, $this->_path);
+        \ftp_chdir($this->connection, $this->path);
         // read file to memory
         // if false then close memory and return and empty revisition id
-        if (@\ftp_fget($this->_connection, $mem, $this->_revisitionFileName, \FTP_BINARY) === false) {
+        $result = @\ftp_fget(
+            $this->connection,
+            $mem,
+            $this->revisitionFileName,
+            \FTP_BINARY
+        );
+
+        if (false === $result) {
             \fclose($mem);
             return '';
         }
@@ -199,6 +228,8 @@ class Ftp extends G\Remote\AdapterAbstract
      * put revisition id in file on remote server
      *
      * @param String $uid revisition id
+     *
+     * @return Null
      */
     public function putServerRevisitionId($uid)
     {
@@ -209,9 +240,9 @@ class Ftp extends G\Remote\AdapterAbstract
         // rewind memoy
         \rewind($mem);
         // change directory
-        \ftp_chdir($this->_connection, $this->_path);
+        \ftp_chdir($this->connection, $this->path);
         // read from file to file on ftp server
-        \ftp_fput($this->_connection, $this->_revisitionFileName, $mem, \FTP_BINARY);
+        \ftp_fput($this->connection, $this->revisitionFileName, $mem, \FTP_BINARY);
         // close memory
         \fclose($mem);
     }
@@ -219,16 +250,18 @@ class Ftp extends G\Remote\AdapterAbstract
     /**
      * copy a file
      *
-     * @param String $sourceFile source file
-     * @param String $destination_file desitnation
+     * @param String $file        source file
+     * @param String $destination destination
+     *
+     * @return Null
      */
     public function put($file, $destination)
     {
         // if the file content was given
         if (\is_string($file)) {
             // write the file content to temp with a max size
-            // files bigger then $this->_tempMaxSize will be stored as files
-            $temp = \fopen('php://temp/maxmemory:'.$this->_tempMaxSize, 'r+');
+            // files bigger then $this->tempMaxSize will be stored as files
+            $temp = \fopen('php://temp/maxmemory:'.$this->tempMaxSize, 'r+');
             // put content to the temp memory
             \fputs($temp, $file);
             // rewind to beginning
@@ -239,68 +272,86 @@ class Ftp extends G\Remote\AdapterAbstract
         }
 
         // check if folder exists
-        $dirname = \dirname($this->_path . '/' . $destination);
+        $dirname = \dirname($this->path . '/' . $destination);
         $dirs = array();
-        while(@\ftp_chdir($this->_connection, $dirname) === false) {
+        while (@\ftp_chdir($this->connection, $dirname) === false) {
             $dirs[] = \basename($dirname);
             $dirname = \dirname($dirname);
         }
 
         // create folders that do not exist
         $dirs = \array_reverse($dirs);
-        foreach($dirs as $dir) {
-            \ftp_mkdir($this->_connection, $dir);
-            \ftp_chdir($this->_connection, $dir);
+        foreach ($dirs as $dir) {
+            \ftp_mkdir($this->connection, $dir);
+            \ftp_chdir($this->connection, $dir);
         }
 
         // put file from file handle to ftp server
-        \ftp_fput($this->_connection, basename($destination), $file, \FTP_BINARY);
+        \ftp_fput($this->connection, basename($destination), $file, \FTP_BINARY);
         \fclose($file);
     }
 
     /**
      * rename/move a file
      *
-     * @param String $file file name
-     * @param String $destination the destination
+     * @param String  $source                   file name
+     * @param String  $destination              the destination
      * @param Boolean $remove_empty_directories remove empty directories
+     *
+     * @return Null
      */
     public function rename($source, $destination, $remove_empty_directories = true)
     {
-        @\ftp_rename($this->_connection, $this->_path . '/' . $source, $this->_path . '/' . $destination);
+        @\ftp_rename(
+            $this->connection,
+            $this->path . '/' . $source,
+            $this->path . '/' .
+            $destination
+        );
 
         // remove empty directories
         if ($remove_empty_directories === true) {
-            $this->_rmDir(\dirname($this->_path . '/' . $source));
+            $this->rmDir(\dirname($this->path . '/' . $source));
         }
     }
 
     /**
      * unlink a file
      *
-     * @param String $file a file
+     * @param String  $file                     file name
      * @param Boolean $remove_empty_directories remove empty directories
+     *
+     * @return Null
      */
     public function unlink($file, $remove_empty_directories = true)
     {
-        @\ftp_delete($this->_connection, $this->_path . '/' . $file);
+        @\ftp_delete($this->connection, $this->path . '/' . $file);
 
         // remove empty directories
         if ($remove_empty_directories === true) {
-            $this->_rmDir(\dirname($this->_path . '/' . $file));
+            $this->rmDir(\dirname($this->path . '/' . $file));
         }
     }
 
     /**
      * copy a file on remote
      *
-     * @param String $source source file
+     * @param String $source      source file
      * @param String $destination the destination for copy
+     *
+     * @return Null
      */
     public function copy($source, $destination)
     {
-        $mem = \fopen('php://temp/maxmemory:'.$this->_tempMaxSize, 'r+');
-        if (@\ftp_fget($this->_connection, $mem, $this->_path . '/' .$source, \FTP_BINARY) === false) {
+        $mem = \fopen('php://temp/maxmemory:'.$this->tempMaxSize, 'r+');
+        $result = @\ftp_fget(
+            $this->connection,
+            $mem,
+            $this->path . '/' .$source,
+            \FTP_BINARY
+        );
+
+        if (false === $result) {
             return;
         }
         \rewind($mem);

@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Git
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/Adapter/Git
  */
 
 /**
@@ -32,8 +40,11 @@ use \Gitty as G;
 /**
  * git repository adapter
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Git
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/Adapter/Git
  * @todo make defaultGitDir a static and his access functions
  */
 class Git extends G\Repositories\AdapterAbstract
@@ -41,50 +52,62 @@ class Git extends G\Repositories\AdapterAbstract
     /**
      * default git meta directory, by default it's named .git
      */
-    protected $_defaultGitDir = '.git';
+    protected $defaultGitDir = '.git';
 
     /**
      * name of the description file
      * git's default is "description"
      */
-    protected $_descriptionFile = 'description';
+    protected $descriptionFile = 'description';
 
     /**
      * default path to the git excutable
      * /usr/bin/git should be a good location
      */
-    protected $_binLocation = '/usr/bin/git';
+    protected $binLocation = '/usr/bin/git';
 
     /**
      * the auto discovered git dir for the repository
      */
-    protected $_gitDir = null;
+    protected $gitDir = null;
 
     /**
      * auto discover the git directory
      *
      * @return String git directory
      */
-    protected function _discoverGitDir()
+    protected function discoverGitDir()
     {
-        if ($this->_gitDir === null) {
-            if (\is_dir($this->_path . '/' . $this->_defaultGitDir)) {
-                $this->_gitDir = realpath($this->_path . '/' . $this->_defaultGitDir);
+        if (null === $this->gitDir) {
+            if (\is_dir($this->path . '/' . $this->defaultGitDir)) {
+                $this->gitDir = realpath(
+                    $this->path . '/' .
+                    $this->defaultGitDir
+                );
             } else {
-                $this->_gitDir = $this->_path;
+                $this->gitDir = $this->path;
             }
         }
 
-        return $this->_gitDir;
+        return $this->gitDir;
     }
 
     /**
      * exec a git command
+     *
+     * @param String $command exec command
+     *
+     * @return Null
      */
-    protected function _execCommand($command)
+    protected function execCommand($command)
     {
         $out = array();
-        $command_complete = \sprintf('GIT_DIR=%s %s %s', $this->_discoverGitDir(), $this->_binLocation, $command);
+        $command_complete = \sprintf(
+            'GIT_DIR=%s %s %s',
+            $this->discoverGitDir(),
+            $this->binLocation,
+            $command
+        );
         $dummy = \exec($command_complete, $out);
         return $out;
     }
@@ -93,57 +116,67 @@ class Git extends G\Repositories\AdapterAbstract
      * get newest and oldest revisition id
      *
      * @param Boolean $reset reset the values from the class
+     *
      * @return Array newest and oldest as keys
      */
-    protected function _getRevId($reset = false)
+    protected function getRevId($reset = false)
     {
-        if (($this->_newestRevisitionId === null && $this->_oldestRevisitionId === null) || $reset === true) {
-            $revs = $this->_execCommand('rev-list --all --full-history --topo-order');
+        if ((null === $this->newestRevisitionId
+            && null === $this->oldestRevisitionId)
+            || true === $reset
+        ) {
+            $revs = $this->execCommand(
+                'rev-list --all --full-history --topo-order'
+            );
 
-            $this->_newestRevisitionId = $revs[0];
-            $this->_oldestRevisitionId = \end($revs);
+            $this->newestRevisitionId = $revs[0];
+            $this->oldestRevisitionId = \end($revs);
         }
 
-        return array('newest' => $this->_newestRevisitionId, 'oldest' => $this->_oldestRevisitionId);
+        return array(
+            'newest' => $this->newestRevisitionId,
+            'oldest' => $this->oldestRevisitionId
+        );
     }
 
     /**
      * parse files form git diff
      *
      * @param Array $diff the diff as array
-     * @return Array an array containing the deleted, modified, copied, renamed, added files
+     *
+     * @return Array an array containing files
      */
-    protected function _parseFiles($diff)
+    protected function parseFiles($diff)
     {
         foreach ($diff as $file) {
             $fileInfo = \preg_split('#\s+#', $file);
 
             switch (\substr($fileInfo[0], 0, 1)) {
-                case 'D':
-                    \array_push($this->_deleted, $fileInfo[1]);
-                    break;
-                case 'M':
-                    \array_push($this->_modified, $fileInfo[1]);
-                    break;
-                case 'C':
-                    \array_push($this->_copied, array($fileInfo[1] => $fileInfo[2]));
-                    break;
-                case 'R':
-                    \array_push($this->_renamed, array($fileInfo[1] => $fileInfo[2]));
-                    break;
-                case 'A':
-                default:
-                    \array_push($this->_added, $fileInfo[1]);
-                    break;
+            case 'D':
+                \array_push($this->deleted, $fileInfo[1]);
+                break;
+            case 'M':
+                \array_push($this->modified, $fileInfo[1]);
+                break;
+            case 'C':
+                \array_push($this->copied, array($fileInfo[1] => $fileInfo[2]));
+                break;
+            case 'R':
+                \array_push($this->renamed, array($fileInfo[1] => $fileInfo[2]));
+                break;
+            case 'A':
+            default:
+                \array_push($this->added, $fileInfo[1]);
+                break;
             }
         }
 
         return array(
-            'deleted'  => $this->_deleted,
-            'modified' => $this->_modified,
-            'copied'   => $this->_copied,
-            'renamed'  => $this->_renamed,
-            'added'    => $this->_added
+            'deleted'  => $this->deleted,
+            'modified' => $this->modified,
+            'copied'   => $this->copied,
+            'renamed'  => $this->renamed,
+            'added'    => $this->added
         );
     }
 
@@ -151,6 +184,7 @@ class Git extends G\Repositories\AdapterAbstract
      * constructor
      *
      * @param Array $options options for the adapter
+     *
      * @todo throw exception if git is not found
      */
     public function __construct($options)
@@ -159,16 +193,21 @@ class Git extends G\Repositories\AdapterAbstract
 
         // get description from file
         if ($this->getDescription() === '') {
-            $descFile = $this->_discoverGitDir() . '/' . $this->_descriptionFile;
+            $descFile = $this->discoverGitDir() . '/' . $this->descriptionFile;
 
             if (\is_file($descFile)) {
 
                 if (!\is_readable($descFile)) {
-                    require_once \dirname(__FILE__) . '/../Exception.php';
-                    throw new G\Repositories\Exception("'$projectName' contains a description file, but it's not readable");
+                    include_once \dirname(__FILE__) . '/../Exception.php';
+                    throw new G\Repositories\Exception(
+                        "'$projectName' contains a description file" .
+                        ", but it's not readable"
+                    );
                 }
 
-                $this->setDescription(\trim(\strip_tags(\file_get_contents($descFile))));
+                $this->setDescription(
+                    \trim(\strip_tags(\file_get_contents($descFile)))
+                );
             }
         }
     }
@@ -180,17 +219,19 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getDefaultGitDir()
     {
-        return $this->_defaultGitDir;
+        return $this->defaultGitDir;
     }
 
     /**
      * set default git directory
      *
      * @param String $git_dir default git dir
+     *
+     * @return Null
      */
     public function setDefaultGitDir($git_dir)
     {
-        $this->_defaultGitDir = $git_dir;
+        $this->defaultGitDir = $git_dir;
     }
 
     /**
@@ -200,17 +241,19 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getDescriptionFile()
     {
-        return $this->_descriptionFile;
+        return $this->descriptionFile;
     }
 
     /**
      * set name of the description file
      *
      * @param String $decription_file name of the description file
+     *
+     * @return Null
      */
     public function setDescriptionFile($decription_file)
     {
-        $this->_descriptionFile = $decription_file;
+        $this->descriptionFile = $decription_file;
     }
 
     /**
@@ -220,17 +263,19 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getBinLocation()
     {
-        return $this->_binLocation;
+        return $this->binLocation;
     }
 
     /**
      * set location of the git excutable
      *
      * @param String $bin_location path to git
+     *
+     * @return Null
      */
     public function setBinLocation($bin_location)
     {
-        $this->_binLocation = $bin_location;
+        $this->binLocation = $bin_location;
     }
 
     /**
@@ -240,13 +285,19 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getOwner()
     {
-        if ($this->_owner === null) {
-            $ownerString = $this->_execCommand('rev-list --header --max-count=1 HEAD');
+        if ($this->owner === null) {
+            $ownerString = $this->execCommand(
+                'rev-list --header --max-count=1 HEAD'
+            );
 
             foreach ($ownerString as $output) {
                 if (\substr($output, 0, 9) == 'committer') {
                     $results = array();
-                    \preg_match('/^ (.+) \d+ \+\d{4}$/', \substr($output, 9), $results);
+                    \preg_match(
+                        '/^ (.+) \d+ \+\d{4}$/',
+                        \substr($output, 9),
+                        $results
+                    );
 
                     $owner = \trim($results[1]);
                 }
@@ -255,17 +306,19 @@ class Git extends G\Repositories\AdapterAbstract
             $this->setOwner($owner);
         }
 
-        return $this->_owner;
+        return $this->owner;
     }
 
     /**
      * set owner of the repository
      *
      * @param String $owner owner
+     *
+     * @return Null
      */
     public function setOwner($owner)
     {
-        $this->_owner = $owner;
+        $this->owner = $owner;
     }
 
     /**
@@ -275,14 +328,20 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getLastChange()
     {
-        if ($this->_lastChange === null) {
+        if ($this->lastChange === null) {
 
-            $dateString = $this->_execCommand('rev-list --header --max-count=1 HEAD');
+            $dateString = $this->execCommand(
+                'rev-list --header --max-count=1 HEAD'
+            );
 
             foreach ($dateString as $output) {
                 if (\substr($output, 0, 9) == 'committer') {
                     $results = array();
-                    \preg_match('/^ .+ (\d+) \+\d{4}$/', \substr($output, 9), $results);
+                    \preg_match(
+                        '/^ .+ (\d+) \+\d{4}$/',
+                        \substr($output, 9),
+                        $results
+                    );
 
                     $date = \trim($results[1]);
                 }
@@ -294,17 +353,19 @@ class Git extends G\Repositories\AdapterAbstract
 
         }
 
-        return $this->_lastChange;
+        return $this->lastChange;
     }
 
     /**
      * set last change date of the repository
      *
      * @param \DateTime $datetime DateTime object with last change date
+     *
+     * @return Null
      */
     public function setLastChange(\DateTime $datetime)
     {
-        $this->_lastChange = $datetime;
+        $this->lastChange = $datetime;
     }
 
     /**
@@ -314,17 +375,17 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getBranches()
     {
-        if ($this->showBranches() === true) {
-            $this->_branches = array(array('name' => 'master', 'default' => 0));
-            return $this->_branches;
+        if (true === $this->showBranches()) {
+            $this->branches = array(array('name' => 'master', 'default' => 0));
+            return $this->branches;
         }
 
-        if (\count($this->_branches) === 0) {
-            $branchesString = $this->_execCommand('branch');
+        if (0 === \count($this->branches)) {
+            $branchesString = $this->execCommand('branch');
 
             $branches = array();
-            foreach($branchesString as $branch) {
-                if (\substr($branch, 0 ,1) == '*') {
+            foreach ($branchesString as $branch) {
+                if ('*' === \substr($branch, 0, 1)) {
                     $branches[] = array(
                         'name' => \trim(\substr($branch, 1)),
                         'default' => 1
@@ -340,17 +401,19 @@ class Git extends G\Repositories\AdapterAbstract
             $this->setBranches($branches);
         }
 
-        return $this->_branches;
+        return $this->branches;
     }
 
     /**
      * set branches
      *
      * @param Array $branches branches as array
+     *
+     * @return Null
      */
     public function setBranches($branches)
     {
-        $this->_branches = $branches;
+        $this->branches = $branches;
     }
 
     /**
@@ -360,56 +423,63 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getNewestRevisitionId()
     {
-        list($newest, ) = array_values($this->_getRevId());
+        list($newest, ) = \array_values($this->getRevId());
         return $newest;
     }
 
     /**
      * get updates file since a version id
      *
-     * @param String $uuid version id
-     * @return Array an array containing the deleted, modified, copied, renamed, added files
+     * @param String $uid version id
+     *
+     * @return Array an array containing files
      */
     public function getUpdateFiles($uid)
     {
-        list($newest, $oldest) = array_values($this->_getRevId());
-        $files = $this->_execCommand('diff -M -C --name-status '. $uid . ' ' . $newest);
-        return $this->_parseFiles($files);
+        list($newest, $oldest) = \array_values($this->getRevId());
+        $files = $this->execCommand(
+            'diff -M -C --name-status '. $uid . ' ' . $newest
+        );
+        return $this->parseFiles($files);
     }
 
     /**
      * get alles files from the repository
      *
-     * @return Array an array containing the deleted, modified, copied, renamed, added files
+     * @return Array an array containing files
      */
     public function getInstallFiles()
     {
-        list($newest, $oldest) = array_values($this->_getRevId());
-        $files = $this->_execCommand('ls-files --full-name');
+        list($newest, $oldest) = \array_values($this->getRevId());
+        $files = $this->execCommand('ls-files --full-name');
 
-        $this->_deleted = array();
-        $this->_modified  = array();
-        $this->_copied = array();
-        $this->_renamed = array();
-        $this->_added = $files;
+        $this->deleted = array();
+        $this->modified  = array();
+        $this->copied = array();
+        $this->renamed = array();
+        $this->added = $files;
 
         return array(
-            'deleted'  => $this->_deleted,
-            'modified' => $this->_modified,
-            'copied'   => $this->_copied,
-            'renamed'  => $this->_renamed,
-            'added'    => $this->_added
+            'deleted'  => $this->deleted,
+            'modified' => $this->modified,
+            'copied'   => $this->copied,
+            'renamed'  => $this->renamed,
+            'added'    => $this->added
         );
     }
 
     /**
      * get handle of a file in the repository
      *
+     * @param String $file file name
+     *
+     * @return Resource file hanlde
+     * @return String   file source
      * @todo support for file that are not pysically
      */
     public function getFile($file)
     {
-        $handle = fopen($this->getPath() . '/' . $file, 'r');
+        $handle = \fopen($this->getPath() . '/' . $file, 'r');
         return $handle;
     }
 }

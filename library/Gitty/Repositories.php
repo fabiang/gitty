@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Config
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories
  */
 
 /**
@@ -34,45 +42,53 @@ use \Gitty\Loader as Loader;
 /**
  * repository class
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Config
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Repositories
  */
 class Repositories
 {
     /**
      * default adapter
      */
-    protected static $_default_adapter = null;
+    protected static $defaultadapter = null;
 
     /**
      * instance of the adapter
      */
-    protected $_adapter = null;
+    protected $adapter = null;
 
     /**
      * this class registers all repos to this variable
      */
-    protected $_repositories = array();
+    protected $repositories = array();
 
     /**
      * config object
      */
-    protected $_config = null;
+    protected $config = null;
 
     /**
      * set default adapter
      *
      * @param String $adapter adapter name as string
+     *
+     * @return Null
      * @todo make the test better
      */
     public static function setDefaultAdapter($adapter)
     {
         if (!(new $adapter instanceof Repo\AdapterInterface)) {
-            require_once dirname(__FILE__).'/Repositories/Exception.php';
-            throw new Repo\Exception(get_class($data).' does not implement Gitty\Repository\AdapterInterface interface');
+            include_once dirname(__FILE__).'/Repositories/Exception.php';
+            throw new Repo\Exception(
+                get_class($data).' does not implement\
+                Gitty\Repository\AdapterInterface interface'
+            );
         }
 
-        self::$_default_adapter = $adapter;
+        self::$defaultadapter = $adapter;
     }
 
     /**
@@ -82,11 +98,11 @@ class Repositories
      */
     public static function getDefaultAdapter()
     {
-        if (self::$_default_adapter === null) {
-            self::$_default_adapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
+        if (null === self::$defaultadapter) {
+            self::$defaultadapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
         }
 
-        return self::$_default_adapter;
+        return self::$defaultadapter;
     }
 
     /**
@@ -98,15 +114,16 @@ class Repositories
     {
         $projects = $config->projects;
 
-        foreach($projects as $project_uniqname => $project_data) {
+        foreach ($projects as $project_uniqname => $project_data) {
 
             if (isset($project_data->adapter)) {
 
                 try {
-                    $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\' . ucfirst($project_data->adapter);
+                    $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\'
+                        . ucfirst($project_data->adapter);
                     Loader::loadClass($adapter);
                 } catch(\Gitty\Exception $e) {
-                    require_once dirname(__FILE__).'/Repositories/Exception.php';
+                    include_once dirname(__FILE__).'/Repositories/Exception.php';
                     throw new Repo\Exception("adapter '$adapter' is unknown");
                 }
 
@@ -119,7 +136,8 @@ class Repositories
             Loader::loadClass($adapter);
             $repository = new $adapter($project_data);
 
-            foreach($project_data->deployment as $deployment_name => $deployment_data) {
+            foreach ($project_data->deployment as $deployment_name =>
+                     $deployment_data) {
 
                 $remote = new \Gitty\Remote($deployment_data);
                 $repository->registerRemote($remote);
@@ -137,30 +155,33 @@ class Repositories
      */
     public function getRepositories()
     {
-        return $this->_repositories;
+        return $this->repositories;
     }
 
     /**
      * register an adapter
      *
      * @param Gitty\Repositories\AdapterAbstract $repository an repository object
+     *
+     * @return Null
      */
     public function register(Repo\AdapterAbstract $repository)
     {
-        $this->_repositories[] = $repository;
+        $this->repositories[] = $repository;
     }
 
     /**
      * unregister an adapter
      *
      * @param Gitty\Repositories\AdapterAbstract $repository an repository object
+     *
      * @return Boolean true if adapter is found, otherwise false
      */
     public function unregister(Repo\AdapterAbstract $repository)
     {
-        $index = array_search($repository, $this->_repositories, true);
+        $index = array_search($repository, $this->repositories, true);
         if ($index !== false) {
-            unset($this->_repositories[$index]);
+            unset($this->repositories[$index]);
             return true;
         }
 

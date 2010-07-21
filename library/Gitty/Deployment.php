@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
+*
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Deployment
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Deployment
  */
 
 /**
@@ -27,50 +35,53 @@ namespace Gitty;
 /**
  * deployment class
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Deployment
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Deployment
  */
 class Deployment
 {
     /**
      * project id
      */
-    protected $_project_id = 0;
+    protected $project_id = 0;
 
     /**
      * branch
      */
-    protected $_branch = null;
+    protected $branch = null;
 
     /**
      * remote id
      */
-    protected $_remote_id = 0;
+    protected $remote_id = 0;
 
     /**
      * repositories object
      */
-    protected $_repositories = null;
+    protected $repositories = null;
 
     /**
      * current deployed repository
      */
-    protected $_deploy_repository = null;
+    protected $deploy_repository = null;
 
     /**
      * current remote to deploy
      */
-    protected $_deploy_remote = null;
+    protected $deploy_remote = null;
 
     /**
      * observers
      */
-    protected $_observers = array();
+    protected $observers = array();
 
     /**
      * the observers when cleaned
      */
-    protected $_clean = false;
+    protected $clean = false;
 
     /**
      * deployment should install instead of update
@@ -91,8 +102,10 @@ class Deployment
      * call a method of all observers
      *
      * @param String $function the function name
+     *
+     * @return Null
      */
-    protected function _callObservers($function)
+    protected function callObservers($function)
     {
         $params = array($this);
         // if there are more parameters, turn them into array
@@ -100,7 +113,7 @@ class Deployment
             $params = \array_merge($params, \array_slice(\func_get_args(), 1));
         }
 
-        foreach($this->_observers as $observer) {
+        foreach ($this->observers as $observer) {
             if (\method_exists($observer, $function)) {
                 \call_user_func_array(array($observer, $function), $params);
             }
@@ -111,34 +124,36 @@ class Deployment
      * gets the current repository
      *
      * @param Boolean $reset reset repository look up
+     *
      * @return Gitty\Repositories\AdapterAbstract the current repository
      */
-    protected function _getCurrentRepository($reset = false)
+    protected function getCurrentRepository($reset = false)
     {
-        if ($this->_deploy_repository === null || $reset === true) {
+        if (null === $this->deploy_repository || true === $reset) {
             // get repostories from repository object
-            $repos = $this->_repositories->getRepositories();
-            $this->_deploy_repository = $repos[$this->_project_id];
+            $repos = $this->repositories->getRepositories();
+            $this->deploy_repository = $repos[$this->project_id];
         }
 
-        return $this->_deploy_repository;
+        return $this->deploy_repository;
     }
 
     /**
      * get current remote object
      *
      * @param Boolean $reset reset remite look up
+     *
      * @return Gitty\Remote\AdapterAbstract the current remote
      */
-    protected function _getCurrentRemote($reset = false)
+    protected function getCurrentRemote($reset = false)
     {
-        if ($this->_deploy_remote === null || $reset === true) {
+        if (null === $this->deploy_remote || true === $reset) {
             // get remotes from repositories object
-            $remote = $this->_getCurrentRepository()->getRemotes();
-            $this->_deploy_remote = $remote[$this->_remote_id];
+            $remote = $this->getCurrentRepository()->getRemotes();
+            $this->deploy_remote = $remote[$this->remote_id];
         }
 
-        return $this->_deploy_remote;
+        return $this->deploy_remote;
     }
 
     /**
@@ -146,36 +161,38 @@ class Deployment
      *
      * @return Array array contains the modified/added/deleted/renamed/copied files
      */
-    protected function _getFiles()
+    protected function getFiles()
     {
-        $repo = $this->_getCurrentRepository();
-        if ($this->install === true) {
+        $repo = $this->getCurrentRepository();
+        if (true === $this->install) {
             return $repo->getInstallFiles();
         }
 
-        $remote = $this->_getCurrentRemote();
+        $remote = $this->getCurrentRemote();
         return $repo->getUpdateFiles($remote->getServerRevisitionId());
     }
 
     /**
      * write a file with the revisition file to the server
+     *
+     * @return Null
      */
-    protected function _writeRevistionFile()
+    protected function writeRevistionFile()
     {
-        $repo = $this->_getCurrentRemote()->putServerRevisitionId(
-            $this->_getCurrentRepository()->getNewestRevisitionId()
+        $repo = $this->getCurrentRemote()->putServerRevisitionId(
+            $this->getCurrentRepository()->getNewestRevisitionId()
         );
     }
 
     /**
      * constructor
      *
-     * @param Gitty\Config $config configuration object
-     * @param Boolean $install install should be performed, copies all files to the remote
+     * @param Gitty\Config $config  configuration object
+     * @param Boolean      $install install should be performed
      */
     public function __construct(Config $config, $install = false)
     {
-        $this->_repositories = new Repositories($config);
+        $this->repositories = new Repositories($config);
         $this->config = $config;
         $this->install = $install;
     }
@@ -195,30 +212,33 @@ class Deployment
      */
     public function getObersers()
     {
-        return $this->_observers;
+        return $this->observers;
     }
 
     /**
      * register an observer
      *
-     * @param Gitty\Observer\ObserverInterface $observer observer which implements the ObserverInterface
+     * @param Gitty\Observer\ObserverInterface $observer observer
+     *
+     * @return Null
      */
     public function registerObserver(Observer\ObserverInterface $observer)
     {
-        $this->_observers[] = $observer;
+        $this->observers[] = $observer;
     }
 
     /**
      * unregister an observer
      *
-     * @param Gitty\Observer\ObserverInterface $observer observer which implements the ObserverInterface
+     * @param Gitty\Observer\ObserverInterface $observer observer
+     *
      * @return Boolean true when observer was removed, otherwise false
      */
     public function unregisterObserver(Observer\ObserverInterface $observer)
     {
-        $index = \array_search($observer, $this->_observers, true);
-        if ($index !== false) {
-            unset($this->_observers[$index]);
+        $index = \array_search($observer, $this->observers, true);
+        if (false !== $index) {
+            unset($this->observers[$index]);
             return true;
         }
 
@@ -232,18 +252,20 @@ class Deployment
      */
     public function getProjectId()
     {
-        return $this->_project_id;
+        return $this->project_id;
     }
 
     /**
      * set porject id
      *
      * @param Integer $id project id
+     *
+     * @return Null
      */
     public function setProjectId($id)
     {
-        $this->_project_id = $id;
-        $this->_getCurrentRepository();
+        $this->project_id = $id;
+        $this->getCurrentRepository();
     }
 
     /**
@@ -253,17 +275,19 @@ class Deployment
      */
     public function getBranch()
     {
-        return $this->_branch;
+        return $this->branch;
     }
 
     /**
      * set branch
      *
      * @param String $branch branch name
+     *
+     * @return Null
      */
     public function setBranch($branch)
     {
-        $this->_branch = $branch;
+        $this->branch = $branch;
     }
 
     /**
@@ -273,129 +297,138 @@ class Deployment
      */
     public function getRemoteId()
     {
-        return $this->_remote_id;
+        return $this->remote_id;
     }
 
     /**
      * set remote id
      *
      * @param Integer $remote remote id
+     *
+     * @return Null
      */
     public function setRemoteId($remote)
     {
-        $this->_remote_id = $remote;
+        $this->remote_id = $remote;
     }
 
     /**
      * start the updating installation process
      * and call the obeservers while performing
+     *
+     * @return Null
      */
     public function start()
     {
-        $this->_callObservers('onStart');
+        $this->callObservers('onStart');
 
-        $remote = $this->_getCurrentRemote();
-        $repo = $this->_getCurrentRepository();
+        $remote = $this->getCurrentRemote();
+        $repo = $this->getCurrentRepository();
 
         $datetime = new \DateTime();
         $datetime->format($this->config->global->gitty->dateFormat);
         $this->start = $datetime;
 
-        if ($this->_getCurrentRepository()->getNewestRevisitionId() == $remote->getServerRevisitionId() && $this->install === false) {
-            $this->_callObservers('onUpToDate');
+        $newest = $this->getCurrentRepository()->getNewestRevisitionId();
+        if ($newest == $remote->getServerRevisitionId()
+            && false === $this->install
+        ) {
+            $this->callObservers('onUpToDate');
             return;
         }
 
-        $files = $this->_getFiles();
+        $files = $this->getFiles();
 
         // call stat on the observers
-        $this->_callObservers('onStat', $files);
+        $this->callObservers('onStat', $files);
 
         //first the added files
         $added = $files['added'];
         if (\count($added) > 0) {
-            $this->_callObservers('onAddStart');
+            $this->callObservers('onAddStart');
 
-            foreach($added as $file) {
-                $this->_callObservers('onAdd', $file);
+            foreach ($added as $file) {
+                $this->callObservers('onAdd', $file);
                 $remote->put($repo->getFile($file), $file);
             }
 
-            $this->_callObservers('onAddEnd');
+            $this->callObservers('onAddEnd');
         }
 
         // the modified files are copied too
         $modified = $files['modified'];
         if (\count($modified) > 0) {
-            $this->_callObservers('onModifiedStart');
+            $this->callObservers('onModifiedStart');
 
-            foreach($modified as $file) {
-                $this->_callObservers('onModified', $file);
+            foreach ($modified as $file) {
+                $this->callObservers('onModified', $file);
                 $remote->put($repo->getFile($file), $file);
             }
 
-            $this->_callObservers('onModifiedEnd');
+            $this->callObservers('onModifiedEnd');
         }
 
         // copied files
         $copied = $files['copied'];
         if (\count($copied) > 0) {
-            $this->_callObservers('onCopiedStart');
+            $this->callObservers('onCopiedStart');
 
-            foreach($copied as $file) {
+            foreach ($copied as $file) {
                 $source = \array_keys($file);
                 $destination = \array_values($file);
 
-                $this->_callObservers('onCopied', $source[0]);
+                $this->callObservers('onCopied', $source[0]);
                 $remote->copy($source[0], $destination[0]);
             }
 
-            $this->_callObservers('onCopiedEnd');
+            $this->callObservers('onCopiedEnd');
         }
 
         // renamed files
         $renamed = $files['renamed'];
         if (\count($renamed) > 0) {
-            $this->_callObservers('onRenamedStart');
+            $this->callObservers('onRenamedStart');
 
-            foreach($renamed as $file) {
+            foreach ($renamed as $file) {
                 $source = \array_keys($file);
                 $destination = \array_values($file);
 
-                $this->_callObservers('onRenamed', $source[0], $destination[0]);
+                $this->callObservers('onRenamed', $source[0], $destination[0]);
                 $remote->rename($source[0], $destination[0]);
             }
 
-            $this->_callObservers('onRenamedEnd');
+            $this->callObservers('onRenamedEnd');
         }
 
         // deleted files
         $deleted = $files['deleted'];
         if (\count($deleted) > 0) {
-            $this->_callObservers('onDeletedStart');
+            $this->callObservers('onDeletedStart');
 
-            foreach($deleted as $file) {
-                $this->_callObservers('onDeleted', $file);
+            foreach ($deleted as $file) {
+                $this->callObservers('onDeleted', $file);
                 $remote->unlink($file);
             }
 
-            $this->_callObservers('onDeletedEnd');
+            $this->callObservers('onDeletedEnd');
         }
 
         // write revisition id to a file
-        $this->_writeRevistionFile();
+        $this->writeRevistionFile();
 
         $remote->cleanUp();
     }
 
     /**
      * call onEnd event on the observer
+     *
+     * @return Null
      */
     public function end()
     {
-        if ($this->_clean === false) {
-            $this->_callObservers('onEnd');
-            $this->_clean = true;
+        if (false === $this->clean) {
+            $this->callObservers('onEnd');
+            $this->clean = true;
         }
     }
 }

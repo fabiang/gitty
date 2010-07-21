@@ -17,6 +17,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  Remote
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote
  */
 
 /**
@@ -27,56 +35,54 @@ namespace Gitty;
 /**
  * remote class class
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  Remote
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote
  */
 class Remote
 {
      /**
      * default adapter
      */
-    protected static $_default_adapter = null;
+    protected static $defaultadapter = null;
 
     /**
      * instance of the adapter
      */
-    protected $_adapter = null;
-
-    /**
-     * helper function to make default adapter namespace-aware
-     */
-    protected static function _getDefaultAdapter()
-    {
-        if (self::$_default_adapter === null) {
-            self::$_default_adapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';
-        }
-
-        return self::$_default_adapter;
-    }
+    protected $adapter = null;
 
     /**
      * set default adapter
      *
      * @param String $adapter an adapter that implements the AdapterInterface
-     * @throws \Gitty\Remote\Exception if adapter is not an instance of \Gitty\Remote\AdapterInterface
+     *
+     * @return Null
+     * @throws \Gitty\Remote\Exception adapter is not \Gitty\Remote\AdapterInterface
      * @todo make test better
      */
     public static function setDefaultAdapter($adapter)
     {
         if (!(new $adapter instanceof Remote\AdapterInterface)) {
-            require_once \dirname(__FILE__).'/Remote/Exception.php';
-            throw new Remote\Exception(get_class($data).' does not implement Gitty\Remote\AdapterInterface interface');
+            include_once \dirname(__FILE__).'/Remote/Exception.php';
+            throw new Remote\Exception(
+                get_class($data).' does not implement\
+                Gitty\Remote\AdapterInterface interface'
+            );
         }
 
-        self::$_default_adapter = $adapter;
+        self::$defaultadapter = $adapter;
     }
 
     /**
      * initialize adapter
+     *
+     * @return Null
      */
-    protected function _init()
+    protected function init()
     {
-        $this->_adapter->init();
+        $this->adapter->init();
     }
 
     /**
@@ -86,7 +92,11 @@ class Remote
      */
     public static function getDefaultAdapter()
     {
-        return self::_getDefaultAdapter();
+        if (null === self::$defaultadapter) {
+            self::$defaultadapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';
+        }
+
+        return self::getDefaultAdapter();
     }
 
     /**
@@ -99,25 +109,26 @@ class Remote
         if (isset($config->adapter)) {
 
             try {
-                $adapter = __NAMESPACE__.'\\Remote\\Adapter\\' . ucfirst($config->adapter);
+                $adapter = __NAMESPACE__.'\\Remote\\Adapter\\' .
+                    ucfirst($config->adapter);
                 Loader::loadClass($adapter);
             } catch(Exception $e) {
-                require_once \dirname(__FILE__).'/Remote/Exception.php';
+                include_once \dirname(__FILE__).'/Remote/Exception.php';
                 throw new Remote\Exception("adapter '$adapter' is unknown");
             }
 
             $remote = new $adapter($config);
 
         } else {
-            $adapter = self::_getDefaultAdapter();
+            $adapter = self::getDefaultAdapter();
         }
 
         Loader::loadClass($adapter);
         $remote = new $adapter($config);
 
-        $this->_adapter = $remote;
+        $this->adapter = $remote;
 
-        $this->_init();
+        $this->init();
     }
 
     /**
@@ -127,48 +138,57 @@ class Remote
      */
     public function getServerRevisitionId()
     {
-        return $this->_adapter->getServerRevisitionId();
+        return $this->adapter->getServerRevisitionId();
     }
 
     /**
      * put revisition id in file on remote server
      *
      * @param String $uid revisition id
+     *
+     * @return Null
      */
     public function putServerRevisitionId($uid)
     {
-        $this->_adapter->putServerRevisitionId($uid);
+        $this->adapter->putServerRevisitionId($uid);
     }
 
     /**
      * put a file onto remote
      *
-     * @param String $file file name
+     * @param String $file        file name
+     * @param String $destination deistnation
+     *
+     * @return Null
      */
     public function put($file, $destination)
     {
-        $this->_adapter->put($file, $destination);
+        $this->adapter->put($file, $destination);
     }
 
     /**
      * copy a file
      *
-     * @param String $file file name
+     * @param String $file        file name
      * @param String $destination destination
+     *
+     * @return Null
      */
     public function copy($file, $destination)
     {
-        $this->_adapter->copy($file, $destination);
+        $this->adapter->copy($file, $destination);
     }
 
     /**
      * unlink file
      *
      * @param String $file file name
+     *
+     * @return Null
      */
     public function unlink($file)
     {
-        $this->_adapter->unlink($file);
+        $this->adapter->unlink($file);
     }
 
     /**
@@ -178,23 +198,30 @@ class Remote
      */
     /*public function makeDir($dir)
     {
-        $this->_adapter->makeDir($dir);
+        $this->adapter->makeDir($dir);
     }*/
 
     /**
      * rename/move a file
      *
-     * @param String $file file name
+     * @param String $file        file name
      * @param String $destination destination
+     *
+     * @return Null
      */
     public function rename($file, $destination)
     {
-        $this->_adapter->rename($file, $destination);
+        $this->adapter->rename($file, $destination);
     }
 
+    /**
+     * do some cleanup in the adapter
+     *
+     * @return Null
+     */
     public function cleanUp()
     {
-        $this->_adapter->cleanUp();
+        $this->adapter->cleanUp();
     }
 
     /**
@@ -204,7 +231,7 @@ class Remote
      */
     public function getAdapter()
     {
-        return $this->_adapter;
+        return $this->adapter;
     }
 
     /**
@@ -214,6 +241,6 @@ class Remote
      */
     public function __toString()
     {
-        return $this->_adapter->__toString();
+        return $this->adapter->__toString();
     }
 }

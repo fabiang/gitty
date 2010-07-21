@@ -16,7 +16,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * PHP Version 5.3
+ *
+ * @category Gitty
+ * @package  AdapterAbstract
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote/AdapterAbstract
  */
 
 /**
@@ -27,26 +35,19 @@ namespace Gitty\Remote;
 /**
  * repository class
  *
- * @package Gitty
- * @license http://www.gnu.org/licenses/gpl.html
+ * @category Gitty
+ * @package  AdapterAbstract
+ * @author   Fabian Grutschus <f.grutschus@lubyte.de>
+ * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
+ * @link     http://gitty.lubyte.de/docs/Gitty/Remote/AdapterAbstract
  * @todo implement some getter and setters
  */
 abstract class AdapterAbstract
 {
     /**
-     * stream context
-     */
-    protected $_context = null;
-
-    /**
-     * adapter url
-     */
-    protected $_url = null;
-
-    /**
      * the revisition file name
      */
-    public $_revisitionFileName = 'revisition.txt';
+    public $revisitionFileName = 'revisition.txt';
 
     /**
      * file mode for new files
@@ -75,45 +76,69 @@ abstract class AdapterAbstract
      * put revisition id in file on remote server
      *
      * @param String $uid revisition id
+     *
+     * @return Null
      */
     abstract public function putServerRevisitionId($uid);
 
     /**
      * adapter must have a copy function
+     *
+     * @param String $file        source file name
+     * @param String $destination destination name
+     *
+     * @return Null
      */
     abstract public function put($file, $destination);
 
     /**
      * adapter must have a rename function
+     *
+     * @param String $source      source file name
+     * @param String $destination destination name
+     *
+     * @return Null
      */
     abstract public function rename($source, $destination);
 
     /**
      * adapter must have an unlink function
+     *
+     * @param String  $file                     filename
+     * @param Boolean $remove_empty_directories remove empty directories
+     *
+     * @return Null
      */
     abstract public function unlink($file, $remove_empty_directories = true);
 
     /**
      * adapter must have a copy function
+     *
+     * @param String $source      source file name
+     * @param String $destination destination name
+     *
+     * @return Null
      */
     abstract public function copy($source, $destination);
 
     /**
      * adapter must implement init
      *
-     * @abstract
+     * @return Null
      */
     abstract public function init();
 
     /**
      * adapter must have cleanUp function
+     *
+     * @return Null
      */
     abstract public function cleanUp();
 
     /**
      * adapter must implement __toString
      *
-     * @abstract
+     * @return Null
      */
     abstract public function __toString();
 }
