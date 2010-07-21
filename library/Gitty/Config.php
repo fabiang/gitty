@@ -93,7 +93,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
      * @return array Resulting array, once all have been merged
      * @see http://www.php.net/manual/en/function.array-merge-recursive.php#96201
      */
-    private function arrayMergeRecursiveDistinct ()
+    private function _arrayMergeRecursiveDistinct ()
     {
         $arrays = \func_get_args();
         $base = \array_shift($arrays);
@@ -111,7 +111,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
                 }
                 if (\is_array($value) or \is_array($base[$key])) {
                     // modified from original
-                    $base[$key] = $this->arrayMergeRecursiveDistinct(
+                    $base[$key] = $this->_arrayMergeRecursiveDistinct(
                         $base[$key],
                         $append[$key]
                     );
@@ -158,7 +158,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
 
         // merge default data
         if ($merge === true) {
-            $data = $this->arrayMergeRecursiveDistinct(self::$defaultConfig, $data);
+            $data = $this->_arrayMergeRecursiveDistinct(self::$defaultConfig, $data);
         }
 
         foreach ($data as $name => $value) {
