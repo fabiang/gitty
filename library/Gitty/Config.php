@@ -157,7 +157,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
         }
 
         // merge default data
-        if ($merge === true) {
+        if (true === $merge) {
             $data = $this->_arrayMergeRecursiveDistinct(self::$defaultConfig, $data);
         }
 

@@ -325,6 +325,9 @@ class Deployment
         $remote = $this->getCurrentRemote();
         $repo = $this->getCurrentRepository();
 
+        //init remote
+        $remote->init();
+
         $datetime = new \DateTime();
         $datetime->format($this->config->global->gitty->dateFormat);
         $this->start = $datetime;

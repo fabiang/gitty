@@ -53,7 +53,7 @@ class Repositories
     /**
      * default adapter
      */
-    protected static $defaultadapter = null;
+    public static $defaultAdapter = null;
 
     /**
      * instance of the adapter
@@ -88,7 +88,7 @@ class Repositories
             );
         }
 
-        self::$defaultadapter = $adapter;
+        self::$defaultAdapter = $adapter;
     }
 
     /**
@@ -98,11 +98,7 @@ class Repositories
      */
     public static function getDefaultAdapter()
     {
-        if (null === self::$defaultadapter) {
-            self::$defaultadapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
-        }
-
-        return self::$defaultadapter;
+        return self::$defaultAdapter;
     }
 
     /**
@@ -188,3 +184,6 @@ class Repositories
         return false;
     }
 }
+
+$class = __NAMESPACE__.'\\Repositories';
+$class::$defaultAdapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';

@@ -46,7 +46,7 @@ class Remote
      /**
      * default adapter
      */
-    protected static $defaultadapter = null;
+    public static $defaultAdapter = null;
 
     /**
      * instance of the adapter
@@ -72,7 +72,7 @@ class Remote
             );
         }
 
-        self::$defaultadapter = $adapter;
+        self::$defaultAdapter = $adapter;
     }
 
     /**
@@ -92,10 +92,6 @@ class Remote
      */
     public static function getDefaultAdapter()
     {
-        if (null === self::$defaultadapter) {
-            self::$defaultadapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';
-        }
-
         return self::getDefaultAdapter();
     }
 
@@ -127,8 +123,6 @@ class Remote
         $remote = new $adapter($config);
 
         $this->adapter = $remote;
-
-        $this->init();
     }
 
     /**
@@ -244,3 +238,6 @@ class Remote
         return $this->adapter->__toString();
     }
 }
+
+$class = __NAMESPACE__.'\\Remote';
+$class::$defaultAdapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';
