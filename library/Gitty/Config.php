@@ -158,12 +158,12 @@ class Config implements \IteratorAggregate, \ArrayAccess
 
         // merge default data
         if (true === $merge) {
-            $data = $this->_arrayMergeRecursiveDistinct(self::$defaultConfig, $data);
+            $data = $this->_arrayMergeRecursiveDistinct($data, self::$defaultConfig);
         }
 
         foreach ($data as $name => $value) {
             if (\is_array($value)) {
-                $this->data[$name] = new self($value, true, false);
+                $this->data[$name] = new self($value, $allowModifications, false);
             } else {
                 $this->data[$name] = $value;
             }
@@ -227,7 +227,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
     {
         if ($this->allowModifications) {
             if (\is_array($value)) {
-                $this->data[$name] = new self($value, true);
+                $this->data[$name] = new self($value, true, false);
             } else {
                 $this->data[$name] = $value;
             }

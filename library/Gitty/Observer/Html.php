@@ -55,8 +55,10 @@ class Html implements ObserverInterface
      */
     protected function flush()
     {
-        ob_flush();
-        flush();
+        if (false !== \ob_get_length()) {
+            \ob_flush();
+            \flush();
+        }
     }
 
     /**

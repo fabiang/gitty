@@ -7,9 +7,8 @@ require_once 'PHPUnit/Framework.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
 require_once \dirname(__FILE__).'/../../library/Gitty/Config/Exception.php';
-require_once \dirname(__FILE__).'/../../library/Gitty/Config/Loader.php';
-require_once \dirname(__FILE__).'/../../library/Gitty/Config/Ini.php';
 require_once \dirname(__FILE__).'/../../library/Gitty/Config.php';
+require_once \dirname(__FILE__).'/../../library/Gitty/Config/Ini.php';
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -90,8 +89,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $filename = \dirname(__FILE__).'/../data/empty.ini';
-        $conf = new Gitty\Config(array());
+        $conf = new Gitty\Config(array(), true, true);
 
         foreach($this->exampleConfig as $key => $value) {
             $conf->$key = $value;
@@ -102,7 +100,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGet()
     {
-        $conf = new Gitty\Config(array());
+        $conf = new Gitty\Config(array(), true, false);
         $conf->test = 1;
         $this->assertEquals($conf->toArray(), array('test' => 1));
 
@@ -131,7 +129,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $should_be = array('test' => 1, 'bar' => 2);
 
-        $conf = new Gitty\Config($should_be);
+        $conf = new Gitty\Config($should_be, true, false);
 
         $this->assertTrue($conf->getIterator() instanceof \IteratorAggregate);
 
@@ -156,5 +154,15 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $conf->second = 2;
         $this->assertTrue(isset($conf['second']));
         $this->assertEquals($conf->second, 2);
+    }
+
+    public function testIniClass()
+    {
+        $conf1 = new Gitty\Config($this->exampleConfig);
+
+        $filename = \dirname(__FILE__).'/../data/example.ini';
+        $conf2 = new Gitty\Config\Ini($filename);
+
+        $this->assertEquals($conf1->toArray(), $conf2->toArray());
     }
 }

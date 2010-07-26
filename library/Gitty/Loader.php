@@ -87,6 +87,7 @@ class Loader
             if (\is_string($dirs)) {
                 $dirs = \explode(\PATH_SEPARATOR, $dirs);
             }
+
             foreach ($dirs as $key => $dir) {
                 if ($dir == '.') {
                     $dirs[$key] = $dirPath;
@@ -198,7 +199,7 @@ class Loader
 
         self::loadClass($class);
         $methods = \get_class_methods($class);
-        if (!\in_array('autoload', (array) $methods)) {
+        if (!\in_array('autoload', (array)$methods)) {
             include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception(
                 "The class \"$class\" does not have an autoload() method"
