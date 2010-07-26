@@ -46,7 +46,7 @@ class Remote
      /**
      * default adapter
      */
-    public static $defaultAdapter = null;
+    protected static $defaultAdapter = null;
 
     /**
      * instance of the adapter
@@ -64,25 +64,16 @@ class Remote
      */
     public static function setDefaultAdapter($adapter)
     {
-        if (!(new $adapter instanceof Remote\AdapterInterface)) {
+        /*
+        if (!(__NAME\AdapterInterface)) {
             include_once \dirname(__FILE__).'/Remote/Exception.php';
             throw new Remote\Exception(
                 get_class($data).' does not implement\
                 Gitty\Remote\AdapterInterface interface'
             );
-        }
+        }*/
 
         self::$defaultAdapter = $adapter;
-    }
-
-    /**
-     * initialize adapter
-     *
-     * @return Null
-     */
-    protected function init()
-    {
-        $this->adapter->init();
     }
 
     /**
@@ -92,7 +83,11 @@ class Remote
      */
     public static function getDefaultAdapter()
     {
-        return self::getDefaultAdapter();
+        if (null === self::$defaultAdapter) {
+            self::$defaultAdapter = __NAMESPACE__.'\\Remote\\Adapter\\Ftp';
+        }
+
+        return self::$defaultAdapter;
     }
 
     /**
@@ -145,6 +140,16 @@ class Remote
     public function putServerRevisitionId($uid)
     {
         $this->adapter->putServerRevisitionId($uid);
+    }
+
+    /**
+     * initialize adapter
+     *
+     * @return Null
+     */
+    public function init()
+    {
+        $this->adapter->init();
     }
 
     /**
@@ -238,6 +243,3 @@ class Remote
         return $this->adapter->__toString();
     }
 }
-
-$class = __NAMESPACE__.'\\Remote';
-$class::$defaultAdapter = __NAMESPACE__.'\\Remotes\\Adapter\\Ftp';

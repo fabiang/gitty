@@ -85,19 +85,6 @@ class Ftp extends G\Remote\AdapterAbstract
     protected $tempMaxSize = 5242880;
 
     /**
-     * close ftp connection
-     *
-     * @return Null
-     */
-    protected function close()
-    {
-        if (null !== $this->connection) {
-            ftp_close($this->connection);
-            $this->connection = null;
-        }
-    }
-
-    /**
      * remove directories that are empty
      *
      * @param String $path path name
@@ -162,6 +149,7 @@ class Ftp extends G\Remote\AdapterAbstract
         $this->connection = @ftp_connect($this->hostname, $this->port);
 
         if (false === $this->connection) {
+            $this->connection = null;
             include_once \dirname(__FILE__) . '/../Exception.php';
             throw new Remote\Exception(
                 'Ftp adapter: Can\'t connect to\
@@ -171,10 +159,24 @@ class Ftp extends G\Remote\AdapterAbstract
 
         $login = @ftp_login($this->connection, $this->username, $this->password);
         if (false === $login) {
+            $this->close();
             include_once \dirname(__FILE__) . '/../Exception.php';
             throw new Remote\Exception(
                 'Ftp adapter: Can\'t login with username '.$this->hostname
             );
+        }
+    }
+
+    /**
+     * close ftp connection
+     *
+     * @return Null
+     */
+    public function close()
+    {
+        if (null !== $this->connection) {
+            ftp_close($this->connection);
+            $this->connection = null;
         }
     }
 
@@ -196,6 +198,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function getServerRevisitionId()
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         // open memory for read/write
         $mem = \fopen('php://memory', 'r+');
         // change directory
@@ -233,6 +239,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function putServerRevisitionId($uid)
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         // open memory for read/write
         $mem = \fopen('php://memory', 'r+');
         // put revisition id to memory
@@ -257,6 +267,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function put($file, $destination)
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         // if the file content was given
         if (\is_string($file)) {
             // write the file content to temp with a max size
@@ -302,6 +316,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function rename($source, $destination, $remove_empty_directories = true)
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         @\ftp_rename(
             $this->connection,
             $this->path . '/' . $source,
@@ -325,6 +343,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function unlink($file, $remove_empty_directories = true)
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         @\ftp_delete($this->connection, $this->path . '/' . $file);
 
         // remove empty directories
@@ -343,6 +365,10 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function copy($source, $destination)
     {
+        if (null == $this->connection) {
+            $this->init();
+        }
+
         $mem = \fopen('php://temp/maxmemory:'.$this->tempMaxSize, 'r+');
         $result = @\ftp_fget(
             $this->connection,

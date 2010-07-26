@@ -43,7 +43,7 @@ namespace Gitty;
  */
 final class Version
 {
-    const VERSION = '0.2pre';
+    const VERSION = '0.3';
 
     /**
      * compare version with Gittys version

@@ -35,6 +35,7 @@ namespace Gitty;
 /**
  * short hands
  */
+use \Gitty as Gitty;
 use \Gitty\Repositories as Repo;
 use \Gitty\Config as Config;
 use \Gitty\Loader as Loader;
@@ -53,7 +54,7 @@ class Repositories
     /**
      * default adapter
      */
-    public static $defaultAdapter = null;
+    protected static $defaultAdapter = null;
 
     /**
      * instance of the adapter
@@ -80,11 +81,10 @@ class Repositories
      */
     public static function setDefaultAdapter($adapter)
     {
-        if (!(new $adapter instanceof Repo\AdapterInterface)) {
+        if (!(new $adapter(array()) instanceof Repo\AdapterAbstract)) {
             include_once dirname(__FILE__).'/Repositories/Exception.php';
             throw new Repo\Exception(
-                get_class($data).' does not implement\
-                Gitty\Repository\AdapterInterface interface'
+                "$adapter does not extend Gitty\Repositories\AdapterInterface"
             );
         }
 
@@ -98,6 +98,10 @@ class Repositories
      */
     public static function getDefaultAdapter()
     {
+        if (null === self::$defaultAdapter) {
+            self::$defaultAdapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
+        }
+
         return self::$defaultAdapter;
     }
 
@@ -118,12 +122,10 @@ class Repositories
                     $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\'
                         . ucfirst($project_data->adapter);
                     Loader::loadClass($adapter);
-                } catch(\Gitty\Exception $e) {
+                } catch(Gitty\Exception $e) {
                     include_once dirname(__FILE__).'/Repositories/Exception.php';
                     throw new Repo\Exception("adapter '$adapter' is unknown");
                 }
-
-                $repository = new $adapter($project_data);
 
             } else {
                 $adapter = self::getDefaultAdapter();
@@ -132,12 +134,14 @@ class Repositories
             Loader::loadClass($adapter);
             $repository = new $adapter($project_data);
 
-            foreach ($project_data->deployment as $deployment_name =>
-                     $deployment_data) {
+            if (isset($project_data->deployment)) {
+                foreach ($project_data->deployment as $deployment_name =>
+                         $deployment_data) {
 
-                $remote = new \Gitty\Remote($deployment_data);
-                $repository->registerRemote($remote);
+                    $remote = new \Gitty\Remote($deployment_data);
+                    $repository->registerRemote($remote);
 
+                }
             }
 
             $this->register($repository);
@@ -184,6 +188,3 @@ class Repositories
         return false;
     }
 }
-
-$class = __NAMESPACE__.'\\Repositories';
-$class::$defaultAdapter = __NAMESPACE__.'\\Repositories\\Adapter\\Git';
