@@ -9,6 +9,9 @@ require_once 'PHPUnit/Framework/TestCase.php';
 require_once \dirname(__FILE__).'/../../library/Gitty/Exception.php';
 require_once \dirname(__FILE__).'/../../library/Gitty/Loader.php';
 
+/**
+ * @outputBuffering disabled
+ */
 class LoaderTest extends \PHPUnit_Framework_TestCase
 {
     public function testClassExists()
@@ -82,25 +85,77 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     public function testAutoLoad()
     {
-        $inc_path = \get_include_path();
-        \set_include_path(\dirname(__FILE__).'/../../library');
-        Gitty\Loader::registerAutoload();
+        if (!\function_exists('spl_autoload_register')) {
+            $this->setExpectedException('\Gitty\Exception');
+            Gitty\Loader::registerAutoload();
+        } else {
+            $inc_path = \get_include_path();
+            \set_include_path(\dirname(__FILE__).'/../../library');
+            Gitty\Loader::registerAutoload();
 
-        $loaded = new Gitty\Observer\Html();
+            $loaded = new Gitty\Observer\Html();
 
-        Gitty\Loader::registerAutoload(null, false);
-        \set_include_path($inc_path);
+            Gitty\Loader::registerAutoload(null, false);
+            \set_include_path($inc_path);
+        }
     }
 
     public function testAutoloadConstruction()
     {
-        $inc_path = \get_include_path();
-        \set_include_path(\dirname(__FILE__).'/../../library');
+        if (!\function_exists('spl_autoload_register')) {
+            $this->setExpectedException('\Gitty\Exception');
+            Gitty\Loader::registerAutoload();
+        } else {
+            $inc_path = \get_include_path();
+            \set_include_path(\dirname(__FILE__).'/../../library');
 
-        $loader = new Gitty\Loader();
-        $loaded = new Gitty\Remote\Adapter\Ftp(new Gitty\Config(array()));
+            $loader = new Gitty\Loader();
+            $loaded = new Gitty\Remote\Adapter\Ftp(new Gitty\Config(array()));
 
-        Gitty\Loader::registerAutoload(null, false);
-        \set_include_path($inc_path);
+            Gitty\Loader::registerAutoload(null, false);
+            \set_include_path($inc_path);
+        }
+    }
+
+    public function testSlashPrefix()
+    {
+        Gitty\Loader::loadClass('\\Gitty\\Remote\\Exception', \dirname(__FILE__).'/../../library');
+    }
+
+    public function testDotDir()
+    {
+        Gitty\Loader::loadClass('Gitty\\Repositories\\Exception', array('.', \dirname(__FILE__).'/../../library'));
+    }
+
+    /**
+     * @outputBuffering enabled
+     */
+    public function testMultipleInclude()
+    {
+        Gitty\Loader::loadFile('include.php', \dirname(__FILE__).'/../data', false);
+        Gitty\Loader::loadFile('include.php', \dirname(__FILE__).'/../data', false);
+    }
+
+    /**
+     * @expectedException Gitty\Exception
+     */
+    public function testInvalidLoaderClass()
+    {
+        Gitty\Loader::registerAutoload('Gitty\Version');
+    }
+
+    /**
+     *
+     */
+    public function testMissingSplAutoload()
+    {
+        $this->markTestIncomplete(
+          'test incomplete'
+        );
+
+        if (\class_exists('Runkit_Sandbox')) {
+            $sandbox = new \Runkit_Sandbox(array('disable_functions' => 'spl_autoload_register'));
+            //$sandbox->eval('Gitty\Loader::registerAutoload();');
+        }
     }
 }
