@@ -71,16 +71,9 @@ class Ini extends G\Config
             if (\strlen($pieces[0]) && \strlen($pieces[1])) {
 
                 if (!isset($config[$pieces[0]])) {
-
                     $config[$pieces[0]] = array();
-
-                } elseif (!\is_array($config[$pieces[0]])) {
-                    include_once \dirname(__FILE__).'/Exception.php';
-                    throw new Exception(
-                        "Cannot create sub-key for\
-                        '{$pieces[0]}' as key already exists"
-                    );
                 }
+
                 $config[$pieces[0]] = $this->processKey(
                     $config[$pieces[0]],
                     $pieces[1],

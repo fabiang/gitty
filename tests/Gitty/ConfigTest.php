@@ -165,4 +165,69 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($conf1->toArray(), $conf2->toArray());
     }
+
+    public function testConfigObjectLoading()
+    {
+        $filename = \dirname(__FILE__).'/../data/example.ini';
+        $conf1 = new Gitty\Config\Ini($filename);
+
+        $conf2 = new Gitty\Config($conf1);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     */
+    public function testConfigObjectLoadingInvalid()
+    {
+        require_once \dirname(__FILE__).'/../../library/Gitty/Version.php';
+        $conf1 = new Gitty\Version($filename);
+        $conf2 = new Gitty\Config($conf1);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     */
+    public function testConfigNoArrayOrObject()
+    {
+        $conf = new Gitty\Config(1);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     */
+    public function testConfigNotModificationableUnset()
+    {
+        $conf = new Gitty\Config(array('test' => 1), false);
+        unset($conf->test);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     */
+    public function testConfigNotModificationableSet()
+    {
+        $conf = new Gitty\Config(array(), false);
+        $conf->test = 1;
+    }
+
+    public function testConfigMerging()
+    {
+        Gitty\Config::$defaultConfig = 1;
+        $conf = new Gitty\Config(array(), false);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     */
+    public function testInvalidIniKey()
+    {
+        $filename = \dirname(__FILE__).'/../data/broken2.ini';
+        $conf = new Gitty\Config\Ini($filename);
+    }
+
+    public function testInvaliddublicateKey()
+    {
+        $filename = \dirname(__FILE__).'/../data/broken3.ini';
+        $conf = new Gitty\Config\Ini($filename);
+    }
 }

@@ -97,9 +97,12 @@ class Config implements \IteratorAggregate, \ArrayAccess
     {
         $arrays = \func_get_args();
         $base = \array_shift($arrays);
-        if (!\is_array($base)) {
-            $base = empty($base) ? array() : array($base);
-        }
+        /*
+         * can't happen since it's already throws an error in the constructor
+         * if (!\is_array($base)) {
+         *   $base = empty($base) ? array() : array($base);
+         * }
+         */
         foreach ($arrays as $append) {
             if (!\is_array($append)) {
                 $append = array($append);
@@ -109,7 +112,8 @@ class Config implements \IteratorAggregate, \ArrayAccess
                     $base[$key] = $append[$key];
                     continue;
                 }
-                if (\is_array($value) or \is_array($base[$key])) {
+
+                if (\is_array($value) or isset($base[$key]) and \is_array($base[$key])) {
                     // modified from original
                     $base[$key] = $this->_arrayMergeRecursiveDistinct(
                         $base[$key],
@@ -140,7 +144,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
     public function __construct($data, $allowModifications = true, $merge = true)
     {
         if (\is_object($data)) {
-            if (!($data instanceof C\Loader)) {
+            if (!($data instanceof self)) {
                 include_once \dirname(__FILE__).'/Config/Exception.php';
                 throw new C\Exception(
                     get_class($data).' does not implement\
