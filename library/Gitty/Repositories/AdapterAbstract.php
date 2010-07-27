@@ -72,7 +72,7 @@ abstract class AdapterAbstract
     /**
      * registered remotes for this project (FTPs, SSHs etc)
      */
-    protected $remoted = array();
+    protected $remotes = array();
 
     /**
      * the owner
@@ -149,7 +149,8 @@ abstract class AdapterAbstract
     public function __set($name, $value)
     {
         $method = 'set' . $name;
-        if (('mapper' == $name) || !\method_exists($this, $method)) {
+        if (!\method_exists($this, $method)) {
+            include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Invalid property ' . $name);
         }
         $this->$method($value);
@@ -166,7 +167,8 @@ abstract class AdapterAbstract
     public function __get($name)
     {
         $method = 'get' . $name;
-        if (('mapper' == $name) || !\method_exists($this, $method)) {
+        if (!\method_exists($this, $method)) {
+            include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception('Invalid property ' . $name);
         }
         return $this->$method();
@@ -302,7 +304,7 @@ abstract class AdapterAbstract
      */
     public function setPath($path)
     {
-        if ('/' === \strlen($path) > 1 && \substr($path, -1)) {
+        if (\strlen($path) > 1 && '/' === \substr($path, -1)) {
             $path = \substr($path, 0, -1);
         }
 
@@ -314,8 +316,12 @@ abstract class AdapterAbstract
      *
      * @return Boolean show branches
      */
-    public function showBranches()
+    public function showBranches($show = null)
     {
+        if (\is_bool($show)) {
+            $this->showBranches = $show;
+        }
+
         return $this->showBranches;
     }
 
@@ -326,7 +332,7 @@ abstract class AdapterAbstract
      */
     public function getRemotes()
     {
-        return $this->remoted;
+        return $this->remotes;
     }
 
     /**
@@ -338,7 +344,7 @@ abstract class AdapterAbstract
      */
     public function registerRemote(G\Remote $remote)
     {
-        $this->remoted[] = $remote;
+        $this->remotes[] = $remote;
     }
 
     /**
@@ -350,9 +356,9 @@ abstract class AdapterAbstract
      */
     public function unregisterRemote(G\Remote $remote)
     {
-        $index = \array_search($remote, $this->remoted, true);
-        if (isset($this->remoted[$index])) {
-            unset($this->remoted[$index]);
+        $index = \array_search($remote, $this->remotes, true);
+        if (isset($this->remotes[$index])) {
+            unset($this->remotes[$index]);
         }
         return !!$index;
     }

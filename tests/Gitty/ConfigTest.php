@@ -29,8 +29,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         'projects' => array(
             'myproject' => array(
                 'name' => 'Myproject',
-                'repository' => '/home/git/repositories/myproject',
-                'description' => 'overwrite description',
+                'path' => '/home/crash/public_html/gitty/tests/data/example',
+                'description' => '',
                 'showBranches' => 1,
                 'deployment' => array(
                     'hostnamecom' => array(

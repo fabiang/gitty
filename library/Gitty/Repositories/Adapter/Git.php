@@ -72,6 +72,16 @@ class Git extends G\Repositories\AdapterAbstract
     protected $gitDir = null;
 
     /**
+     * oldest revisition id
+     */
+    protected $oldestRevisitionId = null;
+
+    /**
+     * newest revisition id
+     */
+    protected $newestRevisitionId = null;
+
+    /**
      * auto discover the git directory
      *
      * @return String git directory
@@ -113,33 +123,6 @@ class Git extends G\Repositories\AdapterAbstract
     }
 
     /**
-     * get newest and oldest revisition id
-     *
-     * @param Boolean $reset reset the values from the class
-     *
-     * @return Array newest and oldest as keys
-     */
-    protected function getRevId($reset = false)
-    {
-        if ((null === $this->newestRevisitionId
-            && null === $this->oldestRevisitionId)
-            || true === $reset
-        ) {
-            $revs = $this->execCommand(
-                'rev-list --all --full-history --topo-order'
-            );
-
-            $this->newestRevisitionId = $revs[0];
-            $this->oldestRevisitionId = \end($revs);
-        }
-
-        return array(
-            'newest' => $this->newestRevisitionId,
-            'oldest' => $this->oldestRevisitionId
-        );
-    }
-
-    /**
      * parse files form git diff
      *
      * @param Array $diff the diff as array
@@ -148,6 +131,12 @@ class Git extends G\Repositories\AdapterAbstract
      */
     protected function parseFiles($diff)
     {
+        $this->deleted = array();
+        $this->modified  = array();
+        $this->copied = array();
+        $this->renamed = array();
+        $this->added = array();
+
         foreach ($diff as $file) {
             $fileInfo = \preg_split('#\s+#', $file);
 
@@ -200,8 +189,8 @@ class Git extends G\Repositories\AdapterAbstract
                 if (!\is_readable($descFile)) {
                     include_once \dirname(__FILE__) . '/../Exception.php';
                     throw new G\Repositories\Exception(
-                        "'$projectName' contains a description file" .
-                        ", but it's not readable"
+                        'repository contains a description file' .
+                        ', but it\'s not readable'
                     );
                 }
 
@@ -210,6 +199,33 @@ class Git extends G\Repositories\AdapterAbstract
                 );
             }
         }
+    }
+
+    /**
+     * get newest and oldest revisition id
+     *
+     * @param Boolean $reset reset the values from the class
+     *
+     * @return Array newest and oldest as keys
+     */
+    public function revId($reset = false)
+    {
+        if ((null === $this->newestRevisitionId
+            && null === $this->oldestRevisitionId)
+            || true === $reset
+        ) {
+            $revs = $this->execCommand(
+                'rev-list --all --full-history --topo-order'
+            );
+
+            $this->newestRevisitionId = $revs[0];
+            $this->oldestRevisitionId = \end($revs);
+        }
+
+        return array(
+            'newest' => $this->newestRevisitionId,
+            'oldest' => $this->oldestRevisitionId
+        );
     }
 
     /**
@@ -375,7 +391,7 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getBranches()
     {
-        if (true === $this->showBranches()) {
+        if (false === $this->showBranches()) {
             $this->branches = array(array('name' => 'master', 'default' => 0));
             return $this->branches;
         }
@@ -423,7 +439,7 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getNewestRevisitionId()
     {
-        list($newest, ) = \array_values($this->getRevId());
+        list($newest, ) = \array_values($this->revId());
         return $newest;
     }
 
@@ -436,7 +452,7 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getUpdateFiles($uid)
     {
-        list($newest, $oldest) = \array_values($this->getRevId());
+        list($newest, $oldest) = \array_values($this->revId());
         $files = $this->execCommand(
             'diff -M -C --name-status '. $uid . ' ' . $newest
         );
@@ -450,7 +466,7 @@ class Git extends G\Repositories\AdapterAbstract
      */
     public function getInstallFiles()
     {
-        list($newest, $oldest) = \array_values($this->getRevId());
+        list($newest, $oldest) = \array_values($this->revId());
         $files = $this->execCommand('ls-files --full-name');
 
         $this->deleted = array();
