@@ -97,6 +97,9 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
             Gitty\Loader::registerAutoload(null, false);
             \set_include_path($inc_path);
+
+            $this->assertEquals('\Gitty\Observer\Html', Gitty\Loader::autoLoad('\Gitty\Observer\Html'));
+            $this->assertFalse(Gitty\Loader::autoLoad('\Gitty\fsdfsfsdf'));
         }
     }
 
@@ -145,7 +148,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     *
+     * not finished yet
      */
     public function testMissingSplAutoload()
     {
@@ -153,7 +156,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
           'test incomplete'
         );
 
-        if (\class_exists('Runkit_Sandbox')) {
+        if (\class_exists('\\Runkit_Sandbox')) {
             $sandbox = new \Runkit_Sandbox(array('disable_functions' => 'spl_autoload_register'));
             //$sandbox->eval('Gitty\Loader::registerAutoload();');
         }

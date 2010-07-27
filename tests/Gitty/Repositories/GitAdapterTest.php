@@ -304,6 +304,10 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
                 'renamed' => array(array('file3.txt' => 'renamed.txt'))
             )
         );
+
+        $this->markTestIncomplete(
+            'add tests for copied files'
+        );
     }
 
     public function testGetFile()

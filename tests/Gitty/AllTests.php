@@ -18,6 +18,8 @@ require_once \dirname(__FILE__).'/RepositoriesTest.php';
 require_once \dirname(__FILE__).'/RemoteTest.php';
 require_once \dirname(__FILE__).'/Remote/AllTests.php';
 require_once \dirname(__FILE__).'/Repositories/AllTests.php';
+require_once \dirname(__FILE__).'/Observer/AllTests.php';
+require_once \dirname(__FILE__).'/DeploymentTest.php';
 
 \PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
@@ -34,6 +36,8 @@ class AllTests
         $suite->addTestSuite("$ns\\Remote\\AllTests");
         $suite->addTestSuite("$ns\\RepositoriesTest");
         $suite->addTestSuite("$ns\\Repositories\\AllTests");
+        $suite->addTestSuite("$ns\\Observer\\AllTests");
+        $suite->addTestSuite("$ns\\DeploymentTest");
         return $suite;
     }
 }

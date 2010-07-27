@@ -94,8 +94,9 @@ class Ini extends G\Config
      * class constructor
      *
      * @param String $filename the filepath to the ini file
+     * @param Boolean $allowModifications allow modifications of the object
      */
-    public function __construct($filename)
+    public function __construct($filename, $allowModifications = true)
     {
         if (!\file_exists($filename)) {
             include_once \dirname(__FILE__).'/Exception.php';
@@ -127,6 +128,6 @@ class Ini extends G\Config
 
         }
 
-        parent::__construct($processArray);
+        parent::__construct($processArray, $allowModifications, true);
     }
 }

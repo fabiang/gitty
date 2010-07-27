@@ -49,6 +49,11 @@ use \Gitty\Deployment as Deployment;
 class Html implements ObserverInterface
 {
     /**
+     * deployment is started
+     */
+    protected $started = false;
+
+    /**
      * flush output to server
      *
      * @return Null
@@ -85,6 +90,7 @@ class Html implements ObserverInterface
      */
     public function onStart(Deployment $deployment)
     {
+        $this->started = true;
         $this->flush();
 
         print '<p>Starting ';
@@ -148,13 +154,15 @@ class Html implements ObserverInterface
      */
     public function onEnd(Deployment $deployment)
     {
-        $start = $deployment->start;
-        $interval = $start->diff(new \DateTime());
-        \printf(
-            '<p>Everything done. Operation took %s.</p>',
-            $interval->format('%i minutes and %s seconds')
-        );
-        $this->flush();
+        if (true === $this->started) {
+            $start = $deployment->start;
+            $interval = $start->diff(new \DateTime());
+            \printf(
+                '<p>Everything done. Operation took %s.</p>',
+                $interval->format('%i minutes and %s seconds')
+            );
+            $this->flush();
+        }
     }
 
     /**

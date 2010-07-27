@@ -212,8 +212,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testConfigMerging()
     {
+        $default = Gitty\Config::$defaultConfig;
         Gitty\Config::$defaultConfig = 1;
         $conf = new Gitty\Config(array(), false);
+        Gitty\Config::$defaultConfig = $default;
     }
 
     /**

@@ -121,42 +121,6 @@ class Deployment
     }
 
     /**
-     * gets the current repository
-     *
-     * @param Boolean $reset reset repository look up
-     *
-     * @return Gitty\Repositories\AdapterAbstract the current repository
-     */
-    protected function getCurrentRepository($reset = false)
-    {
-        if (null === $this->deploy_repository || true === $reset) {
-            // get repostories from repository object
-            $repos = $this->repositories->getRepositories();
-            $this->deploy_repository = $repos[$this->project_id];
-        }
-
-        return $this->deploy_repository;
-    }
-
-    /**
-     * get current remote object
-     *
-     * @param Boolean $reset reset remite look up
-     *
-     * @return Gitty\Remote\AdapterAbstract the current remote
-     */
-    protected function getCurrentRemote($reset = false)
-    {
-        if (null === $this->deploy_remote || true === $reset) {
-            // get remotes from repositories object
-            $remote = $this->getCurrentRepository()->getRemotes();
-            $this->deploy_remote = $remote[$this->remote_id];
-        }
-
-        return $this->deploy_remote;
-    }
-
-    /**
      * get files for installation/update
      *
      * @return Array array contains the modified/added/deleted/renamed/copied files
@@ -206,11 +170,65 @@ class Deployment
     }
 
     /**
+     * gets the current repository
+     *
+     * @param Boolean $reset reset repository look up
+     *
+     * @return Gitty\Repositories\AdapterAbstract the current repository
+     */
+    public function getCurrentRepository($reset = false)
+    {
+        if (null === $this->deploy_repository || true === $reset) {
+            // get repostories from repository object
+            $repos = $this->repositories->getRepositories();
+            if (!isset($repos[$this->project_id])) {
+                include_once \dirname(__FILE__).'/Exception.php';
+                throw new Exception(
+                    'there is no repository registered with the id ' .
+                    $this->project_id .
+                    ' (only '.\count($repos).' repositories registered)'
+                );
+            }
+
+            $this->deploy_repository = $repos[$this->project_id];
+        }
+
+        return $this->deploy_repository;
+    }
+
+    /**
+     * get current remote object
+     *
+     * @param Boolean $reset reset remite look up
+     *
+     * @return Gitty\Remote\AdapterAbstract the current remote
+     */
+    public function getCurrentRemote($reset = false)
+    {
+        if (null === $this->deploy_remote || true === $reset) {
+            // get remotes from repositories object
+            $remote = $this->getCurrentRepository()->getRemotes();
+            if (!isset($remote[$this->remote_id])) {
+                include_once \dirname(__FILE__).'/Exception.php';
+                throw new Exception(
+                    'there is no remote registered with the id ' .
+                    $this->remote_id .
+                    ' (only '.\count($remote).' repositories registered)'
+                );
+            }
+
+            $this->deploy_remote = $remote[$this->remote_id];
+        }
+
+        return $this->deploy_remote;
+    }
+
+    /**
      * get registered observers
      *
      * @return Array observers
      */
-    public function getObersers()
+    public function getObservers()
     {
         return $this->observers;
     }
@@ -264,7 +282,7 @@ class Deployment
      */
     public function setProjectId($id)
     {
-        $this->project_id = $id;
+        $this->project_id = (int)$id;
         $this->getCurrentRepository();
     }
 
@@ -309,7 +327,8 @@ class Deployment
      */
     public function setRemoteId($remote)
     {
-        $this->remote_id = $remote;
+        $this->remote_id = (int)$remote;
+        $this->getCurrentRemote();
     }
 
     /**

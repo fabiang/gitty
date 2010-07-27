@@ -14,7 +14,7 @@ require_once \dirname(__FILE__).'/Gitty/AllTests.php';
 
 \PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 \PHPUnit_Util_Filter::addFileToFilter(\dirname(__FILE__).'/data/include.php');
-date_default_timezone_set('Europe/Berlin');
+\date_default_timezone_set('Europe/Berlin');
 
 class AllTests
 {
