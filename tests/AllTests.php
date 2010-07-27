@@ -41,7 +41,8 @@ class AllTests
         $zip = new \ZipArchive;
         if (true === $zip->open(\dirname(__FILE__).'/data/example-git-repo.zip')) {
             $destination = \dirname(__FILE__).'/data/example';
-            self::rrmdir($destination.'/.git');
+            self::rrmdir($destination);
+            \mkdir($destination);
 
             $zip->extractTo($destination);
             $zip->close();
