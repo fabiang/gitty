@@ -20,6 +20,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testAdapterOptions()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -44,6 +45,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testSetUnkownOption()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -58,6 +60,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetUnkownOption()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -69,6 +72,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetSetOptions()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -88,6 +92,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testSetPath()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -99,6 +104,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testAdapterName()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -109,6 +115,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testShowBranches()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -123,6 +130,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testRemotes()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
 
         $repo = new Gitty\Repositories($config);
         $repo_adapter = \array_shift($repo->getRepositories());
@@ -155,6 +163,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testDescriptionFileNotReadable()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $filename = $config->projects->myproject->path.'/.git/description';
         $chmod = \substr(\sprintf('%o', \fileperms($filename)), -4);
         \chmod($filename, 0000);
@@ -172,6 +181,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testOwner()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $this->assertGreaterThan(0, \strlen($repo->getOwner()));
@@ -180,6 +190,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testLastChange()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $this->assertTrue($repo->getLastChange() instanceof \DateTime);
@@ -191,6 +202,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testBranches()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $this->assertGreaterThan(0, \count($repo->getBranches()));
@@ -206,6 +218,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testInstall()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $install = $repo->getInstallFiles();
@@ -224,6 +237,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testRevisionIds()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $revIds = $repo->revId();
@@ -239,6 +253,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testUpdate()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $repo->revId();
@@ -294,6 +309,7 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetFile()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
         $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
 
         $install = $repo->getInstallFiles();

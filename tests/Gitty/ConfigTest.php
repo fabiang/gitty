@@ -29,7 +29,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         'projects' => array(
             'myproject' => array(
                 'name' => 'Myproject',
-                'path' => '/home/crash/public_html/gitty/tests/data/example',
+                'path' => '/path/to/gitty/tests/data/example',
                 'description' => '',
                 'showBranches' => 1,
                 'deployment' => array(
