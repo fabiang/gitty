@@ -141,9 +141,9 @@ class Loader
          * Try finding for the plain filename in the include_path.
          */
         if ($once) {
-            include_once $filename;
+            @include_once $filename;
         } else {
-            include $filename;
+            @include $filename;
         }
 
         /**
@@ -190,12 +190,14 @@ class Loader
             $class = __NAMESPACE__.'\\Loader';
         }
 
+        // @codeCoverageIgnoreStart
         if (!\function_exists('spl_autoload_register')) {
             include_once \dirname(__FILE__).'/Exception.php';
             throw new Exception(
                 'spl_autoload does not exist in this PHP installation'
             );
         }
+        // @codeCoverageIgnoreEnd
 
         self::loadClass($class);
         $methods = \get_class_methods($class);
@@ -224,7 +226,7 @@ class Loader
     }
 
     /**
-     * check for invalid filename charackters
+     * check for invalid filename charakters
      *
      * @param String $filename the filename
      *

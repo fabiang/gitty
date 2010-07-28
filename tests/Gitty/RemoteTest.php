@@ -53,6 +53,7 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Gitty\Remote\Exception
      * @covers Gitty\Remote::__construct
+     * @covers Gitty\Exception
      */
     public function testDefaultAdapterClassNotFound()
     {
@@ -78,6 +79,7 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Gitty\Remote\Exception
      * @covers Gitty\Remote::__construct
+     * @covers Gitty\Exception
      */
     public function testDefaultAdapterClassInvalid()
     {
@@ -103,6 +105,7 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Gitty\Remote\Exception
      * @covers Gitty\Remote::__construct
+     * @covers Gitty\Exception
      */
     public function testUnkownAdapterInConfig()
     {
@@ -167,6 +170,7 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Gitty\Remote\Exception
      * @covers Gitty\Remote::__construct
+     * @covers Gitty\Exception
      */
     public function testAdapterLoadingFromNamespaceUnknown()
     {
@@ -197,6 +201,7 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Gitty\Remote\Exception
      * @covers Gitty\Remote::__construct
+     * @covers Gitty\Exception
      */
     public function testAdapterLoadingFromNamespaceInvalid()
     {

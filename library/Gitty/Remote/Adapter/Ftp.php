@@ -85,6 +85,11 @@ class Ftp extends G\Remote\AdapterAbstract
     protected $tempMaxSize = 5242880;
 
     /**
+     * configuration object of the remote
+     */
+    public $config = null;
+
+    /**
      * remove directories that are empty
      *
      * @param String $path path name
@@ -119,6 +124,8 @@ class Ftp extends G\Remote\AdapterAbstract
         if ($config->revisitionFileName) {
             $this->revisitionFileName = $config->revisitionFileName;
         }
+
+        $this->config = $config;
     }
 
     /**
@@ -382,5 +389,115 @@ class Ftp extends G\Remote\AdapterAbstract
         }
         \rewind($mem);
         $this->put($mem, $destination);
+    }
+
+    /**
+     * access to hostname
+     *
+     * @return String hostname
+     */
+    public function getHostname()
+    {
+        return $this->hostname;
+    }
+
+    /**
+     * access to hostname (set)
+     *
+     * @param String $hostname hostname
+     *
+     * @return Null
+     */
+    public function setHostname($hostname)
+    {
+        $this->hostname = $hostname;
+    }
+
+    /**
+     * access to port
+     *
+     * @return Integer port
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+    /**
+     * access to port
+     *
+     * @param Integer $port port
+     *
+     * @return Null
+     */
+    public function setPort($port)
+    {
+        $this->port = (int)$port;
+    }
+
+    /**
+     * access to username
+     *
+     * @return String username
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * access to username
+     *
+     * @param String $username username
+     *
+     * @return Null
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+    }
+
+    /**
+     * access to password
+     *
+     * @return String password
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * access to password
+     *
+     * @param String $password password
+     *
+     * @return Null
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+    /**
+     * access to path
+     *
+     * @return String path
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * access to path
+     *
+     * @param String $path path
+     *
+     * @return Null
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
     }
 }
