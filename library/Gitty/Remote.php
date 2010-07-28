@@ -49,6 +49,11 @@ class Remote
     protected static $defaultAdapter = null;
 
     /**
+     *
+     */
+    protected static $registeredAdapterNamespaces = array();
+
+    /**
      * instance of the adapter
      */
     protected $adapter = null;
@@ -60,19 +65,10 @@ class Remote
      *
      * @return Null
      * @throws \Gitty\Remote\Exception adapter is not \Gitty\Remote\AdapterInterface
-     * @todo make test better
+     * @todo create test for valid adapter
      */
     public static function setDefaultAdapter($adapter)
     {
-        /*
-        if (!(__NAME\AdapterInterface)) {
-            include_once \dirname(__FILE__).'/Remote/Exception.php';
-            throw new Remote\Exception(
-                get_class($data).' does not implement\
-                Gitty\Remote\AdapterInterface interface'
-            );
-        }*/
-
         self::$defaultAdapter = $adapter;
     }
 
@@ -91,6 +87,51 @@ class Remote
     }
 
     /**
+     * register a namespace for remotes
+     *
+     * @param String $namespace namespace name
+     *
+     * @return Boolean false when already registered, overwise true
+     */
+    public static function registerAdapterNamespace($adapter)
+    {
+        if (!\in_array($adapter, self::$registeredAdapterNamespaces)) {
+            self::$registeredAdapterNamespaces[] = $adapter;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * unregsiter a namespace for remotes
+     *
+     * @param String $namespace namespace name
+     *
+     * @return Boolean ture when removed, overwise false
+     */
+    public static function unregisterAdapterNamespace($adapter)
+    {
+        $index = \array_search($adapter, self::$registeredAdapterNamespaces);
+        if (false !== $index) {
+            unset(self::$registeredAdapterNamespaces[$index]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * returns all registered namespaces
+     *
+     * @return Array list of namespaces
+     */
+    public static function getAdapterNamespaces()
+    {
+        return self::$registeredAdapterNamespaces;
+    }
+
+    /**
      * constructor
      *
      * @param \Gitty\Config $config configartion object
@@ -98,24 +139,67 @@ class Remote
     public function __construct(Config $config)
     {
         if (isset($config->adapter)) {
+            $adapter = __NAMESPACE__.'\\Remote\\Adapter\\'.\ucfirst($config->adapter);
+
+            // first try loading any of the own adapters
+            try {
+                Loader::loadClass($adapter);
+            } catch(Exception $e) {
+                // throw exception when there are no registered namespaces
+                if (0 === \count(self::getAdapterNamespaces())) {
+                    include_once \dirname(__FILE__).'/Remote/Exception.php';
+                    throw new Remote\Exception(
+                        "can't load adapter '{$config->adapter}' and no namespaces \
+                        registered for lookup"
+                    );
+                }
+
+                // try loading the adapter from the registered namespaces
+                $found = false;
+                $search = 0;
+                foreach(self::getAdapterNamespaces() as $namespace) {
+                    try {
+                        $class = $namespace.'\\'.\ucfirst($config->adapter);
+                        Loader::loadClass($class);
+                        $adapter = $class;
+                        $found = true;
+                    } catch (Exception $e) {
+                        $search++;
+                    }
+                }
+
+                // didn't find the adapter in any registered namespace
+                // throw exception
+                if (false === $found) {
+                    include_once \dirname(__FILE__).'/Remote/Exception.php';
+                    throw new Remote\Exception(
+                        "can't load any adapter of the name {$config->adapter}. \
+                        searched in $search namespaces: " .
+                        \implode(\PATH_SEPARATOR, self::getAdapterNamespaces())
+                    );
+                }
+            }
+        } else {
+            $adapter = self::getDefaultAdapter();
 
             try {
-                $adapter = __NAMESPACE__.'\\Remote\\Adapter\\' .
-                    ucfirst($config->adapter);
                 Loader::loadClass($adapter);
             } catch(Exception $e) {
                 include_once \dirname(__FILE__).'/Remote/Exception.php';
-                throw new Remote\Exception("adapter '$adapter' is unknown");
+                throw new Remote\Exception(
+                    "default adapter '$adapter' can't be found"
+                );
             }
-
-            $remote = new $adapter($config);
-
-        } else {
-            $adapter = self::getDefaultAdapter();
         }
 
-        Loader::loadClass($adapter);
         $remote = new $adapter($config);
+
+        if (!($remote instanceof Remote\AdapterAbstract)) {
+            include_once \dirname(__FILE__).'/Remote/Exception.php';
+            throw new Remote\Exception(
+                "invalid: adapter '$adapter' does not implement AdapterAbstract"
+            );
+        }
 
         $this->adapter = $remote;
     }

@@ -15,102 +15,323 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Remote/Adapter/Ftp.php';
 
 class RemoteTest extends \PHPUnit_Framework_TestCase
 {
-    protected $connectionRemote = null;
-
-    protected function getConnectionRemote()
+    /**
+     * @covers Gitty\Remote::registerAdapterNamespace
+     * @covers Gitty\Remote::unregisterAdapterNamespace
+     * @covers Gitty\Remote::getAdapterNamespaces
+     */
+    public function testNamespaceRegister()
     {
-        if (null === $this->connectionRemote) {
-            // set configuration file with full functional ftp
-            $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../config-homebox.ini');
-            // set javascriptq and lubyte to your own
-            $remote = new Gitty\Remote($config->projects->javascriptq->deployment->lubyte);
-            $this->connectionRemote = $remote;
-        }
+        $this->assertEquals(array(), Gitty\Remote::getAdapterNamespaces());
+        $test_ns = 'MyNamespace\\Gitty\\Remote\\Foobar';
+        $this->assertTrue(Gitty\Remote::registerAdapterNamespace($test_ns));
+        $this->assertEquals(array($test_ns), Gitty\Remote::getAdapterNamespaces());
+        $this->assertFalse(Gitty\Remote::registerAdapterNamespace($test_ns));
+        $this->assertEquals(array($test_ns), Gitty\Remote::getAdapterNamespaces());
 
-        return $this->connectionRemote;
-    }
+        $this->assertTrue(Gitty\Remote::unregisterAdapterNamespace($test_ns));
+        $this->assertEquals(array(), Gitty\Remote::getAdapterNamespaces());
+        $this->assertFalse(Gitty\Remote::unregisterAdapterNamespace($test_ns));
 
-    public function testSetDefaultAdapter()
-    {
-        $adapter = 'Gitty\\Remote\\Adapter\\Ftp';
-        $this->assertEquals(Gitty\Remote::getDefaultAdapter(), $adapter);
-
-        Gitty\Remote::setDefaultAdapter($adapter);
-
-        $this->assertEquals(Gitty\Remote::getDefaultAdapter(), $adapter);
     }
 
     /**
-     * @expectedException Gitty\Remotes\Exception
+     * @covers Gitty\Remote::setDefaultAdapter
+     * @covers Gitty\Remote::getDefaultAdapter
      */
-    public function testSetDefaultUnknownAdapter()
+    public function testSetDefaultAdapter()
     {
-        $this->markTestIncomplete(
-          'test incomplete'
+        $default_adapter = Gitty\Remote::getDefaultAdapter();
+
+        $adapter = 'Gitty\\Remote\\Adapter\\Foobar';
+        Gitty\Remote::setDefaultAdapter($adapter);
+        $this->assertEquals($adapter, Gitty\Remote::getDefaultAdapter());
+
+        Gitty\Remote::setDefaultAdapter($default_adapter);
+    }
+
+    /**
+     * @expectedException Gitty\Remote\Exception
+     * @covers Gitty\Remote::__construct
+     */
+    public function testDefaultAdapterClassNotFound()
+    {
+        $default_adapter = Gitty\Remote::getDefaultAdapter();
+        Gitty\Remote::setDefaultAdapter('Gitty\\Versiondfdsfdf');
+
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteEmptyAdapter.ini'
         );
 
-        /*
-        $adapter = 'Gitty\\Version';
-        Gitty\Repositories::setDefaultAdapter($adapter);
-        */
+        try {
+            $remote = new Gitty\Remote(
+                $config->projects->myproject->deployment->hostnamecom
+            );
+        } catch(Gitty\Remote\Exception $e) {
+            Gitty\Remote::setDefaultAdapter($default_adapter);
+            throw $e;
+        }
+
+        Gitty\Remote::setDefaultAdapter($default_adapter);
     }
 
+    /**
+     * @expectedException Gitty\Remote\Exception
+     * @covers Gitty\Remote::__construct
+     */
+    public function testDefaultAdapterClassInvalid()
+    {
+        $default_adapter = Gitty\Remote::getDefaultAdapter();
+        Gitty\Remote::setDefaultAdapter('Gitty\\Version');
+
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteEmptyAdapter.ini'
+        );
+
+        try {
+            $remote = new Gitty\Remote(
+                $config->projects->myproject->deployment->hostnamecom
+            );
+        } catch(Gitty\Remote\Exception $e) {
+            Gitty\Remote::setDefaultAdapter($default_adapter);
+            throw $e;
+        }
+
+        Gitty\Remote::setDefaultAdapter($default_adapter);
+    }
+
+    /**
+     * @expectedException Gitty\Remote\Exception
+     * @covers Gitty\Remote::__construct
+     */
+    public function testUnkownAdapterInConfig()
+    {
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
+        );
+
+        $remote = new Gitty\Remote(
+            $config->projects->myproject->deployment->hostnamecom
+        );
+    }
+
+    /**
+     * @covers Gitty\Remote::__construct
+     */
     public function testDefaultAdapterLoading()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/remoteKnownAdapter.ini');
-        $remote = new Gitty\Remote($config->projects->myproject->deployment->hostnamecom);
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteEmptyAdapter.ini'
+        );
+        $remote = new Gitty\Remote(
+            $config->projects->myproject->deployment->hostnamecom
+        );
+        $adapter_used = $remote->getAdapter();
+        $default_adapter = Gitty\Remote::getDefaultAdapter();
+        $this->assertEquals(
+            \get_class($adapter_used),
+            $default_adapter
+        );
     }
 
-    public function testInit()
+    /**
+     * @covers Gitty\Remote::__construct
+     */
+    public function testAdapterLoadingFromNamespace()
     {
-        $this->getConnectionRemote()->init();
+        include_once \dirname(__FILE__).
+            '/../data/ExampleNamespace/Gitty/Remote/Foobar.php';
+        $ns1 = 'ExampleNamespace\\Foobar';
+        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
+        Gitty\Remote::registerAdapterNamespace($ns1);
+        Gitty\Remote::registerAdapterNamespace($ns2);
+
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
+        );
+
+        try {
+            $remote = new Gitty\Remote(
+                $config->projects->myproject->deployment->hostnamecom
+            );
+        } catch (Gitty\Remote\Exception $e) {
+            Gitty\Remote::unregisterAdapterNamespace($ns1);
+            Gitty\Remote::unregisterAdapterNamespace($ns2);
+            throw $e;
+        }
+
+        Gitty\Remote::unregisterAdapterNamespace($ns1);
+        Gitty\Remote::unregisterAdapterNamespace($ns2);
     }
 
-    public function testRevisionId()
+    /**
+     * @expectedException Gitty\Remote\Exception
+     * @covers Gitty\Remote::__construct
+     */
+    public function testAdapterLoadingFromNamespaceUnknown()
+    {
+        $ns1 = 'ExampleNamespace\\Foobar';
+        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
+        Gitty\Remote::registerAdapterNamespace($ns1);
+        Gitty\Remote::registerAdapterNamespace($ns2);
+
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
+        );
+        $config->projects->myproject->deployment->hostnamecom->adapter = \uniqid();
+
+        try {
+            $remote = new Gitty\Remote(
+                $config->projects->myproject->deployment->hostnamecom
+            );
+        } catch (Gitty\Remote\Exception $e) {
+            Gitty\Remote::unregisterAdapterNamespace($ns1);
+            Gitty\Remote::unregisterAdapterNamespace($ns2);
+            throw $e;
+        }
+
+        Gitty\Remote::unregisterAdapterNamespace($ns1);
+        Gitty\Remote::unregisterAdapterNamespace($ns2);
+    }
+
+    /**
+     * @expectedException Gitty\Remote\Exception
+     * @covers Gitty\Remote::__construct
+     */
+    public function testAdapterLoadingFromNamespaceInvalid()
+    {
+        include_once \dirname(__FILE__).
+            '/../data/ExampleNamespace/Gitty/Remote/Invalid.php';
+        $ns1 = 'ExampleNamespace\\Foobar';
+        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
+        Gitty\Remote::registerAdapterNamespace($ns1);
+        Gitty\Remote::registerAdapterNamespace($ns2);
+
+        $config = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
+        );
+        $config->projects->myproject->deployment->hostnamecom->adapter = 'Invalid';
+
+        $remote = new Gitty\Remote(
+            $config->projects->myproject->deployment->hostnamecom
+        );
+
+        $this->assertEquals(
+            $ns2 . '\\' . \ucfirst(
+                $config->projects->myproject->deployment->hostnamecom->adapter
+            ),
+            \get_class($remote->getAdapter())
+        );
+
+        Gitty\Remote::unregisterAdapterNamespace($ns1);
+        Gitty\Remote::unregisterAdapterNamespace($ns2);
+    }
+
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::init
+     */
+    public function testInit($remote)
+    {
+        $remote->init();
+    }
+
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::putServerRevisitionId
+     * @covers Gitty\Remote::getServerRevisitionId
+     */
+    public function testRevisionId($remote)
     {
         $uid = \uniqid();
-        $this->getConnectionRemote()->putServerRevisitionId($uid);
-        $this->assertEquals($this->getConnectionRemote()->getServerRevisitionId(), $uid);
+        $remote->putServerRevisitionId($uid);
+        $this->assertEquals($remote->getServerRevisitionId(), $uid);
     }
 
-    public function testPut()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::put
+     */
+    public function testPut($remote)
     {
-        $this->getConnectionRemote()->put('Some Data', '/tests/test.txt');
-        $this->getConnectionRemote()->put(\fopen(\dirname(__FILE__).'/../data/include.php', 'r'), '/tests/test.txt');
+        $remote->put('Some Data', '/tests/test.txt');
+        $remote->put(\fopen(\dirname(__FILE__).'/../data/include.php', 'r'), '/tests/test.txt');
     }
 
-    public function testCopy()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::copy
+     */
+    public function testCopy($remote)
     {
-        $this->getConnectionRemote()->copy('/tests/test.txt', '/test2/test.txt');
+        $remote->copy('/tests/test.txt', '/test2/test.txt');
     }
 
-    public function testRename()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::rename
+     */
+    public function testRename($remote)
     {
-        $this->getConnectionRemote()->rename('/test2/test.txt', '/test2/test1.txt');
-        $this->getConnectionRemote()->rename('/test2/test1.txt', '/foo/test.txt');
+        $remote->rename('/test2/test.txt', '/test2/test1.txt');
+        $remote->rename('/test2/test1.txt', '/foo/test.txt');
     }
 
-    public function testUnlink()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::unlink
+     */
+    public function testUnlink($remote)
     {
-        $this->getConnectionRemote()->unlink('/foo/test.txt');
-        $this->getConnectionRemote()->unlink('/tests/test.txt');
+        $remote->unlink('/foo/test.txt');
+        $remote->unlink('/tests/test.txt');
     }
 
-    public function testGetAdapter()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::getAdapter
+     */
+    public function testGetAdapter($remote)
     {
-        $adapter = $this->getConnectionRemote()->getAdapter();
+        $adapter = $remote->getAdapter();
         $this->assertTrue($adapter instanceof Gitty\Remote\AdapterAbstract);
-        $this->assertEquals(get_class($adapter), 'Gitty\\Remote\\Adapter\\Ftp');
+        $this->assertEquals(\get_class($adapter), 'Gitty\\Remote\\Adapter\\Ftp');
     }
 
-    public function testToString()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::getAdapter
+     * @covers Gitty\Remote::__toString
+     */
+    public function testToString($remote)
     {
-        $adapter = $this->getConnectionRemote()->getAdapter();
-        $this->assertEquals((string)$adapter, (string)$this->getConnectionRemote());
+        $adapter = $remote->getAdapter();
+        $this->assertEquals((string)$adapter, (string)$remote);
     }
 
-    public function testCleanUp()
+    /**
+     * @dataProvider provideWorkingRemote
+     * @covers Gitty\Remote::cleanUp
+     */
+    public function testCleanUp($remote)
     {
-        $this->getConnectionRemote()->cleanUp();
+        $remote->cleanUp();
+    }
+
+    /**
+     * data providers
+     */
+    public static function provideWorkingRemote()
+    {
+        $workingConfig = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../data/workingExample.ini'
+        );
+        $remoteData = $workingConfig->projects->myproject->deployment->hostnamecom;
+
+        $remote = new Gitty\Remote($remoteData);
+
+        return array(
+            array($remote)
+        );
     }
 }
