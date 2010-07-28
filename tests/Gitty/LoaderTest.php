@@ -14,6 +14,9 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Loader.php';
  */
 class LoaderTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers Gitty\Loader::loadClass
+     */
     public function testClassExists()
     {
         $return = Gitty\Loader::loadClass(__CLASS__);
@@ -22,12 +25,16 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Exception
+     * @covers Gitty\Loader::loadClass
      */
     public function testSearchDirsException()
     {
         Gitty\Loader::loadClass('\\Inexistant___', 0);
     }
 
+    /**
+     *@covers Gitty\Loader::loadClass
+     */
     public function testSearchDirsTypes()
     {
         $dir = \dirname(__FILE__).'/../../library';
@@ -37,6 +44,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Exception
+     * @covers Gitty\Loader::loadClass
      */
     public function testSearchDirsInexistantString()
     {
@@ -45,12 +53,16 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Exception
+     * @covers Gitty\Loader::loadClass
      */
     public function testSearchDirsInexistantArray()
     {
         Gitty\Loader::loadClass('Gitty\\Repositories\\Exception', array('not_existant'));
     }
 
+    /**
+     * @covers Gitty\Loader::loadClass
+     */
     public function testIncludePath()
     {
         $inc_path = \get_include_path();
@@ -59,6 +71,9 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
         \set_include_path($inc_path);
     }
 
+    /**
+     * @covers Gitty\Loader::loadFile
+     */
     public function testLoadFile()
     {
         $dir = \dirname(__FILE__).'/../../library/Gitty/Repositories';
@@ -74,6 +89,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Exception
+     * @covers Gitty\Loader::securityCheck
      */
     public function testSecurityCheck()
     {
@@ -83,6 +99,10 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
         \set_include_path($inc_path);
     }
 
+    /**
+     * @covers Gitty\Loader::registerAutoload
+     * @covers Gitty\Loader::autoload
+     */
     public function testAutoLoad()
     {
         if (!\function_exists('spl_autoload_register')) {
@@ -103,6 +123,9 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @covers Gitty\Loader::__construct
+     */
     public function testAutoloadConstruction()
     {
         if (!\function_exists('spl_autoload_register')) {
@@ -120,11 +143,17 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @covers Gitty\Loader::loadClass
+     */
     public function testSlashPrefix()
     {
         Gitty\Loader::loadClass('\\Gitty\\Remote\\Exception', \dirname(__FILE__).'/../../library');
     }
 
+    /**
+     * @covers Gitty\Loader::loadClass
+     */
     public function testDotDir()
     {
         Gitty\Loader::loadClass('Gitty\\Repositories\\Exception', array('.', \dirname(__FILE__).'/../../library'));
@@ -132,6 +161,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @outputBuffering enabled
+     * @covers Gitty\Loader::loadFile
      */
     public function testMultipleInclude()
     {
@@ -141,6 +171,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Exception
+     * @covers Gitty\Loader::registerAutoload
      */
     public function testInvalidLoaderClass()
     {
@@ -149,6 +180,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * not finished yet
+     * @covers Gitty\Loader::registerAutoload
      */
     public function testMissingSplAutoload()
     {
@@ -156,9 +188,9 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
           'test incomplete'
         );
 
-        if (\class_exists('\\Runkit_Sandbox')) {
+        /*if (\class_exists('\\Runkit_Sandbox')) {
             $sandbox = new \Runkit_Sandbox(array('disable_functions' => 'spl_autoload_register'));
-            //$sandbox->eval('Gitty\Loader::registerAutoload();');
-        }
+            $sandbox->eval('Gitty\Loader::registerAutoload();');
+        }*/
     }
 }

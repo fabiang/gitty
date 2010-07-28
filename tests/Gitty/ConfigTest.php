@@ -26,6 +26,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      * @expectedException Gitty\Config\Exception
      * @dataProvider provideBrokenConfigFiles
      * @covers Gitty\Config\Ini::__construct
+     * @covers Gitty\Config\Ini::processKey
      */
     public function testBrokenConfig($filename)
     {
