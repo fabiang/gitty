@@ -12,54 +12,33 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Config/Ini.php';
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
-    protected $exampleConfig = array(
-        'global' => array(
-            'git' => array(
-                'defaultGitDir' => '.git',
-                'descriptionFile' => 'description',
-                'binLocation'=> '/usr/bin/git'
-            ),
-            'gitty' => array(
-                'readDirectories' => '0',
-                'dateFormat' => 'Y-m-d H:i:s',
-                'revistionFile' => 'revision.txt',
-                'tempDir' => '/tmp'
-            )
-        ),
-        'projects' => array(
-            'myproject' => array(
-                'name' => 'Myproject',
-                'path' => '/path/to/gitty/tests/data/example',
-                'description' => '',
-                'showBranches' => 1,
-                'deployment' => array(
-                    'hostnamecom' => array(
-                        'adapter' => 'ftp',
-                        'hostname' => 'hostname.com',
-                        'username' => 'test',
-                        'password' => 'test',
-                        'path' => '/'
-                    )
-                )
-            )
-        )
-    );
-
     /**
      * @expectedException Gitty\Config\Exception
+     * @dataProvider provideInexistantConfigFile
+     * @covers Gitty\Config\Ini::__construct
      */
-    public function testConfigFileExist()
+    public function testConfigFileExist($filename)
     {
-        $filename = \dirname(__FILE__) . '/../data/' . \uniqid("gittyconfig_");
         $conf = new Gitty\Config\Ini($filename);
     }
 
     /**
      * @expectedException Gitty\Config\Exception
+     * @dataProvider provideBrokenConfigFiles
+     * @covers Gitty\Config\Ini::__construct
      */
-    public function testConfigFileReadable()
+    public function testBrokenConfig($filename)
     {
-        $filename = \dirname(__FILE__).'/../data/example.ini';
+        $conf = new Gitty\Config\Ini($filename);
+    }
+
+    /**
+     * @expectedException Gitty\Config\Exception
+     * @dataProvider provideExampleConfigs
+     * @covers Gitty\Config\Ini::__construct
+     */
+    public function testConfigFileReadable($filename, $eConfig)
+    {
         $chmod = \substr(\sprintf('%o', \fileperms($filename)), -4);
         \chmod($filename, 0000);
         try {
@@ -68,36 +47,38 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             \chmod($filename, \octdec($chmod));
             throw $e;
         }
+        \chmod($filename, \octdec($chmod));
     }
 
     /**
-     * @expectedException Gitty\Config\Exception
+     * @dataProvider provideExampleConfigs
+     * @covers Gitty\Config\Ini::__construct
      */
-    public function testBrokenConfig()
+    public function testConfigLoading($filename, $eConfig)
     {
-        $filename = \dirname(__FILE__) . '/../data/broken.ini';
         $conf = new Gitty\Config\Ini($filename);
+        $this->assertEquals($eConfig, $conf->toArray());
     }
 
-    public function testConfigLoading()
-    {
-        $filename = \dirname(__FILE__).'/../data/example.ini';
-        $conf = new Gitty\Config\Ini($filename);
-
-        $this->assertEquals($conf->toArray(), $this->exampleConfig);
-    }
-
-    public function testToArray()
+    /**
+     * @dataProvider provideExampleConfigs
+     * @covers Gitty\Config\Ini::toArray
+     */
+    public function testToArray($filename, $eConfig)
     {
         $conf = new Gitty\Config(array(), true, true);
 
-        foreach($this->exampleConfig as $key => $value) {
+        foreach($eConfig as $key => $value) {
             $conf->$key = $value;
         }
 
-        $this->assertEquals($conf->toArray(), $this->exampleConfig);
+        $this->assertEquals($eConfig, $conf->toArray());
     }
 
+    /**
+     * @covers Gitty\Config::__get
+     * @covers Gitty\Config::__set
+     */
     public function testSetGet()
     {
         $conf = new Gitty\Config(array(), true, false);
@@ -106,16 +87,26 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         $conf = new Gitty\Config(array('test' => '1'));
         $this->assertEquals($conf->test, '1');
+
+        $conf->test = array('bar', 'foo');
+        $this->assertEquals(array('bar', 'foo'), $conf->test->toArray());
     }
 
+    /**
+     * @covers Gitty\Config::get
+     */
     public function testGetDefault()
     {
         $conf = new Gitty\Config(array('test' => 1));
 
-        $this->assertEquals($conf->get('test', 2), 1);
-        $this->assertEquals($conf->get('not_exists', 2), 2);
+        $this->assertEquals(1, $conf->get('test', 2));
+        $this->assertEquals(2, $conf->get('not_exists', 2));
     }
 
+    /**
+     * @covers Gitty\Config::__isset
+     * @covers Gitty\Config::__unset
+     */
     public function testIssetUnset()
     {
         $conf = new Gitty\Config(array('test' => 1));
@@ -125,13 +116,19 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($conf->test));
     }
 
+    /**
+     * @covers Gitty\Config::getIterator
+     */
     public function testIterator()
     {
         $should_be = array('test' => 1, 'bar' => 2);
 
         $conf = new Gitty\Config($should_be, true, false);
 
-        $this->assertTrue($conf->getIterator() instanceof \IteratorAggregate);
+        $this->assertTrue(
+            $conf->getIterator() instanceof \IteratorAggregate or
+            $conf->getIterator() instanceof \Iterator
+        );
 
         $test_it = array();
         foreach($conf as $key => $value) {
@@ -141,6 +138,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($test_it, $should_be);
     }
 
+    /**
+     * @covers Gitty\Config::offsetSet
+     * @covers Gitty\Config::offsetExists
+     * @covers Gitty\Config::offsetUnset
+     * @covers Gitty\Config::offsetGet
+     */
     public function testArrayAccess()
     {
         $conf = new Gitty\Config(array());
@@ -156,44 +159,52 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($conf->second, 2);
     }
 
-    public function testIniClass()
+    /**
+     * @dataProvider provideExampleConfigs
+     * @covers Gitty\Config::__construct
+     */
+    public function testIniClass($filename, $eConfig)
     {
-        $conf1 = new Gitty\Config($this->exampleConfig);
-
-        $filename = \dirname(__FILE__).'/../data/example.ini';
+        $conf1 = new Gitty\Config($eConfig);
         $conf2 = new Gitty\Config\Ini($filename);
-
         $this->assertEquals($conf1->toArray(), $conf2->toArray());
     }
 
-    public function testConfigObjectLoading()
+    /**
+     * @dataProvider provideExampleConfigs
+     * @covers Gitty\Config::__construct
+     */
+    public function testConfigObjectLoading($filename, $eConfig)
     {
-        $filename = \dirname(__FILE__).'/../data/example.ini';
         $conf1 = new Gitty\Config\Ini($filename);
-
         $conf2 = new Gitty\Config($conf1);
     }
 
     /**
      * @expectedException Gitty\Config\Exception
+     * @covers Gitty\Config::__construct
      */
     public function testConfigObjectLoadingInvalid()
     {
-        require_once \dirname(__FILE__).'/../../library/Gitty/Version.php';
+        self::load('library/Gitty/Version.php');
         $conf1 = new Gitty\Version($filename);
         $conf2 = new Gitty\Config($conf1);
     }
 
     /**
      * @expectedException Gitty\Config\Exception
+     * @dataProvider provideNoArrayOrObject
+     * @covers Gitty\Config::__construct
      */
-    public function testConfigNoArrayOrObject()
+    public function testConfigNoArrayOrObject($data)
     {
-        $conf = new Gitty\Config(1);
+        $conf = new Gitty\Config($data);
     }
 
     /**
      * @expectedException Gitty\Config\Exception
+     * @covers Gitty\Config::__construct
+     * @covers Gitty\Config::__unset
      */
     public function testConfigNotModificationableUnset()
     {
@@ -203,6 +214,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Config\Exception
+     * @covers Gitty\Config::__construct
+     * @covers Gitty\Config::__set
      */
     public function testConfigNotModificationableSet()
     {
@@ -210,26 +223,157 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $conf->test = 1;
     }
 
+    /**
+     * @covers Gitty\Config::_mergeConfiguration
+     * @covers Gitty\Config::__construct
+     */
     public function testConfigMerging()
     {
         $default = Gitty\Config::$defaultConfig;
+
+        Gitty\Config::$defaultConfig = array(
+            'bar' => 'foo',
+            'other' => array(
+                'one' => 1,
+                'two' => 2
+            )
+        );
+        $conf = new Gitty\Config(
+            array(
+                'test' => 1,
+                'other' => array(
+                    'one' => 1,
+                    'two' => 2
+                )
+            ),
+            false,
+            true
+        );
+
+        $this->assertEquals(
+            array(
+                'other' => array(
+                    'one' => 1,
+                    'two' => 2
+                ),
+                'test' => 1,
+                'bar'  => 'foo'
+            ),
+            $conf->toArray()
+        );
+
+        // default config isn't an array
         Gitty\Config::$defaultConfig = 1;
-        $conf = new Gitty\Config(array(), false);
+        $conf = new Gitty\Config(
+            array(
+                'foobar' => 1,
+                22232 => 'foobar',
+                'other' => array(
+                    'one' => 1,
+                    'two' => 2
+                )
+            ),
+            false,
+            true
+        );
+
+        $this->assertEquals(
+            array(
+                0 => 1,
+                'foobar' => 1,
+                22232  => 'foobar',
+                'other' => array(
+                    'one' => 1,
+                    'two' => 2
+                )
+            ),
+            $conf->toArray()
+        );
+
         Gitty\Config::$defaultConfig = $default;
     }
 
     /**
-     * @expectedException Gitty\Config\Exception
+     * helper functions
      */
-    public function testInvalidIniKey()
+    public static function load($file)
     {
-        $filename = \dirname(__FILE__).'/../data/broken2.ini';
-        $conf = new Gitty\Config\Ini($filename);
+        include_once(\dirname(__FILE__).'/../../'.$file);
     }
 
-    public function testInvaliddublicateKey()
+    /**
+     * data providers
+     */
+    public static function provideInexistantConfigFile()
     {
-        $filename = \dirname(__FILE__).'/../data/broken3.ini';
-        $conf = new Gitty\Config\Ini($filename);
+        return array(
+            array(\dirname(__FILE__).'/../data/'.\uniqid('gitty_config___')),
+            array(\dirname(__FILE__).'/../data/'.\uniqid('gitty_config___')),
+            array(\dirname(__FILE__).'/../data/'.\uniqid('gitty_config___')),
+            array(\dirname(__FILE__).'/../data/'.\uniqid('gitty_config___'))
+        );
+    }
+
+    /**
+     * test for broken3.ini
+     */
+    public static function provideBrokenConfigFiles()
+    {
+        return array(
+            array(\dirname(__FILE__).'/../data/broken.ini'),
+            array(\dirname(__FILE__).'/../data/broken2.ini'),
+            //array(\dirname(__FILE__).'/../data/broken3.ini')
+        );
+    }
+
+    public static function provideExampleConfigs()
+    {
+        return array(
+            array(
+                \dirname(__FILE__).'/../data/example.ini',
+                array(
+                    'global' => array(
+                        'git' => array(
+                            'defaultGitDir' => '.git',
+                            'descriptionFile' => 'description',
+                            'binLocation'=> '/usr/bin/git'
+                        ),
+                        'gitty' => array(
+                            'readDirectories' => '0',
+                            'dateFormat' => 'Y-m-d H:i:s',
+                            'revistionFile' => 'revision.txt',
+                            'tempDir' => '/tmp'
+                        )
+                    ),
+                    'projects' => array(
+                        'myproject' => array(
+                            'name' => 'Myproject',
+                            'path' => '/path/to/gitty/tests/data/example',
+                            'description' => '',
+                            'showBranches' => 1,
+                            'deployment' => array(
+                                'hostnamecom' => array(
+                                    'adapter' => 'ftp',
+                                    'hostname' => 'hostname.com',
+                                    'username' => 'test',
+                                    'password' => 'test',
+                                    'path' => '/'
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    public static function provideNoArrayOrObject()
+    {
+        return array(
+            array(1),
+            array('string'),
+            array(true),
+            array(false)
+        );
     }
 }

@@ -83,50 +83,35 @@ class Config implements \IteratorAggregate, \ArrayAccess
     );
 
     /**
-     * Merges any number of arrays / parameters recursively, replacing
-     * entries with string keys with values from latter arrays.
-     * If the entry or the next value to be assigned is an array, then it
-     * automagically treats both arguments as an array.
-     * Numeric entries are appended, not replaced, but only if they are
-     * unique
+     * Merge defaultConfig and configuration together
+     * in a distinct was
+     *
+     * @param Mixed $base   default config
+     * @param Array $append configuration
      *
      * @return array Resulting array, once all have been merged
-     * @see http://www.php.net/manual/en/function.array-merge-recursive.php#96201
      */
-    private function _arrayMergeRecursiveDistinct ()
+    private function _mergeConfiguration($base, $append)
     {
-        $arrays = \func_get_args();
-        $base = \array_shift($arrays);
-        /*
-         * can't happen since it's already throws an error in the constructor
-         * if (!\is_array($base)) {
-         *   $base = empty($base) ? array() : array($base);
-         * }
-         */
-        foreach ($arrays as $append) {
-            if (!\is_array($append)) {
-                $append = array($append);
+        if (!\is_array($base)) {
+            $base = empty($base) ? array() : array($base);
+        }
+
+        foreach ($append as $key => $value) {
+            if (!\array_key_exists($key, $base) and !\is_numeric($key)) {
+                $base[$key] = $append[$key];
+                continue;
             }
-            foreach ($append as $key => $value) {
-                if (!\array_key_exists($key, $base) and !\is_numeric($key)) {
-                    $base[$key] = $append[$key];
-                    continue;
-                }
 
-                if (\is_array($value) or isset($base[$key]) and \is_array($base[$key])) {
-                    // modified from original
-                    $base[$key] = $this->_arrayMergeRecursiveDistinct(
-                        $base[$key],
-                        $append[$key]
-                    );
-
-                } elseif (\is_numeric($key)) {
-                    if (!\in_array($value, $base)) {
-                        $base[] = $value;
-                    }
-                } else {
-                    $base[$key] = $value;
-                }
+            if (\is_array($value) or isset($base[$key]) and \is_array($base[$key])) {
+                // modified from original
+                $f = __FUNCTION__;
+                $base[$key] = $this->$f(
+                    $base[$key],
+                    $append[$key]
+                );
+            } else {
+                $base[$key] = $value;
             }
         }
         return $base;
@@ -162,7 +147,7 @@ class Config implements \IteratorAggregate, \ArrayAccess
 
         // merge default data
         if (true === $merge) {
-            $data = $this->_arrayMergeRecursiveDistinct($data, self::$defaultConfig);
+            $data = $this->_mergeConfiguration(self::$defaultConfig, $data);
         }
 
         foreach ($data as $name => $value) {
