@@ -1,18 +1,22 @@
 Gitty - Web deployment made graphically
 
 Gitty is a deployment tool for software over FTP and other protocols
-its written in PHP and has a graphically interface written in HTML
+its written in PHP and has a graphically interface written in HTML.
 
-Requires the following:
+Requirements of Gitty:
 - git
 - web server (Apache, Lighttpd etc)
 - PHP 5.3
 
-How to setup?
-
-just copy the code where u like to, and make sure you pass GITTY_CONFIG
-environment variable to point to your config file, so the index.php and
-console.php can locate them. Edit the bootstrap.php if you like.
-A example config.ini is included.
+- How to setup?
+  just copy the code where u like to, and make sure you pass GITTY_CONFIG
+  environment variable to point to your config file, so the index.php and
+  console.php can locate them. Edit the bootstrap.php if you like.
+  A example config.ini is included.
 
 Thanks to the Zend Framework for many good ideas!
+
+Gitty  Copyright (C) 2010 Fabian Grutschus
+    This program comes with ABSOLUTELY NO WARRANTY; for details type LICENSE
+
+
