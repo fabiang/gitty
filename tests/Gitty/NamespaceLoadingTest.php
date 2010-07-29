@@ -17,11 +17,17 @@ class NamespaceLoadingTest extends \PHPUnit_Framework_TestCase
 {
     protected $remoteNs = array();
     protected $repoNs = array();
+    protected $includePath = null;
 
     public function setUp()
     {
         $this->remoteNs = Gitty\Remote::getAdapterNamespaces();
         $this->repoNs = Gitty\Repositories::getAdapterNamespaces();
+
+        $this->includePath = \get_include_path();
+        \set_include_path(
+            $this->includePath . \PATH_SEPARATOR . \realpath(\dirname(__FILE__) . '/../data/')
+        );
     }
 
     public function tearDown()
@@ -37,6 +43,7 @@ class NamespaceLoadingTest extends \PHPUnit_Framework_TestCase
                 Gitty\Repositories::unregisterAdapterNamespace($adapterNs);
             }
         }
+        \set_include_path($this->includePath);
     }
 
     /**
@@ -67,7 +74,6 @@ class NamespaceLoadingTest extends \PHPUnit_Framework_TestCase
      */
     public function testAdapterLoadingFromNamespace($class, $file, $namespaces, $config)
     {
-        include_once $file;
         foreach ($namespaces as $namespace) {
             $class::registerAdapterNamespace($namespace);
         }
@@ -120,7 +126,6 @@ class NamespaceLoadingTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException($exception);
 
-        include $file;
         $class::registerAdapterNamespace($namespace);
 
         try {

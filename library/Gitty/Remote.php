@@ -65,7 +65,6 @@ class Remote
      *
      * @return Null
      * @throws \Gitty\Remote\Exception adapter is not \Gitty\Remote\AdapterInterface
-     * @todo create test for valid adapter
      */
     public static function setDefaultAdapter($adapter)
     {
@@ -173,7 +172,7 @@ class Remote
                 if (false === $found) {
                     include_once \dirname(__FILE__).'/Remote/Exception.php';
                     throw new Remote\Exception(
-                        "can't load any adapter of the name {$config->adapter}. \
+                        "can't load any adapter of the name '{$config->adapter}'. \
                         searched in $search namespaces: " .
                         \implode(\PATH_SEPARATOR, self::getAdapterNamespaces())
                     );

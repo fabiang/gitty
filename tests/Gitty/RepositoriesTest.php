@@ -15,62 +15,6 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Remote/Adapter/Ftp.php';
 
 class RepositoriesTest extends \PHPUnit_Framework_TestCase
 {
-    protected $defaultAdapter = null;
-
-    public function setUp()
-    {
-        $this->defaultAdapter = Gitty\Repositories::getDefaultAdapter();
-    }
-
-    public function tearDown()
-    {
-        Gitty\Repositories::setDefaultAdapter($this->defaultAdapter);
-    }
-
-    /*
-     * @covers Gitty\Repositories::setDefaultAdapter
-     * @covers Gitty\Repositories::getDefaultAdapter
-     */
-    public function testSetDefaultAdapter()
-    {
-        $adapter = 'Gitty\\Repositories\\Adapter\\Git';
-        Gitty\Repositories::setDefaultAdapter($adapter);
-
-        $this->assertEquals(Gitty\Repositories::getDefaultAdapter(), $adapter);
-    }
-
-    /**
-     * @expectedException Gitty\Repositories\Exception
-     * @covers Gitty\Repositories::__construct
-     */
-    public function testSetDefaultUnknownAdapter()
-    {
-        $adapter = 'Gitty\\Version';
-        Gitty\Repositories::setDefaultAdapter($adapter);
-
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/example.ini');
-        $repo = new Gitty\Repositories($config);
-    }
-
-    public function testAdapterLoading()
-    {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/example.ini');
-        $repo = new Gitty\Repositories($config);
-
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/knownAdapter.ini');
-        $repo = new Gitty\Repositories($config);
-    }
-
-    /**
-     * @expectedException Gitty\Repositories\Exception
-     * @covers Gitty\Repositories::__construct
-     */
-    public function testUnknownAdapter()
-    {
-        $config= new Gitty\Config\Ini(\dirname(__FILE__).'/../data/unknownAdapter.ini');
-        $repo = new Gitty\Repositories($config);
-    }
-
     /**
      * @covers Gitty\Repositories::register
      * @covers Gitty\Repositories::unregister

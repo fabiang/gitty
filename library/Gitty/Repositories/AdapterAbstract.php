@@ -45,7 +45,6 @@ use \Gitty as G;
  * @author   Fabian Grutschus <f.grutschus@lubyte.de>
  * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License
  * @link     http://gitty.lubyte.de/docs/Gitty/Repositories/AdapterAbstract
- * @todo some getters and setters to access options
  */
 abstract class AdapterAbstract
 {

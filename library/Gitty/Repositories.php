@@ -171,7 +171,7 @@ class Repositories
                     if (0 === \count(self::getAdapterNamespaces())) {
                         include_once \dirname(__FILE__).'/Repositories/Exception.php';
                         throw new Repositories\Exception(
-                            "can't load adapter '{$config->adapter}' and no namespaces \
+                            "can't load adapter '{$project_data->adapter}' and no namespaces \
                             registered for lookup"
                         );
                     }
@@ -181,7 +181,7 @@ class Repositories
                     $search = 0;
                     foreach(self::getAdapterNamespaces() as $namespace) {
                         try {
-                            $class = $namespace.'\\'.\ucfirst($config->adapter);
+                            $class = $namespace.'\\'.\ucfirst($project_data->adapter);
                             Loader::loadClass($class);
                             $adapter = $class;
                             $found = true;
@@ -195,7 +195,7 @@ class Repositories
                     if (false === $found) {
                         include_once \dirname(__FILE__).'/Repositories/Exception.php';
                         throw new Repositories\Exception(
-                            "can't load any adapter of the name {$config->adapter}. \
+                            "can't load any adapter of the name '{$project_data->adapter}'. \
                             searched in $search namespaces: " .
                             \implode(\PATH_SEPARATOR, self::getAdapterNamespaces())
                         );
