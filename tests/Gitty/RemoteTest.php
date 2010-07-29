@@ -15,24 +15,16 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Remote/Adapter/Ftp.php';
 
 class RemoteTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @covers Gitty\Remote::registerAdapterNamespace
-     * @covers Gitty\Remote::unregisterAdapterNamespace
-     * @covers Gitty\Remote::getAdapterNamespaces
-     */
-    public function testNamespaceRegister()
+    protected $defaultAdapter = null;
+
+    public function setUp()
     {
-        $this->assertEquals(array(), Gitty\Remote::getAdapterNamespaces());
-        $test_ns = 'MyNamespace\\Gitty\\Remote\\Foobar';
-        $this->assertTrue(Gitty\Remote::registerAdapterNamespace($test_ns));
-        $this->assertEquals(array($test_ns), Gitty\Remote::getAdapterNamespaces());
-        $this->assertFalse(Gitty\Remote::registerAdapterNamespace($test_ns));
-        $this->assertEquals(array($test_ns), Gitty\Remote::getAdapterNamespaces());
+        $this->defaultAdapter = Gitty\Remote::getDefaultAdapter();
+    }
 
-        $this->assertTrue(Gitty\Remote::unregisterAdapterNamespace($test_ns));
-        $this->assertEquals(array(), Gitty\Remote::getAdapterNamespaces());
-        $this->assertFalse(Gitty\Remote::unregisterAdapterNamespace($test_ns));
-
+    public function tearDown()
+    {
+        Gitty\Remote::setDefaultAdapter($this->defaultAdapter);
     }
 
     /**
@@ -41,13 +33,10 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetDefaultAdapter()
     {
-        $default_adapter = Gitty\Remote::getDefaultAdapter();
 
         $adapter = 'Gitty\\Remote\\Adapter\\Foobar';
         Gitty\Remote::setDefaultAdapter($adapter);
         $this->assertEquals($adapter, Gitty\Remote::getDefaultAdapter());
-
-        Gitty\Remote::setDefaultAdapter($default_adapter);
     }
 
     /**
@@ -57,23 +46,15 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
      */
     public function testDefaultAdapterClassNotFound()
     {
-        $default_adapter = Gitty\Remote::getDefaultAdapter();
         Gitty\Remote::setDefaultAdapter('Gitty\\Versiondfdsfdf');
 
         $config = new Gitty\Config\Ini(
             \dirname(__FILE__).'/../data/remoteEmptyAdapter.ini'
         );
 
-        try {
-            $remote = new Gitty\Remote(
-                $config->projects->myproject->deployment->hostnamecom
-            );
-        } catch(Gitty\Remote\Exception $e) {
-            Gitty\Remote::setDefaultAdapter($default_adapter);
-            throw $e;
-        }
-
-        Gitty\Remote::setDefaultAdapter($default_adapter);
+        $remote = new Gitty\Remote(
+            $config->projects->myproject->deployment->hostnamecom
+        );
     }
 
     /**
@@ -83,23 +64,15 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
      */
     public function testDefaultAdapterClassInvalid()
     {
-        $default_adapter = Gitty\Remote::getDefaultAdapter();
         Gitty\Remote::setDefaultAdapter('Gitty\\Version');
 
         $config = new Gitty\Config\Ini(
             \dirname(__FILE__).'/../data/remoteEmptyAdapter.ini'
         );
 
-        try {
-            $remote = new Gitty\Remote(
-                $config->projects->myproject->deployment->hostnamecom
-            );
-        } catch(Gitty\Remote\Exception $e) {
-            Gitty\Remote::setDefaultAdapter($default_adapter);
-            throw $e;
-        }
-
-        Gitty\Remote::setDefaultAdapter($default_adapter);
+        $remote = new Gitty\Remote(
+            $config->projects->myproject->deployment->hostnamecom
+        );
     }
 
     /**
@@ -135,101 +108,6 @@ class RemoteTest extends \PHPUnit_Framework_TestCase
             \get_class($adapter_used),
             $default_adapter
         );
-    }
-
-    /**
-     * @covers Gitty\Remote::__construct
-     */
-    public function testAdapterLoadingFromNamespace()
-    {
-        include_once \dirname(__FILE__).
-            '/../data/ExampleNamespace/Gitty/Remote/Foobar.php';
-        $ns1 = 'ExampleNamespace\\Foobar';
-        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
-        Gitty\Remote::registerAdapterNamespace($ns1);
-        Gitty\Remote::registerAdapterNamespace($ns2);
-
-        $config = new Gitty\Config\Ini(
-            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
-        );
-
-        try {
-            $remote = new Gitty\Remote(
-                $config->projects->myproject->deployment->hostnamecom
-            );
-        } catch (Gitty\Remote\Exception $e) {
-            Gitty\Remote::unregisterAdapterNamespace($ns1);
-            Gitty\Remote::unregisterAdapterNamespace($ns2);
-            throw $e;
-        }
-
-        Gitty\Remote::unregisterAdapterNamespace($ns1);
-        Gitty\Remote::unregisterAdapterNamespace($ns2);
-    }
-
-    /**
-     * @expectedException Gitty\Remote\Exception
-     * @covers Gitty\Remote::__construct
-     * @covers Gitty\Exception
-     */
-    public function testAdapterLoadingFromNamespaceUnknown()
-    {
-        $ns1 = 'ExampleNamespace\\Foobar';
-        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
-        Gitty\Remote::registerAdapterNamespace($ns1);
-        Gitty\Remote::registerAdapterNamespace($ns2);
-
-        $config = new Gitty\Config\Ini(
-            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
-        );
-        $config->projects->myproject->deployment->hostnamecom->adapter = \uniqid();
-
-        try {
-            $remote = new Gitty\Remote(
-                $config->projects->myproject->deployment->hostnamecom
-            );
-        } catch (Gitty\Remote\Exception $e) {
-            Gitty\Remote::unregisterAdapterNamespace($ns1);
-            Gitty\Remote::unregisterAdapterNamespace($ns2);
-            throw $e;
-        }
-
-        Gitty\Remote::unregisterAdapterNamespace($ns1);
-        Gitty\Remote::unregisterAdapterNamespace($ns2);
-    }
-
-    /**
-     * @expectedException Gitty\Remote\Exception
-     * @covers Gitty\Remote::__construct
-     * @covers Gitty\Exception
-     */
-    public function testAdapterLoadingFromNamespaceInvalid()
-    {
-        include_once \dirname(__FILE__).
-            '/../data/ExampleNamespace/Gitty/Remote/Invalid.php';
-        $ns1 = 'ExampleNamespace\\Foobar';
-        $ns2 = 'ExampleNamespace\\Gitty\\Remote\\Adapter';
-        Gitty\Remote::registerAdapterNamespace($ns1);
-        Gitty\Remote::registerAdapterNamespace($ns2);
-
-        $config = new Gitty\Config\Ini(
-            \dirname(__FILE__).'/../data/remoteUnknownAdapter.ini'
-        );
-        $config->projects->myproject->deployment->hostnamecom->adapter = 'Invalid';
-
-        $remote = new Gitty\Remote(
-            $config->projects->myproject->deployment->hostnamecom
-        );
-
-        $this->assertEquals(
-            $ns2 . '\\' . \ucfirst(
-                $config->projects->myproject->deployment->hostnamecom->adapter
-            ),
-            \get_class($remote->getAdapter())
-        );
-
-        Gitty\Remote::unregisterAdapterNamespace($ns1);
-        Gitty\Remote::unregisterAdapterNamespace($ns2);
     }
 
     /**

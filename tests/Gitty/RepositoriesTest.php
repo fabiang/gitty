@@ -15,10 +15,24 @@ require_once \dirname(__FILE__).'/../../library/Gitty/Remote/Adapter/Ftp.php';
 
 class RepositoriesTest extends \PHPUnit_Framework_TestCase
 {
+    protected $defaultAdapter = null;
+
+    public function setUp()
+    {
+        $this->defaultAdapter = Gitty\Repositories::getDefaultAdapter();
+    }
+
+    public function tearDown()
+    {
+        Gitty\Repositories::setDefaultAdapter($this->defaultAdapter);
+    }
+
+    /*
+     * @covers Gitty\Repositories::setDefaultAdapter
+     * @covers Gitty\Repositories::getDefaultAdapter
+     */
     public function testSetDefaultAdapter()
     {
-        Gitty\Repositories::getDefaultAdapter();
-
         $adapter = 'Gitty\\Repositories\\Adapter\\Git';
         Gitty\Repositories::setDefaultAdapter($adapter);
 
@@ -27,11 +41,15 @@ class RepositoriesTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Repositories\Exception
+     * @covers Gitty\Repositories::__construct
      */
     public function testSetDefaultUnknownAdapter()
     {
         $adapter = 'Gitty\\Version';
         Gitty\Repositories::setDefaultAdapter($adapter);
+
+        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/example.ini');
+        $repo = new Gitty\Repositories($config);
     }
 
     public function testAdapterLoading()
@@ -45,6 +63,7 @@ class RepositoriesTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Repositories\Exception
+     * @covers Gitty\Repositories::__construct
      */
     public function testUnknownAdapter()
     {
@@ -52,6 +71,11 @@ class RepositoriesTest extends \PHPUnit_Framework_TestCase
         $repo = new Gitty\Repositories($config);
     }
 
+    /**
+     * @covers Gitty\Repositories::register
+     * @covers Gitty\Repositories::unregister
+     * @covers Gitty\Repositories::getRepositories
+     */
     public function testRepositoryRegister()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../data/knownAdapter.ini');

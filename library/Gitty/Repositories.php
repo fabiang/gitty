@@ -57,6 +57,11 @@ class Repositories
     protected static $defaultAdapter = null;
 
     /**
+     * namespaces
+     */
+    protected static $registeredAdapterNamespaces = array();
+
+    /**
      * instance of the adapter
      */
     protected $adapter = null;
@@ -77,17 +82,9 @@ class Repositories
      * @param String $adapter adapter name as string
      *
      * @return Null
-     * @todo make the test better
      */
     public static function setDefaultAdapter($adapter)
     {
-        if (!(new $adapter(array()) instanceof Repo\AdapterAbstract)) {
-            include_once dirname(__FILE__).'/Repositories/Exception.php';
-            throw new Repo\Exception(
-                "$adapter does not extend Gitty\Repositories\AdapterInterface"
-            );
-        }
-
         self::$defaultAdapter = $adapter;
     }
 
@@ -106,6 +103,51 @@ class Repositories
     }
 
     /**
+     * register a namespace for remotes
+     *
+     * @param String $namespace namespace name
+     *
+     * @return Boolean false when already registered, overwise true
+     */
+    public static function registerAdapterNamespace($adapter)
+    {
+        if (!\in_array($adapter, self::$registeredAdapterNamespaces)) {
+            self::$registeredAdapterNamespaces[] = $adapter;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * unregsiter a namespace for remotes
+     *
+     * @param String $namespace namespace name
+     *
+     * @return Boolean ture when removed, overwise false
+     */
+    public static function unregisterAdapterNamespace($adapter)
+    {
+        $index = \array_search($adapter, self::$registeredAdapterNamespaces);
+        if (false !== $index) {
+            unset(self::$registeredAdapterNamespaces[$index]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * returns all registered namespaces
+     *
+     * @return Array list of namespaces
+     */
+    public static function getAdapterNamespaces()
+    {
+        return self::$registeredAdapterNamespaces;
+    }
+
+    /**
      * constructor
      *
      * @param Gitty\Config $config an configuration object
@@ -118,21 +160,68 @@ class Repositories
 
             if (isset($project_data->adapter)) {
 
-                try {
-                    $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\'
-                        . ucfirst($project_data->adapter);
-                    Loader::loadClass($adapter);
-                } catch(Gitty\Exception $e) {
-                    include_once dirname(__FILE__).'/Repositories/Exception.php';
-                    throw new Repo\Exception("adapter '$adapter' is unknown");
-                }
+                $adapter = __NAMESPACE__.'\\Repositories\\Adapter\\' .
+                    ucfirst($project_data->adapter);
 
+                // first try loading any of the own adapters
+                try {
+                    Loader::loadClass($adapter);
+                } catch(Exception $e) {
+                    // throw exception when there are no registered namespaces
+                    if (0 === \count(self::getAdapterNamespaces())) {
+                        include_once \dirname(__FILE__).'/Repositories/Exception.php';
+                        throw new Repositories\Exception(
+                            "can't load adapter '{$config->adapter}' and no namespaces \
+                            registered for lookup"
+                        );
+                    }
+
+                    // try loading the adapter from the registered namespaces
+                    $found = false;
+                    $search = 0;
+                    foreach(self::getAdapterNamespaces() as $namespace) {
+                        try {
+                            $class = $namespace.'\\'.\ucfirst($config->adapter);
+                            Loader::loadClass($class);
+                            $adapter = $class;
+                            $found = true;
+                        } catch (Exception $e) {
+                            $search++;
+                        }
+                    }
+
+                    // didn't find the adapter in any registered namespace
+                    // throw exception
+                    if (false === $found) {
+                        include_once \dirname(__FILE__).'/Repositories/Exception.php';
+                        throw new Repositories\Exception(
+                            "can't load any adapter of the name {$config->adapter}. \
+                            searched in $search namespaces: " .
+                            \implode(\PATH_SEPARATOR, self::getAdapterNamespaces())
+                        );
+                    }
+                }
             } else {
                 $adapter = self::getDefaultAdapter();
+
+                try {
+                    Loader::loadClass($adapter);
+                } catch(Exception $e) {
+                    include_once \dirname(__FILE__).'/Repositories/Exception.php';
+                    throw new Repositories\Exception(
+                        "default adapter '$adapter' can't be found"
+                    );
+                }
             }
 
-            Loader::loadClass($adapter);
             $repository = new $adapter($project_data);
+
+            if (!($repository instanceof Repo\AdapterAbstract)) {
+               include_once \dirname(__FILE__).'/Repositories/Exception.php';
+               throw new Repo\Exception(
+                   "$adapter does not extend Gitty\Repositories\AdapterInterface"
+               );
+            }
 
             if (isset($project_data->deployment)) {
                 foreach ($project_data->deployment as $deployment_name =>

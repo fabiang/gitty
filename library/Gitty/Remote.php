@@ -49,7 +49,7 @@ class Remote
     protected static $defaultAdapter = null;
 
     /**
-     *
+     * namespaces
      */
     protected static $registeredAdapterNamespaces = array();
 
