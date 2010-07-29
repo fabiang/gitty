@@ -62,11 +62,6 @@ class Repositories
     protected static $registeredAdapterNamespaces = array();
 
     /**
-     * instance of the adapter
-     */
-    protected $adapter = null;
-
-    /**
      * this class registers all repos to this variable
      */
     protected $repositories = array();
@@ -235,6 +230,8 @@ class Repositories
 
             $this->register($repository);
         }
+
+        $this->config = $config;
     }
 
     /**
