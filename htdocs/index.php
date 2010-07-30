@@ -68,21 +68,21 @@ foreach ($repositories->getRepositories() as $i => $repository): ?>
                                 <td><?php print htmlspecialchars($repository->owner); ?></td>
                                 <td><?php print htmlspecialchars($repository->lastChange->format($config->global->gitty->dateFormat)); ?></td>
                                 <td>
-                                    <select name="project[<?php print $i ?>][branch]">
+                                    <select name="project[<?php print $i; ?>][branch]">
 <?php foreach($repository->branches as $branch): ?>
                                         <option<?php if ($branch['default']): ?> selected="selected"<?php endif; ?>><?php print htmlspecialchars($branch['name']); ?></option>
 <?php endforeach; ?>
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="project[<?php print $i ?>][remote]">
+                                    <select name="project[<?php print $i; ?>][remote]">
 <?php foreach($repository->remotes as $j => $remote): ?>
                                         <option value="<?php print $j ?>">#<?php print $j; ?>: <?php print htmlspecialchars($remote); ?></option>
 <?php endforeach; ?>
                                     </select>
                                 </td>
-                                <td><button name="update" value="0">update</button></td>
-                                <td><button name="install" value="0">install</button></td>
+                                <td><button name="update" value="<?php print $i; ?>">update</button></td>
+                                <td><button name="install" value="<?php print $i; ?>">install</button></td>
                             </tr>
                         </tbody>
 <?php endforeach;
