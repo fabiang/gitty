@@ -9,14 +9,16 @@ Requirements of Gitty:
 - PHP 5.3
 
 - How to setup?
-  just copy the code where u like to, and make sure you pass GITTY_CONFIG
-  environment variable to point to your config file, so the index.php and
-  console.php can locate them. Edit the bootstrap.php if you like.
+  just copy the code where you like to, and make sure you make GITTY_CONFIG
+  environment variable point to your configuration file, so the index.php and
+  console.php can locate them.
+  Edit the bootstrap.php if you like.
   A example config.ini is included.
 
-Thanks to the Zend Framework for many good ideas!
+- How I can test Gitty with Unit test?
+  just cd to tests/
+  create a copy of data/example.ini to data/workingExample.ini with a working FTP server
+  run phpunit AllTests.php
 
 Gitty  Copyright (C) 2010 Fabian Grutschus
-    This program comes with ABSOLUTELY NO WARRANTY; for details type LICENSE
-
-
+This program comes with ABSOLUTELY NO WARRANTY; for details LICENSE
