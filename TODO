@@ -1,0 +1,9 @@
+- add support for default adapter setting in configuration
+- add support for adapter namespace stetting in configuration
+- add support for bare git repositories
+- add support for copied files in git
+- make defaultGitDir for the git adapter a static
+- throw an exception when git excutable can't bin found
+- add support for non-physically (bare directories)
+- Unittests:
+    - cover "pre" valid in versionCompare (VersionTest)

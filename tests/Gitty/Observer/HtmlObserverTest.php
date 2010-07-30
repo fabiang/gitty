@@ -41,24 +41,20 @@ class HtmlObserverTest extends \PHPUnit_Framework_TestCase
         $deploy->setBranch('master');
 
         $remote = $deploy->getCurrentRemote();
-
+        $rev_ids = array(
+            '6cbdf356fb1f686ed4491d90981bae6aae5af600',
+            'd8ecaaee5a6d4a3c02b2e4dd424434bdfae12de2',
+            '2aed3dbb1cb3f9567a4a9d9eb270cb3c3454f9ed',
+            '43be268fde6a6d7401e76106e556b3e26487837a'
+        );
         \ob_start();
         \ob_start();
-        $remote->putServerRevisitionId('6cbdf356fb1f686ed4491d90981bae6aae5af600');
-        $deploy->start();
-        $deploy->end();
 
-        $remote->putServerRevisitionId('d8ecaaee5a6d4a3c02b2e4dd424434bdfae12de2');
-        $deploy->start();
-        $deploy->end();
-
-        $remote->putServerRevisitionId('2aed3dbb1cb3f9567a4a9d9eb270cb3c3454f9ed');
-        $deploy->start();
-        $deploy->end();
-
-        $remote->putServerRevisitionId('43be268fde6a6d7401e76106e556b3e26487837a');
-        $deploy->start();
-        $deploy->end();
+        foreach ($rev_ids as $rev_id) {
+            $remote->putServerRevisitionId($rev_id);
+            $deploy->start();
+            $deploy->end();
+        }
 
         //should be up-to-date
         $deploy->start();

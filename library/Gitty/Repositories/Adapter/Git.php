@@ -94,9 +94,14 @@ class Git extends G\Repositories\AdapterAbstract
                     $this->path . '/' .
                     $this->defaultGitDir
                 );
-            } else {
-                $this->gitDir = $this->path;
             }
+            /**
+             * @todo add support for bare git repos
+             * @todo unit test
+             */
+            /*else {
+                $this->gitDir = $this->path;
+            }*/
         }
 
         return $this->gitDir;
@@ -151,9 +156,9 @@ class Git extends G\Repositories\AdapterAbstract
              * @todo support for copied files
              * @todo unit test
              */
-            case 'C':
+            /*case 'C':
                 \array_push($this->copied, array($fileInfo[1] => $fileInfo[2]));
-                break;
+                break;*/
             case 'R':
                 \array_push($this->renamed, array($fileInfo[1] => $fileInfo[2]));
                 break;
@@ -497,7 +502,7 @@ class Git extends G\Repositories\AdapterAbstract
      *
      * @return Resource file hanlde
      * @return String   file source
-     * @todo support for file that are not pysically
+     * @todo support for file that are not physically
      */
     public function getFile($file)
     {

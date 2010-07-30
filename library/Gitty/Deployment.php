@@ -391,7 +391,11 @@ class Deployment
         }
 
         // copied files
-        $copied = $files['copied'];
+        /**
+         * @todo add support for copied files
+         * @todo add unit test
+         */
+        /*$copied = $files['copied'];
         if (\count($copied) > 0) {
             $this->callObservers('onCopiedStart');
 
@@ -404,7 +408,7 @@ class Deployment
             }
 
             $this->callObservers('onCopiedEnd');
-        }
+        }*/
 
         // renamed files
         $renamed = $files['renamed'];
