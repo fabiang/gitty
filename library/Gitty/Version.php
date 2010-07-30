@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Gitty.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Gitty. If not, see <http://www.gnu.org/licenses/>.
  *
  * PHP Version 5.3
  *
@@ -43,7 +43,7 @@ namespace Gitty;
  */
 final class Version
 {
-    const VERSION = '0.3';
+    const VERSION = '0.2';
 
     /**
      * compare version with Gittys version
