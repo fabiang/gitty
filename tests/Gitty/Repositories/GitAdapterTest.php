@@ -17,125 +17,140 @@ require_once \dirname(__FILE__).'/../../../library/Gitty/Remote/Adapter/Ftp.php'
 
 class GitAdapterTest extends \PHPUnit_Framework_TestCase
 {
-    public function testAdapterOptions()
+    protected $config = null;
+
+    public function setUp()
     {
         $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $config = $config->projects->myproject;
+        $config->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $this->config = $config;
+    }
 
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
+    public function teatDown()
+    {
+        $this->config = null;
+    }
+
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::__set
+     * @covers Gitty\Repositories\AdapterAbstract::__get
+     * @covers Gitty\Repositories\AdapterAbstract::getName
+     * @covers Gitty\Repositories\AdapterAbstract::setName
+     * @covers Gitty\Repositories\AdapterAbstract::getDescription
+     * @covers Gitty\Repositories\AdapterAbstract::setDescription
+     * @covers Gitty\Repositories\AdapterAbstract::getPath
+     * @covers Gitty\Repositories\AdapterAbstract::setPath
+     * @covers Gitty\Repositories\Adapter\Git::getOwner
+     * @covers Gitty\Repositories\Adapter\Git::setOwner
+     */
+    public function testAdapterOptions()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $options = array('name', 'description', 'path', 'owner');
         foreach ($options as $option) {
             $function_set = 'set'.ucfirst($option);
             $function_get = 'get'.ucfirst($option);
-            $repo_adapter->$function_set('test');
-            $this->assertEquals($repo_adapter->$function_get(), 'test');
+            $repo->$function_set('test');
+            $this->assertEquals($repo->$function_get(), 'test');
         }
 
         foreach ($options as $option) {
-            $repo_adapter->$option = 'test';
-            $this->assertEquals($repo_adapter->$option, 'test');
+            $repo->$option = 'test';
+            $this->assertEquals($repo->$option, 'test');
         }
     }
 
     /**
      * @expectedException Gitty\Repositories\Exception
+     * @covers Gitty\Repositories\AdapterAbstract::__set
      */
     public function testSetUnkownOption()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $u = \uniqid();
-        $repo_adapter->$u = 'test';
+        $repo->$u = 'test';
     }
 
     /**
      * @expectedException Gitty\Repositories\Exception
+     * @covers Gitty\Repositories\AdapterAbstract::__get
      */
     public function testGetUnkownOption()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $u = \uniqid();
-        $foo = $repo_adapter->$u;
+        $foo = $repo->$u;
     }
 
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::toArray
+     * @covers Gitty\Repositories\AdapterAbstract::getOptions
+     * @covers Gitty\Repositories\AdapterAbstract::setOptions
+     */
     public function testGetSetOptions()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
-
-        $options = $repo_adapter->getOptions();
-        $this->assertEquals($options, $repo_adapter->toArray());
+        $options = $repo->getOptions();
+        $this->assertEquals($options, $repo->toArray());
 
         foreach ($options as $option_name => $option) {
             $func = 'get'. \ucfirst($option_name);
-            $this->assertEquals($option, $repo_adapter->$func());
+            $this->assertEquals($option, $repo->$func());
         }
 
-        $repo_adapter->setOptions($options);
-        $this->assertEquals($repo_adapter->getOptions(), $options);
+        $repo->setOptions($options);
+        $this->assertEquals($repo->getOptions(), $options);
     }
 
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::getPath
+     * @covers Gitty\Repositories\AdapterAbstract::setPath
+     */
     public function testSetPath()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
-
-        $repo_adapter->setPath('/foo/bar/');
-        $this->assertEquals($repo_adapter->getPath(), '/foo/bar');
+        $repo->setPath('/foo/bar/');
+        $this->assertEquals($repo->getPath(), '/foo/bar');
     }
 
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::getAdapterName
+     */
     public function testAdapterName()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
-
-        $this->assertEquals($repo_adapter->getAdapterName(), 'Git');
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+        $this->assertEquals($repo->getAdapterName(), 'Git');
     }
 
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::showBranches
+     */
     public function testShowBranches()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
+        $repo->showBranches(true);
+        $this->assertTrue($repo->showBranches());
 
-        $repo_adapter->showBranches(true);
-        $this->assertTrue($repo_adapter->showBranches());
-
-        $repo_adapter->showBranches(false);
-        $this->assertFalse($repo_adapter->showBranches());
+        $repo->showBranches(false);
+        $this->assertFalse($repo->showBranches());
     }
 
+    /**
+     * @covers Gitty\Repositories\AdapterAbstract::registerRemote
+     * @covers Gitty\Repositories\AdapterAbstract::unregisterRemote
+     * @covers Gitty\Repositories\AdapterAbstract::getRemotes
+     */
     public function testRemotes()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-
-        $repo = new Gitty\Repositories($config);
-        $repo_adapter = \array_shift($repo->getRepositories());
-
-        $this->assertEquals(\count($repo_adapter->getRemotes()), 1);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+        $this->assertEquals(0, \count($repo->getRemotes()));
 
         $remote_conf = new Gitty\Config(
             array(
@@ -147,29 +162,31 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
             false
         );
         $remote = new Gitty\Remote($remote_conf);
-        $repo_adapter->registerRemote($remote);
-        $this->assertEquals(\count($repo_adapter->getRemotes()), 2);
-        $this->assertEquals(\array_pop($repo_adapter->getRemotes()), $remote);
+        $repo->registerRemote($remote);
+        $this->assertEquals(1, \count($repo->getRemotes()));
+        $this->assertEquals($remote, \array_pop($repo->getRemotes()));
 
-        $repo_adapter->unregisterRemote($remote);
-        $this->assertEquals(\count($repo_adapter->getRemotes()), 1);
+        $repo->unregisterRemote($remote);
+        $this->assertEquals(0, \count($repo->getRemotes()));
 
-        $this->assertFalse($repo_adapter->unregisterRemote($remote));
+        $this->assertFalse($repo->unregisterRemote($remote));
     }
 
     /**
      * @expectedException Gitty\Repositories\Exception
+     * @covers Gitty\Repositories\Adapter\Git::__construct
+     * @covers Gitty\Repositories\Adapter\Git::discoverGitDir
      */
     public function testDescriptionFileNotReadable()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $filename = $config->projects->myproject->path.'/.git/description';
+        $config = $this->config;
+
+        $filename = $config->path.'/.git/description';
         $chmod = \substr(\sprintf('%o', \fileperms($filename)), -4);
         \chmod($filename, 0000);
         \clearstatcache();
         try {
-            $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+            $repo = new Gitty\Repositories\Adapter\Git($config);
         } catch(Gitty\Repositories\Exception $e) {
             \chmod($filename, \octdec($chmod));
             throw $e;
@@ -178,20 +195,39 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
         \chmod($filename, \octdec($chmod));
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::__construct
+     * @covers Gitty\Repositories\Adapter\Git::discoverGitDir
+     */
+    public function testDescriptionFileContents()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+
+        $this->assertEquals(
+            "Unnamed repository; edit this file 'description' to name the repository.",
+            $repo->getDescription()
+        );
+    }
+
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::getOwner
+     * @covers Gitty\Repositories\Adapter\Git::execCommand
+     */
     public function testOwner()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $this->assertGreaterThan(0, \strlen($repo->getOwner()));
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::getLastChange
+     * @covers Gitty\Repositories\Adapter\Git::setLastChange
+     * @covers Gitty\Repositories\Adapter\Git::execCommand
+     */
     public function testLastChange()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $this->assertTrue($repo->getLastChange() instanceof \DateTime);
 
@@ -199,28 +235,30 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($repo->getLastChange() instanceof \DateTime);
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::setBranches
+     * @covers Gitty\Repositories\Adapter\Git::getBranches
+     */
     public function testBranches()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $this->assertGreaterThan(0, \count($repo->getBranches()));
         $b_test = array('test', 'bar');
         $repo->setBranches($b_test);
         $this->assertEquals($repo->getBranches(), $b_test);
 
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
         $repo->showBranches(false);
         $this->assertEquals($repo->getBranches(), array(array('name' => 'master', 'default' => 0)));
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::getInstallFiles
+     */
     public function testInstall()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
-
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
         $install = $repo->getInstallFiles();
         $this->assertGreaterThan(0, \count($install['added']));
         $this->assertEquals(
@@ -234,27 +272,74 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::revId
+     */
     public function testRevisionIds()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
-        $revIds = $repo->revId();
+        $expected_rev_ids = array(
+            'newest' => '5a910b78afcb2ff2522cc1ec62bb77048863a393',
+            'oldest' => '43be268fde6a6d7401e76106e556b3e26487837a'
+        );
+
+        $this->assertEquals($repo->revId(), $expected_rev_ids);
+        $this->assertEquals($repo->revId(true), $expected_rev_ids);
+    }
+
+    public function testGetRewestRevisitionId()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
         $this->assertEquals(
-            $revIds,
-            array(
-                'newest' => '5a910b78afcb2ff2522cc1ec62bb77048863a393',
-                'oldest' => '43be268fde6a6d7401e76106e556b3e26487837a'
-            )
+            '5a910b78afcb2ff2522cc1ec62bb77048863a393',
+            $repo->getNewestRevisitionId()
         );
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::setDefaultGitDir
+     * @covers Gitty\Repositories\Adapter\Git::getDefaultGitDir
+     */
+    public function testDefaultGitDir()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+        $uid = \uniqid();
+        $repo->setDefaultGitDir($uid);
+        $this->assertEquals($uid, $repo->getDefaultGitDir());
+    }
+
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::setDescriptionFile
+     * @covers Gitty\Repositories\Adapter\Git::getDescriptionFile
+     */
+    public function testDescriptionFile()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+        $uid = \uniqid();
+        $repo->setDescriptionFile($uid);
+        $this->assertEquals($uid, $repo->getDescriptionFile());
+    }
+
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::setBinLocation
+     * @covers Gitty\Repositories\Adapter\Git::getBinLocation
+     */
+    public function testBinLocation()
+    {
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
+        $uid = \uniqid();
+        $repo->setBinLocation($uid);
+        $this->assertEquals($uid, $repo->getBinLocation());
+    }
+
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::getUpdateFiles
+     * @covers Gitty\Repositories\Adapter\Git::parseFiles
+     */
     public function testUpdate()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $repo->revId();
         $updates = $repo->getUpdateFiles('6cbdf356fb1f686ed4491d90981bae6aae5af600');
@@ -310,11 +395,13 @@ class GitAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers Gitty\Repositories\Adapter\Git::getInstallFiles
+     * @covers Gitty\Repositories\Adapter\Git::getFile
+     */
     public function testGetFile()
     {
-        $config = new Gitty\Config\Ini(\dirname(__FILE__).'/../../data/example.ini');
-        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-        $repo = new Gitty\Repositories\Adapter\Git($config->projects->myproject);
+        $repo = new Gitty\Repositories\Adapter\Git($this->config);
 
         $install = $repo->getInstallFiles();
         $files = $install['added'];

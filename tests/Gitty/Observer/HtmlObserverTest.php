@@ -14,34 +14,26 @@ require_once \dirname(__FILE__).'/../../../library/Gitty/Config/Ini.php';
 
 class HtmlObserverTest extends \PHPUnit_Framework_TestCase
 {
-    protected $workingConfig = '../../../config-homebox.ini';
-    protected $projectName = 'javascriptq';
-    protected $remoteName = 'lubyte';
+    protected $config = null;
 
-    protected function getConf()
+    public function setUp()
     {
-        $config1 = new Gitty\Config\Ini(dirname(__FILE__).'/'.$this->workingConfig);
-        $config2 = new Gitty\Config\Ini(dirname(__FILE__).'/../../data/example.ini');
-
-        $dep1 = $config1->projects->{$this->projectName}->deployment->{$this->remoteName};
-
-        $config2->projects->myproject->deployment->hostnamecom->hostname = $dep1->hostname;
-        if ($dep1->port) {
-            $config2->projects->myproject->deployment->hostnamecom->port = $dep1->port;
-        }
-        $config2->projects->myproject->deployment->hostnamecom->username = $dep1->username;
-        $config2->projects->myproject->deployment->hostnamecom->password = $dep1->password;
-        $config2->projects->myproject->deployment->hostnamecom->path = $dep1->path;
-        $config2->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
-
-        return $config2;
+        $config = new Gitty\Config\Ini(dirname(__FILE__).'/../../data/workingExample.ini');
+        $config->projects->myproject->path = \realpath(\dirname(__FILE__).'/../../data/example');
+        $this->config = $config;
     }
 
+    public function tearDown()
+    {
+        $this->config = null;
+    }
+
+    /**
+     * @covers Gitty\Observer\Html
+     */
     public function testObserverUpdate()
     {
-        $config = $this->getConf();
-
-        $deploy = new Gitty\Deployment($config);
+        $deploy = new Gitty\Deployment($this->config);
 
         $deploy->registerObserver(new Gitty\Observer\Html());
         $deploy->setProjectId(0);
@@ -75,11 +67,12 @@ class HtmlObserverTest extends \PHPUnit_Framework_TestCase
         \ob_end_clean();
     }
 
+    /**
+     * @covers Gitty\Observer\Html
+     */
     public function testObserverInstall()
     {
-        $config = $this->getConf();
-
-        $deploy = new Gitty\Deployment($config, true);
+        $deploy = new Gitty\Deployment($this->config, true);
 
         $deploy->registerObserver(new Gitty\Observer\Html());
         $deploy->setProjectId(0);

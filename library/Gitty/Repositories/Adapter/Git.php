@@ -147,6 +147,10 @@ class Git extends G\Repositories\AdapterAbstract
             case 'M':
                 \array_push($this->modified, $fileInfo[1]);
                 break;
+            /**
+             * @todo support for copied files
+             * @todo unit test
+             */
             case 'C':
                 \array_push($this->copied, array($fileInfo[1] => $fileInfo[2]));
                 break;
@@ -306,6 +310,7 @@ class Git extends G\Repositories\AdapterAbstract
                 'rev-list --header --max-count=1 HEAD'
             );
 
+            $owner = null;
             foreach ($ownerString as $output) {
                 if (\substr($output, 0, 9) == 'committer') {
                     $results = array();
@@ -350,6 +355,7 @@ class Git extends G\Repositories\AdapterAbstract
                 'rev-list --header --max-count=1 HEAD'
             );
 
+            $date = null;
             foreach ($dateString as $output) {
                 if (\substr($output, 0, 9) == 'committer') {
                     $results = array();

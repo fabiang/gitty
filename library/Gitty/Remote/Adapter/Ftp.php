@@ -205,7 +205,7 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function getServerRevisitionId()
     {
-        if (null == $this->connection) {
+        if (null === $this->connection) {
             $this->init();
         }
 
@@ -246,7 +246,7 @@ class Ftp extends G\Remote\AdapterAbstract
      */
     public function putServerRevisitionId($uid)
     {
-        if (null == $this->connection) {
+        if (null === $this->connection) {
             $this->init();
         }
 

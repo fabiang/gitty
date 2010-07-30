@@ -16,26 +16,64 @@ require_once \dirname(__FILE__).'/../../../library/Gitty/Remote/Exception.php';
 
 class FtpAdapterTest extends \PHPUnit_Framework_TestCase
 {
+    protected $config = null;
+
+    public function setUp()
+    {
+        $workingConfig = new Gitty\Config\Ini(
+            \dirname(__FILE__).'/../../data/workingExample.ini'
+        );
+        $remoteData = $workingConfig->projects->myproject->deployment->hostnamecom;
+
+        $this->config = $remoteData;
+    }
+
+    public function tearDown()
+    {
+        $this->config = null;
+    }
+
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::close
      */
-    public function testClose($config)
+    public function testClose()
     {
+        $config = $this->config;
         $config->port = 21;
         $config->revisitionFileName = 'myRevFile.txt';
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         $remote->close();
+        $remote->init();
+        $remote->close();
+    }
+
+    /**
+     * @covers Gitty\Remote\Adapter\Ftp::cleanUp
+     */
+    public function testCleanUp()
+    {
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
+        $remote->init();
+        $remote->cleanUp();
+    }
+
+    /**
+     * @covers Gitty\Remote\Adapter\Ftp::__destruct
+     */
+    public function testDestruct()
+    {
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
+        unset($remote);
     }
 
     /**
      * @expectedException Gitty\Remote\Exception
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::init
      * @covers Gitty\Remote\Exception
      */
-    public function testInvalidHostName($config)
+    public function testInvalidHostName()
     {
+        $config = clone $this->config;
         $config->hostname = \uniqid().'______.local';
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         try {
@@ -74,48 +112,55 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::getServerRevisitionId
+     * @covers Gitty\Remote\Adapter\Ftp::putServerRevisitionId
      */
-    public function testGetServerRevisitionId($config)
+    public function testGetServerRevisitionId()
     {
+        $config = clone $this->config;
         $config->revisitionFileName = 'myRevFile.txt';
         $remote = new Gitty\Remote\Adapter\Ftp($config);
-        $this->assertEquals($remote->getServerRevisitionId(), null);
+        $remote->unlink($config->revisitionFileName);
+        $remote->close();
+
+        $this->assertEquals(null, $remote->getServerRevisitionId());
+        $remote->close();
+
+        $remote->putServerRevisitionId('test');
+        $this->assertEquals('test', $remote->getServerRevisitionId());
+        $remote->unlink($config->revisitionFileName);
         $remote->close();
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::copy
      */
-    public function testCopyUnknownFile($config)
+    public function testCopyUnknownFile()
     {
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
         $remote->init();
-        $this->assertEquals($remote->copy(\uniqid().'/unknown.txt', '/foo/bar'), null);
+        $this->assertEquals(null, $remote->copy(\uniqid().'/unknown.txt', '/foo/bar'));
         $remote->close();
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::getAdapterName
      */
-    public function testGetAdapterName($config)
+    public function testGetAdapterName()
     {
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
-        $this->assertEquals($remote->getAdapterName(), 'Ftp');
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
+        $this->assertEquals('Ftp', $remote->getAdapterName());
         $remote->close();
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::__construct
      * @covers Gitty\Remote\Adapter\Ftp::getPort
      * @covers Gitty\Remote\AdapterAbstract::__get
      */
-    public function testPortSetting($config)
+    public function testPortSetting()
     {
+        $config = clone $this->config;
         $config->port = 21;
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         $this->assertEquals($config->port, $remote->getPort());
@@ -124,13 +169,13 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\AdapterAbstract::__get
      * @covers Gitty\Remote\AdapterAbstract::getRevisitionFileName
      * @covers Gitty\Remote\Adapter\Ftp::__construct
      */
-    public function testRevisitionFileNameSetting($config)
+    public function testRevisitionFileNameSetting()
     {
+        $config = clone $this->config;
         $config->revisitionFileName = \uniqid();
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         $this->assertEquals($config->revisitionFileName, $remote->getRevisitionFileName());
@@ -139,15 +184,15 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\AdapterAbstract::__get
      * @covers Gitty\Remote\Adapter\Ftp::getHostname
      * @covers Gitty\Remote\Adapter\Ftp::getUsername
      * @covers Gitty\Remote\Adapter\Ftp::getPassword
      * @covers Gitty\Remote\Adapter\Ftp::getPath
      */
-    public function testOtherConfigurationOptions($config)
+    public function testOtherConfigurationOptions()
     {
+        $config = $this->config;
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         $config_array = $config->toArray();
         $this->assertEquals(
@@ -173,7 +218,6 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\AdapterAbstract::__get
      * @covers Gitty\Remote\AdapterAbstract::__set
      * @covers Gitty\Remote\AdapterAbstract::getRevisitionFileName
@@ -192,7 +236,7 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
      * @covers Gitty\Remote\Adapter\Ftp::setPath
      * @covers Gitty\Remote\Adapter\Ftp::setPort
      */
-    public function testConfigurationOptionsSetting($config)
+    public function testConfigurationOptionsSetting()
     {
         $methods = array(
             'revisitionFileName',
@@ -202,7 +246,7 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
             'path'
         );
 
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
 
         foreach ($methods as $method) {
             $set = 'set'.\ucfirst($method);
@@ -251,15 +295,16 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
      * also tests auto init of connection
      *
      * @dataProvider provideFtpFunctions
+     * @covers Gitty\Remote\Adapter\Ftp::init
      * @covers Gitty\Remote\Adapter\Ftp::rmDir
      * @covers Gitty\Remote\Adapter\Ftp::put
      * @covers Gitty\Remote\Adapter\Ftp::rename
      * @covers Gitty\Remote\Adapter\Ftp::unlink
      * @covers Gitty\Remote\Adapter\Ftp::copy
      */
-    public function testFtpFunctions($config, $function, $params)
+    public function testFtpFunctions($function, $params)
     {
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
         \call_user_func_array(array($remote, $function), $params);
         $remote->cleanUp();
         $remote->close();
@@ -267,56 +312,42 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Gitty\Remote\Exception
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\AdapterAbstract::__set
      * @covers Gitty\Remote\Exception
      */
-    public function testInvalidSet($config)
+    public function testInvalidSet()
     {
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
         $uid = \uniqid();
         $remote->$uid = 1;
     }
 
     /**
      * @expectedException Gitty\Remote\Exception
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\AdapterAbstract::__get
      * @covers Gitty\Remote\Exception
      */
-    public function testInvalidGet($config)
+    public function testInvalidGet()
     {
-        $remote = new Gitty\Remote\Adapter\Ftp($config);
+        $remote = new Gitty\Remote\Adapter\Ftp($this->config);
         $uid = \uniqid();
         $foo = $remote->$uid;
     }
 
     /**
-     * @dataProvider provideWorkingConfig
      * @covers Gitty\Remote\Adapter\Ftp::__toString
      */
-    public function testToString($config)
+    public function testToString()
     {
+        $config = $this->config;
         $remote = new Gitty\Remote\Adapter\Ftp($config);
         $test = "(FTP) {$config->hostname}:" . (isset($config->port) ? $config->port : 21);
-        $this->assertEquals((string)$remote, $test);
+        $this->assertEquals($test, (string)$remote);
     }
 
     /**
      * data provider
      */
-    public static function provideWorkingConfig()
-    {
-        $workingConfig = new Gitty\Config\Ini(
-            \dirname(__FILE__).'/../../data/workingExample.ini'
-        );
-        $remoteData = $workingConfig->projects->myproject->deployment->hostnamecom;
-
-        return array(
-            array($remoteData)
-        );
-    }
-
     public static function provideInvalidLogins()
     {
         return array(
@@ -328,22 +359,20 @@ class FtpAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function provideFtpFunctions()
     {
-        $config = self::provideWorkingConfig();
-        $config = $config[0][0];
         $file_path = \realpath(\dirname(__FILE__).'/../../data/example/');
         return array(
-            array($config, 'put',    array(\fopen($file_path.'/file1.txt', 'r'), 'file1.txt')),
-            array($config, 'put',    array(\fopen($file_path.'/file2.txt', 'r'), 'file2.txt')),
-            array($config, 'put',    array(\fopen($file_path.'/copy/file2.txt', 'r'), 'copy/file2.txt')),
-            array($config, 'put',    array(\file_get_contents($file_path.'/renamed.txt'), 'foobar.txt')),
-            array($config, 'rename', array('file1.txt', 'renamed.txt')),
-            array($config, 'unlink', array('file2.txt')),
-            array($config, 'copy',   array('renamed.txt', 'copied.txt')),
-            array($config, 'copy',   array('copied.txt', 'copy/foobar/copied.txt')),
-            array($config, 'unlink', array('copy/file2.txt')),
-            array($config, 'unlink', array('copy/copied.txt')),
-            array($config, 'unlink', array('copy/renamed.txt')),
-            array($config, 'unlink', array('copy/foobar/copied.txt')),
+            array('put',    array(\fopen($file_path.'/file1.txt', 'r'), 'file1.txt')),
+            array('put',    array(\fopen($file_path.'/file2.txt', 'r'), 'file2.txt')),
+            array('put',    array(\fopen($file_path.'/copy/file2.txt', 'r'), 'copy/file2.txt')),
+            array('put',    array(\file_get_contents($file_path.'/renamed.txt'), 'foobar.txt')),
+            array('rename', array('file1.txt', 'renamed.txt')),
+            array('unlink', array('file2.txt')),
+            array('copy',   array('renamed.txt', 'copied.txt')),
+            array('copy',   array('copied.txt', 'copy/foobar/copied.txt')),
+            array('unlink', array('copy/file2.txt')),
+            array('unlink', array('copy/copied.txt')),
+            array('unlink', array('copy/renamed.txt')),
+            array('unlink', array('copy/foobar/copied.txt')),
         );
     }
 }
