@@ -133,8 +133,7 @@ class Html implements ObserverInterface
                      \count($files['renamed']) +
                      \count($files['deleted']);
         \printf(
-            '<p>%d files (%d added, %d modified,\
-            %d copied, %d renamed, %d deleted)</p>',
+            '<p>%d files (%d added, %d modified, %d copied, %d renamed, %d deleted)</p>',
             $all_count,
             \count($files['added']),
             \count($files['modified']),
