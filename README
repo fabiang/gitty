@@ -1,7 +1,7 @@
 Gitty - Web deployment made graphically
 
 Gitty is a deployment tool for software over FTP and other protocols
-its written in PHP and has a graphically interface written in HTML.
+its written in PHP and has a graphic interface written in HTML.
 
 Requirements of Gitty:
 - git
@@ -21,4 +21,4 @@ Requirements of Gitty:
   run phpunit AllTests.php
 
 Gitty  Copyright (C) 2010 Fabian Grutschus
-This program comes with ABSOLUTELY NO WARRANTY; for details COPYING
+This program comes with ABSOLUTELY NO WARRANTY; for details see COPYING
