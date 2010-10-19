@@ -1,0 +1,5 @@
+tests/report/*
+Gitty.komodoproject
+htdocs/.htaccess-homebox
+tests/data/workingExample.ini
+config-homebox.ini
